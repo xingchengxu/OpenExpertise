@@ -3,6 +3,9 @@ import { validateCommand } from './commands/validate.js'
 import { runCommand } from './commands/run.js'
 import { inspectCommand } from './commands/inspect.js'
 import { resumeCommand } from './commands/resume.js'
+import { initCommand } from './commands/init.js'
+import { stateCommand, resetStateCommand } from './commands/state.js'
+import { diffCommand } from './commands/diff.js'
 import { makeLogger } from './logger.js'
 
 export function buildProgram(): Command {
@@ -62,6 +65,54 @@ export function buildProgram(): Command {
       const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
       const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
       process.exit(await resumeCommand({ experiencePath: cmdOpts.experience, runId, logger }))
+    })
+
+  program
+    .command('init')
+    .description('Scaffold a new experience directory')
+    .argument('<name>', 'directory name to create')
+    .action(async (name: string, _opts: unknown, cmd: Command) => {
+      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+      process.exit(await initCommand({ name, logger }))
+    })
+
+  program
+    .command('state')
+    .description('Inspect the persistent state blackboard')
+    .argument('[field]', 'specific field to read; omit for full snapshot')
+    .option('--experience <path>', 'experience path', '.')
+    .action(async (field: string | undefined, cmdOpts: { experience: string }, cmd: Command) => {
+      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+      process.exit(
+        await stateCommand({
+          experiencePath: cmdOpts.experience,
+          ...(field !== undefined ? { field } : {}),
+          logger,
+        }),
+      )
+    })
+
+  program
+    .command('reset-state')
+    .description('Delete the persistent state blackboard (destructive)')
+    .option('--experience <path>', 'experience path', '.')
+    .option('--yes', 'confirm destructive action', false)
+    .action(async (cmdOpts: { experience: string; yes: boolean }, cmd: Command) => {
+      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+      process.exit(await resetStateCommand({ experiencePath: cmdOpts.experience, yes: cmdOpts.yes, logger }))
+    })
+
+  program
+    .command('diff')
+    .description('Show evolution advisor suggestions (Plan 6 placeholder)')
+    .option('--experience <path>', 'experience path', '.')
+    .action(async (cmdOpts: { experience: string }, cmd: Command) => {
+      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+      process.exit(await diffCommand({ experiencePath: cmdOpts.experience, logger }))
     })
 
   return program
