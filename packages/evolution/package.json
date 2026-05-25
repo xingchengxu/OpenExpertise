@@ -1,0 +1,16 @@
+{
+  "name": "@openexpertise/evolution",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist", "src/prompts"],
+  "scripts": {
+    "build": "tsc -b && node -e \"require('node:fs').cpSync('src/prompts','dist/prompts',{recursive:true})\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openexpertise/core": "workspace:*",
+    "@openexpertise/schema": "workspace:*"
+  }
+}
