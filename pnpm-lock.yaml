@@ -92,6 +92,9 @@ importers:
       '@openexpertise/schema':
         specifier: workspace:*
         version: link:../schema
+      ajv:
+        specifier: ^8.17.0
+        version: 8.20.0
 
   packages/node-kinds-tool:
     dependencies:
