@@ -32,13 +32,19 @@ describe('hello-tool E2E', () => {
     // Run log was written
     const runLog = join(sandbox.dir, '.openexpertise', 'runs', `${result.runId}.jsonl`)
     expect(existsSync(runLog)).toBe(true)
-    const events = readFileSync(runLog, 'utf8').trim().split('\n').map((l) => JSON.parse(l))
+    const events = readFileSync(runLog, 'utf8')
+      .trim()
+      .split('\n')
+      .map((l) => JSON.parse(l))
     expect(events.find((e) => e.type === 'run.started')).toBeDefined()
     expect(events.find((e) => e.type === 'state.write' && e.field === 'greeting')).toBeDefined()
     expect(events.find((e) => e.type === 'run.finished' && e.status === 'success')).toBeDefined()
 
     // SQLite persists the state
-    const store = new StateStore({ dbPath: join(sandbox.dir, '.openexpertise', 'state.sqlite'), spec })
+    const store = new StateStore({
+      dbPath: join(sandbox.dir, '.openexpertise', 'state.sqlite'),
+      spec,
+    })
     expect(store.get('greeting')).toBe('hello, World')
     store.close()
   })

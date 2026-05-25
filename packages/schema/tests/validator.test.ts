@@ -55,11 +55,19 @@ describe('validateExperienceSpec', () => {
       graph: {
         ...validSpec.graph,
         nodes: [
-          { id: 'greet', kind: 'tool', impl: './t.ts', reads: ['missing_field'], writes: ['greeting'] },
+          {
+            id: 'greet',
+            kind: 'tool',
+            impl: './t.ts',
+            reads: ['missing_field'],
+            writes: ['greeting'],
+          },
         ],
       },
     }
-    expect(() => validateExperienceSpec(bad)).toThrow(/reads undeclared state field "missing_field"/)
+    expect(() => validateExperienceSpec(bad)).toThrow(
+      /reads undeclared state field "missing_field"/,
+    )
   })
 
   it('rejects duplicate node ids', () => {

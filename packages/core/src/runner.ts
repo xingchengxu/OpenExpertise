@@ -45,12 +45,22 @@ export async function runExperience(opts: RunOpts): Promise<RunResult> {
   const store = new StateStore({ dbPath, spec: opts.spec })
 
   try {
-    events.emit({ type: 'run.started', run_id: runId, ts: new Date().toISOString(), args: opts.args ?? {} })
+    events.emit({
+      type: 'run.started',
+      run_id: runId,
+      ts: new Date().toISOString(),
+      args: opts.args ?? {},
+    })
 
     const dag = buildDag(opts.spec)
     const ctx = new RunContext({
-      runId, spec: opts.spec, experienceDir: opts.experienceDir,
-      store, events, dispatchers: opts.dispatchers, args: opts.args ?? {},
+      runId,
+      spec: opts.spec,
+      experienceDir: opts.experienceDir,
+      store,
+      events,
+      dispatchers: opts.dispatchers,
+      args: opts.args ?? {},
     })
     const scheduler = new SequentialScheduler(dag, ctx)
     const { status } = await scheduler.run()

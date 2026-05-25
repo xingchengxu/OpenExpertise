@@ -6,5 +6,11 @@ export { JsonlEventSink } from './events/sink.js'
 export { buildDag, type Dag } from './graph/dag.js'
 export { SequentialScheduler } from './graph/scheduler.js'
 export { RunContext } from './run/context.js'
-export { DispatcherRegistry, type NodeDispatcher, type NodeInputBundle, type NodeOutput, type ResolvedImpl } from './dispatcher/registry.js'
+export {
+  DispatcherRegistry,
+  type NodeDispatcher,
+  type NodeInputBundle,
+  type NodeOutput,
+  type ResolvedImpl,
+} from './dispatcher/registry.js'
 export { runExperience } from './runner.js'

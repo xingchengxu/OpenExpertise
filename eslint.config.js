@@ -3,8 +3,17 @@ import tsparser from '@typescript-eslint/parser'
 
 export default [
   {
+    // Global ignores — applied before any file matching.
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      // Reference projects browsed locally, not part of OpenExpertise source
+      'claude-code-workflow-creator/**',
+      'openhuman/**',
+    ],
+  },
+  {
     files: ['**/*.ts'],
-    ignores: ['**/dist/**', '**/node_modules/**'],
     languageOptions: {
       parser: tsparser,
       parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },

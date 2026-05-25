@@ -9,7 +9,8 @@ export interface MergeContext {
 
 export function applyMerge(ctx: MergeContext): unknown {
   // $ref-only field schemas don't carry merge metadata — treat as last_wins.
-  const strategy: MergeStrategy = 'merge' in ctx.schema ? ctx.schema.merge ?? 'last_wins' : 'last_wins'
+  const strategy: MergeStrategy =
+    'merge' in ctx.schema ? (ctx.schema.merge ?? 'last_wins') : 'last_wins'
   switch (strategy) {
     case 'array_append': {
       if (!Array.isArray(ctx.incoming)) {

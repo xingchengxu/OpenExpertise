@@ -30,6 +30,23 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@22.19.19)
 
+  e2e:
+    dependencies:
+      '@openexpertise/cli':
+        specifier: workspace:*
+        version: link:../packages/cli
+      '@openexpertise/core':
+        specifier: workspace:*
+        version: link:../packages/core
+      '@openexpertise/node-kinds-tool':
+        specifier: workspace:*
+        version: link:../packages/node-kinds-tool
+      '@openexpertise/schema':
+        specifier: workspace:*
+        version: link:../packages/schema
+
+  examples/hello-tool: {}
+
   packages/cli:
     dependencies:
       '@openexpertise/core':

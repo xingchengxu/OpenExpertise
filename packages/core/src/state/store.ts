@@ -60,9 +60,9 @@ export class StateStore {
   }
 
   get(field: string): unknown {
-    const row = this.db
-      .prepare('SELECT value FROM state_snapshot WHERE field = ?')
-      .get(field) as { value: string } | undefined
+    const row = this.db.prepare('SELECT value FROM state_snapshot WHERE field = ?').get(field) as
+      | { value: string }
+      | undefined
     return row ? JSON.parse(row.value) : undefined
   }
 
@@ -79,14 +79,14 @@ export class StateStore {
         'SELECT id, field, value_old, value_new, node_id, run_id, ts FROM state_history WHERE field = ? ORDER BY id ASC',
       )
       .all(field) as Array<{
-        id: number
-        field: string
-        value_old: string | null
-        value_new: string
-        node_id: string
-        run_id: string
-        ts: string
-      }>
+      id: number
+      field: string
+      value_old: string | null
+      value_new: string
+      node_id: string
+      run_id: string
+      ts: string
+    }>
     return rows.map((r) => ({
       id: r.id,
       field: r.field,

@@ -11,15 +11,21 @@ import { join } from 'node:path'
 class FakeTool implements NodeDispatcher {
   readonly kind = 'tool' as const
   constructor(private produce: (b: NodeInputBundle) => NodeOutput) {}
-  async resolve(_n: NodeSpec) { return {} }
+  async resolve(_n: NodeSpec) {
+    return {}
+  }
   async run(_impl: unknown, bundle: NodeInputBundle): Promise<NodeOutput> {
     return this.produce(bundle)
   }
 }
 
 let dir: string
-beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'oe-runner-')) })
-afterEach(() => { rmSync(dir, { recursive: true, force: true }) })
+beforeEach(() => {
+  dir = mkdtempSync(join(tmpdir(), 'oe-runner-'))
+})
+afterEach(() => {
+  rmSync(dir, { recursive: true, force: true })
+})
 
 const spec: ExperienceSpec = {
   name: 't',
@@ -37,16 +43,23 @@ const spec: ExperienceSpec = {
 describe('runExperience', () => {
   it('runs nodes in topological order and threads state', async () => {
     const dispatchers = new DispatcherRegistry()
-    dispatchers.register(new FakeTool((b) => {
-      if (b.state_view.a === undefined) return { state_delta: { a: 7 } }
-      return { state_delta: { b: (b.state_view.a as number) * 2 } }
-    }))
+    dispatchers.register(
+      new FakeTool((b) => {
+        if (b.state_view.a === undefined) return { state_delta: { a: 7 } }
+        return { state_delta: { b: (b.state_view.a as number) * 2 } }
+      }),
+    )
     const events = new EventBus()
     const seen: RunEvent[] = []
     events.subscribe((e) => seen.push(e))
 
     const result = await runExperience({
-      spec, experienceDir: dir, dispatchers, events, args: {}, dbPath: join(dir, 's.sqlite'),
+      spec,
+      experienceDir: dir,
+      dispatchers,
+      events,
+      args: {},
+      dbPath: join(dir, 's.sqlite'),
     })
 
     expect(result.status).toBe('success')
@@ -60,13 +73,20 @@ describe('runExperience', () => {
 
   it('marks run failed when a dispatcher throws', async () => {
     const dispatchers = new DispatcherRegistry()
-    dispatchers.register(new FakeTool(() => { throw new Error('boom') }))
+    dispatchers.register(
+      new FakeTool(() => {
+        throw new Error('boom')
+      }),
+    )
     const result = await runExperience({
       spec: {
         ...spec,
         graph: { ...spec.graph, nodes: [spec.graph.nodes[0]!], edges: [] },
       },
-      experienceDir: dir, dispatchers, events: new EventBus(), args: {},
+      experienceDir: dir,
+      dispatchers,
+      events: new EventBus(),
+      args: {},
       dbPath: join(dir, 's.sqlite'),
     })
     expect(result.status).toBe('failed')

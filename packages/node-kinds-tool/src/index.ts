@@ -1,6 +1,4 @@
-import type {
-  NodeDispatcher, NodeInputBundle, NodeOutput, ResolvedImpl,
-} from '@openexpertise/core'
+import type { NodeDispatcher, NodeInputBundle, NodeOutput, ResolvedImpl } from '@openexpertise/core'
 import { RunContext } from '@openexpertise/core'
 import type { NodeSpec, ToolNodeSpec } from '@openexpertise/schema'
 import { loadToolModule, type LoadedToolModule } from './loader.js'
@@ -27,9 +25,15 @@ export class ToolDispatcher implements NodeDispatcher {
     if (typeof fn !== 'function') {
       throw new Error(`Tool "${ti.nodeId}" module has no default export (or it is not a function)`)
     }
-    const result = await fn({ ...bundle.args, _edge_inputs: bundle.edge_inputs, _state: bundle.state_view })
+    const result = await fn({
+      ...bundle.args,
+      _edge_inputs: bundle.edge_inputs,
+      _state: bundle.state_view,
+    })
     if (result === null || typeof result !== 'object') {
-      throw new Error(`Tool "${ti.nodeId}" default export must return an object with at least { state_delta }`)
+      throw new Error(
+        `Tool "${ti.nodeId}" default export must return an object with at least { state_delta }`,
+      )
     }
     const obj = result as Record<string, unknown>
     const out: NodeOutput = {

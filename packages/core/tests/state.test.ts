@@ -42,13 +42,15 @@ describe('StateStore', () => {
   })
 
   it('rejects writes to undeclared fields', () => {
-    expect(() => store.write({ undeclared: 1 } as any, { runId: 'r', nodeId: 'x' }))
-      .toThrow(/undeclared state field "undeclared"/)
+    expect(() => store.write({ undeclared: 1 } as any, { runId: 'r', nodeId: 'x' })).toThrow(
+      /undeclared state field "undeclared"/,
+    )
   })
 
   it('rejects writes that violate field type', () => {
-    expect(() => store.write({ greeting: 42 } as any, { runId: 'r', nodeId: 'x' }))
-      .toThrow(/greeting/)
+    expect(() => store.write({ greeting: 42 } as any, { runId: 'r', nodeId: 'x' })).toThrow(
+      /greeting/,
+    )
   })
 
   it('appends arrays under array_append strategy', () => {
@@ -59,8 +61,7 @@ describe('StateStore', () => {
 
   it('throws on second write to set_once field', () => {
     store.write({ once: 'a' }, { runId: 'r', nodeId: 'x' })
-    expect(() => store.write({ once: 'b' }, { runId: 'r', nodeId: 'y' }))
-      .toThrow(/set_once/)
+    expect(() => store.write({ once: 'b' }, { runId: 'r', nodeId: 'y' })).toThrow(/set_once/)
   })
 
   it('records history rows for every write', () => {

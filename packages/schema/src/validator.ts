@@ -14,7 +14,10 @@ addFormats(ajv)
 const validateJsonSchema = ajv.compile(schema)
 
 export class ValidationError extends Error {
-  constructor(message: string, public readonly errors: string[] = []) {
+  constructor(
+    message: string,
+    public readonly errors: string[] = [],
+  ) {
     super(message)
     this.name = 'ValidationError'
   }

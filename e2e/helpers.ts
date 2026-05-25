@@ -16,6 +16,8 @@ export function copyExampleToSandbox(exampleName: string): Sandbox {
   cpSync(src, dir, { recursive: true })
   return {
     dir,
-    cleanup() { rmSync(dir, { recursive: true, force: true }) },
+    cleanup() {
+      rmSync(dir, { recursive: true, force: true })
+    },
   }
 }

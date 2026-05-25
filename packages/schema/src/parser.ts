@@ -2,7 +2,11 @@ import { parseDocument, YAMLError } from 'yaml'
 import type { ExperienceSpec } from './types.js'
 
 export class ParseError extends Error {
-  constructor(message: string, public readonly line?: number, public readonly column?: number) {
+  constructor(
+    message: string,
+    public readonly line?: number,
+    public readonly column?: number,
+  ) {
     super(message)
     this.name = 'ParseError'
   }

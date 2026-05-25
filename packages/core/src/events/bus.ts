@@ -3,7 +3,13 @@ export type RunEvent =
   | { type: 'run.finished'; run_id: string; ts: string; status: 'success' | 'failed' | 'partial' }
   | { type: 'node.ready'; run_id: string; node_id: string; ts: string }
   | { type: 'node.started'; run_id: string; node_id: string; ts: string }
-  | { type: 'node.finished'; run_id: string; node_id: string; ts: string; metrics?: { tokens_in?: number; tokens_out?: number; cost_usd?: number } }
+  | {
+      type: 'node.finished'
+      run_id: string
+      node_id: string
+      ts: string
+      metrics?: { tokens_in?: number; tokens_out?: number; cost_usd?: number }
+    }
   | { type: 'node.failed'; run_id: string; node_id: string; ts: string; error: string }
   | { type: 'node.skipped'; run_id: string; node_id: string; ts: string; reason: string }
   | { type: 'state.write'; run_id: string; node_id: string; field: string; ts: string }

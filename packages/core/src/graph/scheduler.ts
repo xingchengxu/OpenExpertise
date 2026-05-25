@@ -11,7 +11,10 @@ export interface NodeRunResult {
 }
 
 export class SequentialScheduler {
-  constructor(private readonly dag: Dag, private readonly ctx: RunContext) {}
+  constructor(
+    private readonly dag: Dag,
+    private readonly ctx: RunContext,
+  ) {}
 
   async run(): Promise<{ status: 'success' | 'failed' | 'partial'; results: NodeRunResult[] }> {
     const results: NodeRunResult[] = []
@@ -25,19 +28,32 @@ export class SequentialScheduler {
       if (predSkipped) {
         skipped.add(node.id)
         this.ctx.events.emit({
-          type: 'node.skipped', run_id: this.ctx.runId, node_id: node.id,
-          ts: this.ctx.now(), reason: 'predecessor failed or skipped',
+          type: 'node.skipped',
+          run_id: this.ctx.runId,
+          node_id: node.id,
+          ts: this.ctx.now(),
+          reason: 'predecessor failed or skipped',
         })
         results.push({ nodeId: node.id, status: 'skipped' })
         continue
       }
 
-      this.ctx.events.emit({ type: 'node.ready', run_id: this.ctx.runId, node_id: node.id, ts: this.ctx.now() })
+      this.ctx.events.emit({
+        type: 'node.ready',
+        run_id: this.ctx.runId,
+        node_id: node.id,
+        ts: this.ctx.now(),
+      })
 
       const bundle = this.assembleBundle(node, edgeBuffer.get(node.id) ?? {})
       const dispatcher: NodeDispatcher = this.ctx.dispatchers.get(node.spec.kind)
 
-      this.ctx.events.emit({ type: 'node.started', run_id: this.ctx.runId, node_id: node.id, ts: this.ctx.now() })
+      this.ctx.events.emit({
+        type: 'node.started',
+        run_id: this.ctx.runId,
+        node_id: node.id,
+        ts: this.ctx.now(),
+      })
       try {
         const impl = await dispatcher.resolve(node.spec, this.ctx)
         const output = await dispatcher.run(impl, bundle, this.ctx)
@@ -45,7 +61,11 @@ export class SequentialScheduler {
           this.ctx.store.write(output.state_delta, { runId: this.ctx.runId, nodeId: node.id })
           for (const field of Object.keys(output.state_delta)) {
             this.ctx.events.emit({
-              type: 'state.write', run_id: this.ctx.runId, node_id: node.id, field, ts: this.ctx.now(),
+              type: 'state.write',
+              run_id: this.ctx.runId,
+              node_id: node.id,
+              field,
+              ts: this.ctx.now(),
             })
           }
         }
@@ -57,15 +77,21 @@ export class SequentialScheduler {
           }
         }
         this.ctx.events.emit({
-          type: 'node.finished', run_id: this.ctx.runId, node_id: node.id,
-          ts: this.ctx.now(), ...(output.metrics ? { metrics: output.metrics } : {}),
+          type: 'node.finished',
+          run_id: this.ctx.runId,
+          node_id: node.id,
+          ts: this.ctx.now(),
+          ...(output.metrics ? { metrics: output.metrics } : {}),
         })
         results.push({ nodeId: node.id, status: 'success', output })
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err))
         this.ctx.events.emit({
-          type: 'node.failed', run_id: this.ctx.runId, node_id: node.id,
-          ts: this.ctx.now(), error: error.message,
+          type: 'node.failed',
+          run_id: this.ctx.runId,
+          node_id: node.id,
+          ts: this.ctx.now(),
+          error: error.message,
         })
         results.push({ nodeId: node.id, status: 'failed', error })
         skipped.add(node.id)
@@ -74,7 +100,9 @@ export class SequentialScheduler {
     }
 
     const status = anyFailed
-      ? results.every((r) => r.status === 'failed' || r.status === 'skipped') ? 'failed' : 'partial'
+      ? results.every((r) => r.status === 'failed' || r.status === 'skipped')
+        ? 'failed'
+        : 'partial'
       : 'success'
     return { status, results }
   }

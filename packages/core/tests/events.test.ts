@@ -29,8 +29,12 @@ describe('EventBus', () => {
 
 describe('JsonlEventSink', () => {
   let dir: string
-  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'oe-sink-')) })
-  afterEach(() => { rmSync(dir, { recursive: true, force: true }) })
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'oe-sink-'))
+  })
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true })
+  })
 
   it('writes one line per event', () => {
     const sink = new JsonlEventSink(join(dir, 'run.jsonl'))

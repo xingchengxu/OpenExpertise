@@ -11,7 +11,10 @@
     },
     "./schema": "./src/schemas/experience.schema.json"
   },
-  "files": ["dist", "src/schemas"],
+  "files": [
+    "dist",
+    "src/schemas"
+  ],
   "scripts": {
     "build": "tsc -b && node -e \"require('node:fs').cpSync('src/schemas','dist/schemas',{recursive:true})\"",
     "typecheck": "tsc --noEmit"

@@ -32,7 +32,12 @@ export function buildProgram(): Command {
       const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
       const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
       let args: Record<string, unknown> = {}
-      try { args = JSON.parse(cmdOpts.args) as Record<string, unknown> } catch { logger.error('--args must be valid JSON'); process.exit(2) }
+      try {
+        args = JSON.parse(cmdOpts.args) as Record<string, unknown>
+      } catch {
+        logger.error('--args must be valid JSON')
+        process.exit(2)
+      }
       process.exit(await runCommand({ path, args, logger }))
     })
 

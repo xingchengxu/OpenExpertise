@@ -7,7 +7,10 @@ export interface LoadedToolModule {
   [k: string]: unknown
 }
 
-export async function loadToolModule(impl: string, experienceDir: string): Promise<LoadedToolModule> {
+export async function loadToolModule(
+  impl: string,
+  experienceDir: string,
+): Promise<LoadedToolModule> {
   const abs = isAbsolute(impl) ? impl : resolve(experienceDir, impl)
   if (!existsSync(abs)) {
     throw new Error(`Tool impl not found: ${abs} (declared as "${impl}" in experience.yaml)`)

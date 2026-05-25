@@ -16,13 +16,30 @@ function spec(nodes: string[], edges: Array<[string, string]>): ExperienceSpec {
 
 describe('buildDag', () => {
   it('returns nodes in topological order for a linear DAG', () => {
-    const dag = buildDag(spec(['a', 'b', 'c'], [['a', 'b'], ['b', 'c']]))
+    const dag = buildDag(
+      spec(
+        ['a', 'b', 'c'],
+        [
+          ['a', 'b'],
+          ['b', 'c'],
+        ],
+      ),
+    )
     expect(dag.topoOrder.map((n) => n.id)).toEqual(['a', 'b', 'c'])
   })
 
   it('groups parallel branches in any valid topological order', () => {
-    const dag = buildDag(spec(['root', 'left', 'right', 'join'],
-      [['root', 'left'], ['root', 'right'], ['left', 'join'], ['right', 'join']]))
+    const dag = buildDag(
+      spec(
+        ['root', 'left', 'right', 'join'],
+        [
+          ['root', 'left'],
+          ['root', 'right'],
+          ['left', 'join'],
+          ['right', 'join'],
+        ],
+      ),
+    )
     const order = dag.topoOrder.map((n) => n.id)
     expect(order[0]).toBe('root')
     expect(order[3]).toBe('join')
@@ -30,12 +47,29 @@ describe('buildDag', () => {
   })
 
   it('throws on cycle', () => {
-    expect(() => buildDag(spec(['a', 'b'], [['a', 'b'], ['b', 'a']])))
-      .toThrow(/cycle/i)
+    expect(() =>
+      buildDag(
+        spec(
+          ['a', 'b'],
+          [
+            ['a', 'b'],
+            ['b', 'a'],
+          ],
+        ),
+      ),
+    ).toThrow(/cycle/i)
   })
 
   it('reports predecessors for each node', () => {
-    const dag = buildDag(spec(['a', 'b', 'c'], [['a', 'c'], ['b', 'c']]))
+    const dag = buildDag(
+      spec(
+        ['a', 'b', 'c'],
+        [
+          ['a', 'c'],
+          ['b', 'c'],
+        ],
+      ),
+    )
     const c = dag.nodes.get('c')!
     expect(new Set(c.predecessors)).toEqual(new Set(['a', 'b']))
   })

@@ -5,8 +5,12 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 let dir: string
-beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'oe-cli-')) })
-afterEach(() => { rmSync(dir, { recursive: true, force: true }) })
+beforeEach(() => {
+  dir = mkdtempSync(join(tmpdir(), 'oe-cli-'))
+})
+afterEach(() => {
+  rmSync(dir, { recursive: true, force: true })
+})
 
 describe('oe CLI', () => {
   it('exits 0 on valid experience', async () => {
@@ -20,9 +24,10 @@ graph:
 `
     writeFileSync(join(dir, 'experience.yaml'), yaml)
     const program = buildProgram()
-    const exit = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') })
-    await expect(program.parseAsync(['node', 'oe', 'validate', dir]))
-      .rejects.toThrow('exit')
+    const exit = vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('exit')
+    })
+    await expect(program.parseAsync(['node', 'oe', 'validate', dir])).rejects.toThrow('exit')
     expect(exit).toHaveBeenCalledWith(0)
     exit.mockRestore()
   })

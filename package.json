@@ -15,7 +15,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r typecheck",
-    "clean": "pnpm -r exec rm -rf dist .tsbuildinfo node_modules/.cache"
+    "clean": "pnpm -r exec rm -rf dist tsconfig.tsbuildinfo .tsbuildinfo node_modules/.cache"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
