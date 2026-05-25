@@ -13,7 +13,7 @@
   },
   "files": ["dist", "src/schemas"],
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc -b && node -e \"require('node:fs').cpSync('src/schemas','dist/schemas',{recursive:true})\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

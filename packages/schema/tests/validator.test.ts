@@ -48,4 +48,31 @@ describe('validateExperienceSpec', () => {
     }
     expect(() => validateExperienceSpec(bad)).toThrow(/undeclared state field "nonexistent"/)
   })
+
+  it('rejects reads referencing undeclared state field', () => {
+    const bad: ExperienceSpec = {
+      ...validSpec,
+      graph: {
+        ...validSpec.graph,
+        nodes: [
+          { id: 'greet', kind: 'tool', impl: './t.ts', reads: ['missing_field'], writes: ['greeting'] },
+        ],
+      },
+    }
+    expect(() => validateExperienceSpec(bad)).toThrow(/reads undeclared state field "missing_field"/)
+  })
+
+  it('rejects duplicate node ids', () => {
+    const bad: ExperienceSpec = {
+      ...validSpec,
+      graph: {
+        nodes: [
+          { id: 'dup', kind: 'tool', impl: './a.ts', writes: ['greeting'] },
+          { id: 'dup', kind: 'tool', impl: './b.ts', writes: ['greeting'] },
+        ],
+        edges: [],
+      },
+    }
+    expect(() => validateExperienceSpec(bad)).toThrow(/duplicate node ids/i)
+  })
 })

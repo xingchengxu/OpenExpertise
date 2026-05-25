@@ -74,6 +74,7 @@ export interface DatasetNodeSpec {
   kind: 'dataset'
   phase?: string
   source: DatasetSource
+  reads?: string[]
   writes?: string[]
   on_error?: ErrorPolicy
 }

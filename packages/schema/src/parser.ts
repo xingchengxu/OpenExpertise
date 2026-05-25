@@ -20,7 +20,7 @@ export function parseExperienceYaml(source: string): ExperienceSpec {
     )
   }
   const parsed = doc.toJS()
-  if (typeof parsed !== 'object' || parsed === null) {
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
     throw new ParseError('experience.yaml must be a YAML mapping at the top level')
   }
   return parsed as ExperienceSpec
