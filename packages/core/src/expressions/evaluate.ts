@@ -17,14 +17,26 @@ function tokenize(src: string): Token[] {
   let i = 0
   while (i < src.length) {
     const c = src[i]!
-    if (c === ' ' || c === '\t' || c === '\n') { i++; continue }
-    if (c === '(') { tokens.push({ kind: 'lparen' }); i++; continue }
-    if (c === ')') { tokens.push({ kind: 'rparen' }); i++; continue }
+    if (c === ' ' || c === '\t' || c === '\n') {
+      i++
+      continue
+    }
+    if (c === '(') {
+      tokens.push({ kind: 'lparen' })
+      i++
+      continue
+    }
+    if (c === ')') {
+      tokens.push({ kind: 'rparen' })
+      i++
+      continue
+    }
     if (c === '$' && src[i + 1] === '.') {
       let j = i + 2
       while (j < src.length && /[a-zA-Z0-9_.]/.test(src[j]!)) j++
       tokens.push({ kind: 'path', value: src.slice(i, j) })
-      i = j; continue
+      i = j
+      continue
     }
     if (c === '"' || c === "'") {
       const quote = c
@@ -32,22 +44,56 @@ function tokenize(src: string): Token[] {
       while (j < src.length && src[j] !== quote) j++
       if (j >= src.length) throw new Error(`Unterminated string in expression: ${src}`)
       tokens.push({ kind: 'str', value: src.slice(i + 1, j) })
-      i = j + 1; continue
+      i = j + 1
+      continue
     }
     if (/[0-9]/.test(c) || (c === '-' && /[0-9]/.test(src[i + 1] ?? ''))) {
       let j = i + 1
       while (j < src.length && /[0-9.]/.test(src[j]!)) j++
       tokens.push({ kind: 'num', value: parseFloat(src.slice(i, j)) })
-      i = j; continue
+      i = j
+      continue
     }
-    if (c === '=' && src[i + 1] === '=') { tokens.push({ kind: 'op', value: '==' }); i += 2; continue }
-    if (c === '!' && src[i + 1] === '=') { tokens.push({ kind: 'op', value: '!=' }); i += 2; continue }
-    if (c === '>' && src[i + 1] === '=') { tokens.push({ kind: 'op', value: '>=' }); i += 2; continue }
-    if (c === '<' && src[i + 1] === '=') { tokens.push({ kind: 'op', value: '<=' }); i += 2; continue }
-    if (c === '>') { tokens.push({ kind: 'op', value: '>' }); i++; continue }
-    if (c === '<') { tokens.push({ kind: 'op', value: '<' }); i++; continue }
-    if (c === '&' && src[i + 1] === '&') { tokens.push({ kind: 'op', value: '&&' }); i += 2; continue }
-    if (c === '|' && src[i + 1] === '|') { tokens.push({ kind: 'op', value: '||' }); i += 2; continue }
+    if (c === '=' && src[i + 1] === '=') {
+      tokens.push({ kind: 'op', value: '==' })
+      i += 2
+      continue
+    }
+    if (c === '!' && src[i + 1] === '=') {
+      tokens.push({ kind: 'op', value: '!=' })
+      i += 2
+      continue
+    }
+    if (c === '>' && src[i + 1] === '=') {
+      tokens.push({ kind: 'op', value: '>=' })
+      i += 2
+      continue
+    }
+    if (c === '<' && src[i + 1] === '=') {
+      tokens.push({ kind: 'op', value: '<=' })
+      i += 2
+      continue
+    }
+    if (c === '>') {
+      tokens.push({ kind: 'op', value: '>' })
+      i++
+      continue
+    }
+    if (c === '<') {
+      tokens.push({ kind: 'op', value: '<' })
+      i++
+      continue
+    }
+    if (c === '&' && src[i + 1] === '&') {
+      tokens.push({ kind: 'op', value: '&&' })
+      i += 2
+      continue
+    }
+    if (c === '|' && src[i + 1] === '|') {
+      tokens.push({ kind: 'op', value: '||' })
+      i += 2
+      continue
+    }
     if (/[a-zA-Z_]/.test(c)) {
       let j = i + 1
       while (j < src.length && /[a-zA-Z0-9_]/.test(src[j]!)) j++
@@ -55,7 +101,8 @@ function tokenize(src: string): Token[] {
       if (word === 'true') tokens.push({ kind: 'bool', value: true })
       else if (word === 'false') tokens.push({ kind: 'bool', value: false })
       else tokens.push({ kind: 'ident', value: word })
-      i = j; continue
+      i = j
+      continue
     }
     throw new Error(`Unexpected character "${c}" in expression: ${src}`)
   }
@@ -123,7 +170,8 @@ function parseAtom(ctx: ParseCtx): Ast {
     if (close.kind !== 'rparen') throw new Error('Expected )')
     return inside
   }
-  if (t.kind === 'num' || t.kind === 'str' || t.kind === 'bool') return { kind: 'lit', value: t.value }
+  if (t.kind === 'num' || t.kind === 'str' || t.kind === 'bool')
+    return { kind: 'lit', value: t.value }
   if (t.kind === 'path') return { kind: 'path', value: t.value }
   if (t.kind === 'ident') {
     if (peek(ctx)?.kind === 'lparen') {
@@ -153,8 +201,10 @@ function resolvePath(path: string, state: Record<string, unknown>): unknown {
 
 function evalAst(ast: Ast, state: Record<string, unknown>): unknown {
   switch (ast.kind) {
-    case 'lit': return ast.value
-    case 'path': return resolvePath(ast.value, state)
+    case 'lit':
+      return ast.value
+    case 'path':
+      return resolvePath(ast.value, state)
     case 'call': {
       if (ast.fn === 'length') {
         const v = evalAst(ast.args[0]!, state)
@@ -164,8 +214,10 @@ function evalAst(ast: Ast, state: Record<string, unknown>): unknown {
       throw new Error(`Unknown function: ${ast.fn}`)
     }
     case 'binop': {
-      if (ast.op === '&&') return Boolean(evalAst(ast.lhs, state)) && Boolean(evalAst(ast.rhs, state))
-      if (ast.op === '||') return Boolean(evalAst(ast.lhs, state)) || Boolean(evalAst(ast.rhs, state))
+      if (ast.op === '&&')
+        return Boolean(evalAst(ast.lhs, state)) && Boolean(evalAst(ast.rhs, state))
+      if (ast.op === '||')
+        return Boolean(evalAst(ast.lhs, state)) || Boolean(evalAst(ast.rhs, state))
       const l = evalAst(ast.lhs, state)
       const r = evalAst(ast.rhs, state)
       if (l === undefined || r === undefined) {
@@ -174,12 +226,18 @@ function evalAst(ast: Ast, state: Record<string, unknown>): unknown {
         return false
       }
       switch (ast.op) {
-        case '==': return l === r
-        case '!=': return l !== r
-        case '>': return (l as number) > (r as number)
-        case '<': return (l as number) < (r as number)
-        case '>=': return (l as number) >= (r as number)
-        case '<=': return (l as number) <= (r as number)
+        case '==':
+          return l === r
+        case '!=':
+          return l !== r
+        case '>':
+          return (l as number) > (r as number)
+        case '<':
+          return (l as number) < (r as number)
+        case '>=':
+          return (l as number) >= (r as number)
+        case '<=':
+          return (l as number) <= (r as number)
       }
       throw new Error(`Unknown binop: ${ast.op}`)
     }

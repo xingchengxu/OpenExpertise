@@ -27,9 +27,7 @@ export class SequentialScheduler {
     const skipped = new Set<string>()
     let anyFailed = false
 
-    const pipelineStageIds = new Set(
-      (this.ctx.spec.graph.pipelines ?? []).flatMap((p) => p.stages),
-    )
+    const pipelineStageIds = new Set((this.ctx.spec.graph.pipelines ?? []).flatMap((p) => p.stages))
 
     for (const node of this.dag.topoOrder) {
       if (pipelineStageIds.has(node.id)) {
@@ -80,7 +78,13 @@ export class SequentialScheduler {
         const items: unknown[] = Array.isArray(sourceVal) ? sourceVal : []
         let anyFanFailed = false
         for (let idx = 0; idx < items.length; idx++) {
-          await this.runNodeOnce(node, { $item: items[idx], $index: idx }, skipped, results, edgeBuffer)
+          await this.runNodeOnce(
+            node,
+            { $item: items[idx], $index: idx },
+            skipped,
+            results,
+            edgeBuffer,
+          )
           const last = results[results.length - 1]
           if (last?.status === 'failed') anyFanFailed = true
         }
@@ -153,10 +157,22 @@ export class SequentialScheduler {
     results: NodeRunResult[],
     edgeBuffer: Map<string, Record<string, unknown>>,
   ): Promise<void> {
-    this.ctx.events.emit({ type: 'node.ready', run_id: this.ctx.runId, node_id: node.id, ts: this.ctx.now(), ...(node.spec.phase ? { phase: node.spec.phase } : {}) })
+    this.ctx.events.emit({
+      type: 'node.ready',
+      run_id: this.ctx.runId,
+      node_id: node.id,
+      ts: this.ctx.now(),
+      ...(node.spec.phase ? { phase: node.spec.phase } : {}),
+    })
     const bundle = this.assembleBundle(node, edgeBuffer.get(node.id) ?? {}, extraArgs)
     const dispatcher: NodeDispatcher = this.ctx.dispatchers.get(node.spec.kind)
-    this.ctx.events.emit({ type: 'node.started', run_id: this.ctx.runId, node_id: node.id, ts: this.ctx.now(), ...(node.spec.phase ? { phase: node.spec.phase } : {}) })
+    this.ctx.events.emit({
+      type: 'node.started',
+      run_id: this.ctx.runId,
+      node_id: node.id,
+      ts: this.ctx.now(),
+      ...(node.spec.phase ? { phase: node.spec.phase } : {}),
+    })
 
     const policy = node.spec.on_error ?? { policy: 'skip' as const }
     const maxAttempts = policy.policy === 'retry' ? policy.attempts : 1

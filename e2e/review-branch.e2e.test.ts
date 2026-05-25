@@ -25,20 +25,22 @@ class ScriptedLLM implements LLMClient {
     if (prompt.includes('reviewing dimension')) {
       return {
         text: '',
-        tool_calls: [{
-          name: 'structured_output',
-          input: {
-            findings: [
-              { title: 'sample bug', severity: 'high' },
-            ],
+        tool_calls: [
+          {
+            name: 'structured_output',
+            input: {
+              findings: [{ title: 'sample bug', severity: 'high' }],
+            },
           },
-        }],
+        ],
       }
     }
     if (prompt.includes('Adversarially verify')) {
       return {
         text: '',
-        tool_calls: [{ name: 'structured_output', input: { verified_findings: [{ is_real: true }] } }],
+        tool_calls: [
+          { name: 'structured_output', input: { verified_findings: [{ is_real: true }] } },
+        ],
       }
     }
     if (prompt.includes('compute a risk_score')) {
@@ -52,7 +54,9 @@ class ScriptedLLM implements LLMClient {
 }
 
 let dir: string
-afterEach(() => { if (dir) rmSync(dir, { recursive: true, force: true }) })
+afterEach(() => {
+  if (dir) rmSync(dir, { recursive: true, force: true })
+})
 
 describe('review-branch end-to-end (mocked Anthropic)', () => {
   it('runs all stages and produces a risk_score', async () => {

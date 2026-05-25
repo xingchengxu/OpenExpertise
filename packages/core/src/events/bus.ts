@@ -11,8 +11,22 @@ export type RunEvent =
       phase?: string
       metrics?: { tokens_in?: number; tokens_out?: number; cost_usd?: number }
     }
-  | { type: 'node.failed'; run_id: string; node_id: string; ts: string; phase?: string; error: string }
-  | { type: 'node.skipped'; run_id: string; node_id: string; ts: string; phase?: string; reason: string }
+  | {
+      type: 'node.failed'
+      run_id: string
+      node_id: string
+      ts: string
+      phase?: string
+      error: string
+    }
+  | {
+      type: 'node.skipped'
+      run_id: string
+      node_id: string
+      ts: string
+      phase?: string
+      reason: string
+    }
   | { type: 'state.write'; run_id: string; node_id: string; field: string; ts: string }
 
 export type EventListener = (event: RunEvent) => void

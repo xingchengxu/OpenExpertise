@@ -10,19 +10,23 @@ import {
   SequentialScheduler,
   buildDag,
   type NodeDispatcher,
-  type NodeInputBundle,
   type NodeOutput,
 } from '../src/index.js'
 import type { ExperienceSpec, NodeSpec } from '@openexpertise/schema'
 
 let dir: string
-beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'oe-when-')) })
-afterEach(() => { rmSync(dir, { recursive: true, force: true }) })
+beforeEach(() => {
+  dir = mkdtempSync(join(tmpdir(), 'oe-when-'))
+})
+afterEach(() => {
+  rmSync(dir, { recursive: true, force: true })
+})
 
 describe('Conditional edges with when:', () => {
   it('skips downstream node when the only incoming edge condition is false', async () => {
     const spec: ExperienceSpec = {
-      name: 't', version: '0.1.0',
+      name: 't',
+      version: '0.1.0',
       state: { schema: { count: { type: 'number' }, result: { type: 'string' } } },
       graph: {
         nodes: [
@@ -35,7 +39,9 @@ describe('Conditional edges with when:', () => {
     const store = new StateStore({ dbPath: join(dir, 's.sqlite'), spec })
     const dispatcher: NodeDispatcher = {
       kind: 'tool',
-      async resolve(n: NodeSpec) { return { id: n.id } },
+      async resolve(n: NodeSpec) {
+        return { id: n.id }
+      },
       async run(impl: { id: string }): Promise<NodeOutput> {
         if (impl.id === 'seed') return { state_delta: { count: 0 } }
         return { state_delta: { result: 'should-not-run' } }
@@ -44,8 +50,13 @@ describe('Conditional edges with when:', () => {
     const dispatchers = new DispatcherRegistry()
     dispatchers.register(dispatcher)
     const ctx = new RunContext({
-      runId: 'r', spec, experienceDir: dir, store,
-      events: new EventBus(), dispatchers, args: {},
+      runId: 'r',
+      spec,
+      experienceDir: dir,
+      store,
+      events: new EventBus(),
+      dispatchers,
+      args: {},
     })
     const scheduler = new SequentialScheduler(buildDag(spec), ctx)
     const { status, results } = await scheduler.run()
@@ -58,7 +69,8 @@ describe('Conditional edges with when:', () => {
 
   it('runs downstream node when condition is true', async () => {
     const spec: ExperienceSpec = {
-      name: 't', version: '0.1.0',
+      name: 't',
+      version: '0.1.0',
       state: { schema: { count: { type: 'number' }, result: { type: 'string' } } },
       graph: {
         nodes: [
@@ -71,7 +83,9 @@ describe('Conditional edges with when:', () => {
     const store = new StateStore({ dbPath: join(dir, 's.sqlite'), spec })
     const dispatcher: NodeDispatcher = {
       kind: 'tool',
-      async resolve(n: NodeSpec) { return { id: n.id } },
+      async resolve(n: NodeSpec) {
+        return { id: n.id }
+      },
       async run(impl: { id: string }): Promise<NodeOutput> {
         if (impl.id === 'seed') return { state_delta: { count: 5 } }
         return { state_delta: { result: 'ran' } }
@@ -80,8 +94,13 @@ describe('Conditional edges with when:', () => {
     const dispatchers = new DispatcherRegistry()
     dispatchers.register(dispatcher)
     const ctx = new RunContext({
-      runId: 'r', spec, experienceDir: dir, store,
-      events: new EventBus(), dispatchers, args: {},
+      runId: 'r',
+      spec,
+      experienceDir: dir,
+      store,
+      events: new EventBus(),
+      dispatchers,
+      args: {},
     })
     const scheduler = new SequentialScheduler(buildDag(spec), ctx)
     const { status } = await scheduler.run()
