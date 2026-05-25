@@ -1,5 +1,5 @@
 import { readFileSync, existsSync } from 'node:fs'
-import { join, dirname, resolve } from 'node:path'
+import { join, resolve } from 'node:path'
 import { parseExperienceYaml } from '@openexpertise/schema'
 import { DispatcherRegistry, EventBus, runExperience } from '@openexpertise/core'
 import { ToolDispatcher } from '@openexpertise/node-kinds-tool'
@@ -41,8 +41,20 @@ export async function resumeCommand(opts: ResumeOpts): Promise<number> {
     if (!lazyClient) lazyClient = new AnthropicLLMClient()
     return lazyClient
   }
-  dispatchers.register(new AgentDispatcher({ get client() { return getClient() } } as any))
-  dispatchers.register(new SkillDispatcher({ get client() { return getClient() } } as any))
+  dispatchers.register(
+    new AgentDispatcher({
+      get client() {
+        return getClient()
+      },
+    } as any),
+  )
+  dispatchers.register(
+    new SkillDispatcher({
+      get client() {
+        return getClient()
+      },
+    } as any),
+  )
   dispatchers.register(new DatasetDispatcher())
   dispatchers.register(new ExperienceDispatcher({ runExperience }))
 

@@ -103,7 +103,9 @@ export function buildProgram(): Command {
     .action(async (cmdOpts: { experience: string; yes: boolean }, cmd: Command) => {
       const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
       const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
-      process.exit(await resetStateCommand({ experiencePath: cmdOpts.experience, yes: cmdOpts.yes, logger }))
+      process.exit(
+        await resetStateCommand({ experiencePath: cmdOpts.experience, yes: cmdOpts.yes, logger }),
+      )
     })
 
   program

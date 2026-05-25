@@ -222,7 +222,11 @@ export class SequentialScheduler {
           this.ctx.store.write(hit.state_delta, { runId: this.ctx.runId, nodeId: node.id })
           for (const field of Object.keys(hit.state_delta)) {
             this.ctx.events.emit({
-              type: 'state.write', run_id: this.ctx.runId, node_id: node.id, field, ts: this.ctx.now(),
+              type: 'state.write',
+              run_id: this.ctx.runId,
+              node_id: node.id,
+              field,
+              ts: this.ctx.now(),
             })
           }
         }
@@ -234,7 +238,9 @@ export class SequentialScheduler {
           }
         }
         this.ctx.events.emit({
-          type: 'node.finished', run_id: this.ctx.runId, node_id: node.id,
+          type: 'node.finished',
+          run_id: this.ctx.runId,
+          node_id: node.id,
           ts: this.ctx.now(),
           ...(node.spec.phase ? { phase: node.spec.phase } : {}),
           ...(hit.metrics ? { metrics: hit.metrics } : {}),

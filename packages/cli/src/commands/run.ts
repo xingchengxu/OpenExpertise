@@ -65,7 +65,13 @@ export async function runCommand(opts: RunOpts): Promise<number> {
       })),
     })
     // Wait for the run to complete, then let the TUI flush.
-    const result = await runExperience({ spec, experienceDir, dispatchers, events, args: opts.args })
+    const result = await runExperience({
+      spec,
+      experienceDir,
+      dispatchers,
+      events,
+      args: opts.args,
+    })
     // Give the TUI a tick to render the final state, then unmount.
     await new Promise((r) => setTimeout(r, 100))
     tuiInstance.unmount()
