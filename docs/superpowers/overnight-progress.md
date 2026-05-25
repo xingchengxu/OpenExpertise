@@ -23,7 +23,7 @@ Worktree note: harness required worktree isolation mid-session. Working in `.cla
 | Plan | Status | HEAD after | Tests | Notes |
 |---|---|---|---|---|
 | 1 | ✅ Complete | `b849fcf` | 39/39 | Walking skeleton (prior session, in main checkout) |
-| 2 | 🟡 In progress | — | — | Heterogeneous dispatchers + on_error |
+| 2 | ✅ Complete | `2555cde` | 70/70 | Heterogeneous dispatchers + on_error; 4 new packages |
 | 3 | ⏳ Pending | — | — | Control flow + review-branch |
 | 4 | ⏳ Pending | — | — | Cache + resume + TUI + remaining CLI |
 | 5 | ⏳ Pending | — | — | Authoring skill |
@@ -35,7 +35,17 @@ Worktree note: harness required worktree isolation mid-session. Working in `.cla
 
 ## Verification commands used
 
-(populated per plan)
+### Plan 2 (HEAD `2555cde`)
+- `pnpm clean && pnpm install && pnpm -r build && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test`
+- All green: typecheck 0 errors, lint 0 errors (10 `as any` test warnings), prettier clean, 70/70 tests across 18 test files
+- `node packages/cli/dist/bin.js validate examples/agent-echo` → exit 0
+- Plan 2 commits: `abb6826` (LLMClient+prompt), `876d4d7` (agent scaffold), `076afe8` (AgentDispatcher), `386a7b6` (AnthropicLLMClient), `218fa4b` (skill scaffold), `c5101ca` (SkillDispatcher), `239e8e7` (dataset scaffold), `6afc5e6` (DatasetDispatcher), `00eab36` (experience scaffold), `3897685` (ExperienceDispatcher), `bef2776` (on_error), `2c443a7` (CLI register all), `f7db1f7` (agent-echo example), `e393e2e` (dataset-aggregate example), `2a05852` (multi-kind e2e), `1387801`/`2555cde` (prettier passes)
+- Deviations from plan (all reasonable inline fixes):
+  - Added `ajv` dep to node-kinds-agent (plan omitted)
+  - Added `parquet` exhaustive case in dataset file source for `exactOptionalPropertyTypes` compat
+  - Added `mkdirSync` for sub-experience SQLite dir
+  - Added node-kinds-tool as devDep to node-kinds-experience for test resolution
+  - Added cross-package deps to e2e/package.json for vitest resolution
 
 ## Morning checklist (priorities to review first)
 
