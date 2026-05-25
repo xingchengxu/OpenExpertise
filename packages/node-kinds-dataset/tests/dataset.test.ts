@@ -132,14 +132,12 @@ describe('DatasetDispatcher — sqlite source', () => {
 
 describe('DatasetDispatcher — http source', () => {
   it('GETs a URL and parses JSON', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue(
-        new Response(JSON.stringify([{ a: 1 }]), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      )
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([{ a: 1 }]), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
     vi.stubGlobal('fetch', fetchMock)
 
     const dispatcher = new DatasetDispatcher()
