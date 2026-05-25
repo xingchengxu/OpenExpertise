@@ -9,6 +9,7 @@
     "assets",
     "scripts"
   ],
+  "publishConfig": { "access": "public" },
   "scripts": {
     "test": "vitest run"
   },
