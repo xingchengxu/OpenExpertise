@@ -25,3 +25,5 @@ export type {
   LLMUsage,
 } from './llm/client.js'
 export { interpolatePrompt } from './llm/prompt.js'
+export { computeCacheKey, type CacheKeyInput } from './cache/key.js'
+export { CacheStore, type CacheStoreOpts } from './cache/store.js'
