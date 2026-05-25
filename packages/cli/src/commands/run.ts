@@ -7,6 +7,7 @@ import { AgentDispatcher, AnthropicLLMClient } from '@openexpertise/node-kinds-a
 import { SkillDispatcher } from '@openexpertise/node-kinds-skill'
 import { DatasetDispatcher } from '@openexpertise/node-kinds-dataset'
 import { ExperienceDispatcher } from '@openexpertise/node-kinds-experience'
+import { startTui } from '@openexpertise/tui'
 import { resolveExperienceYaml } from './validate.js'
 import type { Logger } from 'pino'
 
@@ -14,6 +15,7 @@ export interface RunOpts {
   path: string
   args: Record<string, unknown>
   logger: Logger
+  tui: boolean
 }
 
 export async function runCommand(opts: RunOpts): Promise<number> {
@@ -53,6 +55,23 @@ export async function runCommand(opts: RunOpts): Promise<number> {
   dispatchers.register(new ExperienceDispatcher({ runExperience }))
 
   const events = new EventBus()
+
+  if (opts.tui) {
+    const tuiInstance = startTui({
+      events,
+      nodes: spec.graph.nodes.map((n) => ({
+        id: n.id,
+        ...(n.phase ? { phase: n.phase } : {}),
+      })),
+    })
+    // Wait for the run to complete, then let the TUI flush.
+    const result = await runExperience({ spec, experienceDir, dispatchers, events, args: opts.args })
+    // Give the TUI a tick to render the final state, then unmount.
+    await new Promise((r) => setTimeout(r, 100))
+    tuiInstance.unmount()
+    return result.status === 'success' ? 0 : 1
+  }
+
   events.subscribe((e) => opts.logger.info(e, e.type))
 
   const result = await runExperience({ spec, experienceDir, dispatchers, events, args: opts.args })

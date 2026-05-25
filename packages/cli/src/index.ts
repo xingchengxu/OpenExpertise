@@ -32,7 +32,8 @@ export function buildProgram(): Command {
     .description('Execute an experience')
     .argument('[path]', 'path to experience.yaml or experience directory', '.')
     .option('--args <json>', 'JSON object passed as args to the experience', '{}')
-    .action(async (path: string, cmdOpts: { args: string }, cmd: Command) => {
+    .option('--tui', 'show interactive dashboard instead of log output', false)
+    .action(async (path: string, cmdOpts: { args: string; tui: boolean }, cmd: Command) => {
       const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
       const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
       let args: Record<string, unknown> = {}
@@ -42,7 +43,7 @@ export function buildProgram(): Command {
         logger.error('--args must be valid JSON')
         process.exit(2)
       }
-      process.exit(await runCommand({ path, args, logger }))
+      process.exit(await runCommand({ path, args, logger, tui: cmdOpts.tui }))
     })
 
   program
