@@ -2,6 +2,9 @@
 claude-code-workflow-creator/
 openhuman/
 
+# Harness / IDE settings
+.claude/
+
 # Build outputs
 dist/
 node_modules/
