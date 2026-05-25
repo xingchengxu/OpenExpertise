@@ -2,6 +2,7 @@ import { Command } from 'commander'
 import { validateCommand } from './commands/validate.js'
 import { runCommand } from './commands/run.js'
 import { inspectCommand } from './commands/inspect.js'
+import { resumeCommand } from './commands/resume.js'
 import { makeLogger } from './logger.js'
 
 export function buildProgram(): Command {
@@ -50,6 +51,17 @@ export function buildProgram(): Command {
       const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
       const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
       process.exit(await inspectCommand({ experiencePath: cmdOpts.experience, runId, logger }))
+    })
+
+  program
+    .command('resume')
+    .description('Re-run an experience with cached results from a prior run')
+    .argument('<run-id>', 'prior run id')
+    .option('--experience <path>', 'experience path', '.')
+    .action(async (runId: string, cmdOpts: { experience: string }, cmd: Command) => {
+      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+      process.exit(await resumeCommand({ experiencePath: cmdOpts.experience, runId, logger }))
     })
 
   return program
