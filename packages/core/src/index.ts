@@ -1,5 +1,6 @@
 // Public exports — populated as Tasks 6–11 complete.
 export { resolveExpression } from './expressions/resolve.js'
+export { evaluateExpression } from './expressions/evaluate.js'
 export { StateStore } from './state/store.js'
 export { EventBus, type RunEvent } from './events/bus.js'
 export { JsonlEventSink } from './events/sink.js'
