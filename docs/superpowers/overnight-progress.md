@@ -26,7 +26,7 @@ Worktree note: harness required worktree isolation mid-session. Working in `.cla
 | 2 | ✅ Complete | `2555cde` | 70/70 | Heterogeneous dispatchers + on_error; 4 new packages |
 | 3 | ✅ Complete | `9feb91a` | 83/83 | Control flow primitives + review-branch demo |
 | 4 | ✅ Complete | `f6b4cd2` | 91/91 | Cache + resume + bounded loop + TUI + 4 new CLI commands |
-| 5 | ⏳ Pending | — | — | Authoring skill |
+| 5 | ✅ Complete | `55336cc` | 100/100 | experience-creator authoring skill |
 | 6 | ⏳ Pending | — | — | Evolution + distribution |
 
 ## Blockers / unresolved
@@ -65,6 +65,14 @@ Worktree note: harness required worktree isolation mid-session. Working in `.cla
   - `packages/tui/src/index.tsx` instead of `.ts` (contains JSX)
   - Fixed unused imports from earlier batches during Task 9 cleanup
   - The Plan 1 TODO note about `oe diff` evolution-advisor is intentionally a stub in Plan 4 — Plan 6 fills it
+
+### Plan 5 (HEAD `55336cc`)
+- `pnpm clean && pnpm install && pnpm -r build && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test` → all green
+- Test count: 100/100 (31 test files); +9 tests (skill-md 1, templates 6 [1 summary + 5 per-template], validate-script 2)
+- New package: `@openexpertise/skill-experience-creator` — Claude Code-compatible SKILL.md + references + templates + worked examples + standalone validator
+- Plan 5 commits: `0b805f5` (plan), `ee8b58d` (scaffold), `7019233` (SKILL.md), `817c25a` (references), `5e71c91` (templates), `cb753a8` (examples), `4395363` (validator script), `59e2771` (tests), `55336cc` (cleanup)
+- Deviations:
+  - `pipeline.yaml` template needed `_unused_a` field declared in `state.schema` (validator catches undeclared writes) — adjusted accordingly
 
 ## Morning checklist (priorities to review first)
 
