@@ -47,9 +47,16 @@ graph:
       prompt: ./prompts/verify.md
       schema:
         type: object
-        required: [is_real]
+        required: [verified_findings]
         properties:
-          is_real: { type: boolean }
+          verified_findings:
+            type: array
+            items:
+              type: object
+              required: [is_real]
+              properties:
+                is_real: { type: boolean }
+      for_each: { source: $.findings }
       writes: [verified_findings]
     - id: score
       kind: agent
@@ -64,9 +71,5 @@ graph:
       writes: [risk_score]
   edges:
     - { from: seed_dimensions, to: bug_review }
-    - { from: bug_review, to: score, when: 'length($.findings) > 0' }
-  pipelines:
-    - id: verify_pipe
-      items: $.findings
-      stages: [verify_finding]
-      phase: verify
+    - { from: bug_review, to: verify_finding }
+    - { from: verify_finding, to: score, when: 'length($.findings) > 0' }
