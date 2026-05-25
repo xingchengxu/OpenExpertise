@@ -1,0 +1,6 @@
+{
+  "name": "@openexpertise/example-agent-echo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module"
+}
