@@ -27,7 +27,7 @@ Worktree note: harness required worktree isolation mid-session. Working in `.cla
 | 3 | ✅ Complete | `9feb91a` | 83/83 | Control flow primitives + review-branch demo |
 | 4 | ✅ Complete | `f6b4cd2` | 91/91 | Cache + resume + bounded loop + TUI + 4 new CLI commands |
 | 5 | ✅ Complete | `55336cc` | 100/100 | experience-creator authoring skill |
-| 6 | ⏳ Pending | — | — | Evolution + distribution |
+| 6 | ✅ Complete | `83a6823` | 105/105 | EvolutionAdvisor + oe evolve/diff + --evolve flag + README + publishConfig |
 
 ## Blockers / unresolved
 
@@ -74,6 +74,95 @@ Worktree note: harness required worktree isolation mid-session. Working in `.cla
 - Deviations:
   - `pipeline.yaml` template needed `_unused_a` field declared in `state.schema` (validator catches undeclared writes) — adjusted accordingly
 
+### Plan 6 (HEAD `83a6823`)
+- `pnpm clean && pnpm install && pnpm -r build && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test` → all green
+- Test count: 105/105 (33 test files); +5 tests (advisor 4, evolution e2e 1)
+- New package: `@openexpertise/evolution` (EvolutionAdvisor + proposal markdown renderer)
+- New CLI commands: `oe evolve <run-id>` writes proposal; `oe run --evolve` auto-triggers after success
+- Updated CLI commands: `oe diff` now lists real proposals (replaces Plan 4 stub)
+- Distribution: root README rewritten with full quickstart; all 11 publishable packages declare `publishConfig: { access: "public" }`
+- Plan 6 commits: `568f846` (plan), `d0b8298` (scaffold), `6a02fb9` (advisor), `c9401ad` (oe evolve), `ba8eeb7` (oe diff real), `c3c9c5d` (--evolve flag), `06ab6dc` (e2e), `d0eb68f` (README+publishConfig), `83a6823` (cleanup)
+- Deviations: none
+
 ## Morning checklist (priorities to review first)
 
-(populated as plans complete)
+### 1. Verify the worktree exists and is the source of truth
+
+```bash
+cd /Users/xuxingcheng/SHLAB/github/OpenExpertise
+git worktree list
+# overnight-plans-2-6 should be listed at .claude/worktrees/overnight-plans-2-6
+# on branch worktree-overnight-plans-2-6
+```
+
+The main checkout at the repo root stays at `b849fcf` (Plan 1 complete). All overnight work — Plans 2-6 — landed on `worktree-overnight-plans-2-6`.
+
+### 2. Smoke-test the V1 end-to-end pipeline
+
+```bash
+cd /Users/xuxingcheng/SHLAB/github/OpenExpertise/.claude/worktrees/overnight-plans-2-6
+pnpm install
+pnpm -r build
+pnpm test
+# Expected: 105/105 tests across 33 files
+node packages/cli/dist/bin.js --help
+# Expected: 9 subcommands listed
+node packages/cli/dist/bin.js run examples/dataset-aggregate
+# Expected: finalState { rows: [4 items], total: 60 }
+```
+
+### 3. Spot-check the new packages
+
+- `packages/node-kinds-agent/src/` — Anthropic SDK wiring + AgentDispatcher
+- `packages/node-kinds-skill/src/` — Claude Code SKILL.md compat
+- `packages/node-kinds-dataset/src/sources/` — file/sqlite/http loaders
+- `packages/node-kinds-experience/src/` — recursive 1-level nesting
+- `packages/tui/src/dashboard.tsx` — ink rendering
+- `packages/evolution/src/advisor.ts` — proposal generator
+- `packages/skill-experience-creator/SKILL.md` — the authoring procedure
+
+### 4. Review the design tensions surfaced during execution
+
+- **Pipeline groups are tested but unused in the `review-branch` demo** because pipelines run AFTER the main DAG pass; the demo needs `score` to run after verified findings exist, so it uses `for_each + edge` instead. Worth thinking about whether the pipeline pass should be reorderable, or whether the topo-graph + pipeline should integrate differently. (Recorded under Plan 3 deviations.)
+- **`AgentDispatcher` lazy-construction pattern in CLI** uses a `get client()` proxy + `as any` cast. Functional but not idiomatic. A proper lazy-loader would be cleaner.
+- **Hard-coded model `claude-sonnet-4-5`** in dispatchers' defaults. Should probably be configurable per-experience and per-run.
+
+### 5. If you want to merge the overnight branch into main
+
+```bash
+cd /Users/xuxingcheng/SHLAB/github/OpenExpertise
+git fetch
+git merge worktree-overnight-plans-2-6 --no-ff
+# or, more conservatively, cherry-pick per-plan if you want finer-grained review
+```
+
+(Not done automatically per safety constraints — no push, no merge without explicit user request.)
+
+### 6. Quick sanity numbers
+
+| Metric | Value |
+|---|---|
+| Plans complete | 6/6 |
+| Tests | 105/105 |
+| Test files | 33 |
+| Packages | 12 (10 publishable + 1 example dirs + 1 e2e) |
+| Lint errors | 0 (12 `as any` warnings in test files, expected) |
+| Typecheck | clean |
+| Prettier | clean |
+| Commits added by overnight session | ~80 (Plan 2: 16, Plan 3: 10, Plan 4: 10, Plan 5: 9, Plan 6: 9, plus progress doc commits) |
+
+### 7. What's NOT in V1 (deferred to v1.1+)
+
+- Single-binary distribution (bun compile) — npm + `node packages/cli/dist/bin.js` works today
+- Cross-experience shared state (`state_scope: shared`)
+- Vector-store dataset source
+- MCP dataset source (`mcp-resource` source type)
+- Parquet dataset source
+- HITL runtime nodes
+- Adaptive / LLM-driven control flow
+- Web UI / visual graph editor
+- Python runtime
+- Per-stage barrier semantics in pipelines (true streaming with cross-item parallelism)
+- Concurrency in `for_each` (V1 parses `concurrency:` but runs sequentially)
+- `oe inspect --tui` (Plan 4's TUI is only wired into `oe run --tui`)
+
