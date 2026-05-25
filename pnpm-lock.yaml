@@ -38,6 +38,9 @@ importers:
       '@openexpertise/core':
         specifier: workspace:*
         version: link:../packages/core
+      '@openexpertise/evolution':
+        specifier: workspace:*
+        version: link:../packages/evolution
       '@openexpertise/node-kinds-agent':
         specifier: workspace:*
         version: link:../packages/node-kinds-agent
@@ -67,6 +70,9 @@ importers:
       '@openexpertise/core':
         specifier: workspace:*
         version: link:../core
+      '@openexpertise/evolution':
+        specifier: workspace:*
+        version: link:../evolution
       '@openexpertise/node-kinds-agent':
         specifier: workspace:*
         version: link:../node-kinds-agent
@@ -116,6 +122,15 @@ importers:
       '@types/object-hash':
         specifier: ^3.0.6
         version: 3.0.6
+
+  packages/evolution:
+    dependencies:
+      '@openexpertise/core':
+        specifier: workspace:*
+        version: link:../core
+      '@openexpertise/schema':
+        specifier: workspace:*
+        version: link:../schema
 
   packages/node-kinds-agent:
     dependencies:

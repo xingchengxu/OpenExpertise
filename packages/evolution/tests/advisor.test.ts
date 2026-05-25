@@ -8,16 +8,19 @@ class CannedLLM implements LLMClient {
   async complete(_opts: LLMCompleteOpts) {
     return {
       text: '',
-      tool_calls: [{
-        name: 'structured_output',
-        input: { proposals: this.proposals },
-      }],
+      tool_calls: [
+        {
+          name: 'structured_output',
+          input: { proposals: this.proposals },
+        },
+      ],
     }
   }
 }
 
 const spec: ExperienceSpec = {
-  name: 't', version: '0.1.0',
+  name: 't',
+  version: '0.1.0',
   state: { schema: { x: { type: 'string' } } },
   graph: { nodes: [{ id: 'a', kind: 'tool', impl: 'x' }], edges: [] },
 }
@@ -47,15 +50,18 @@ describe('EvolutionAdvisor', () => {
 
   it('renders markdown with diff blocks', async () => {
     const advisor = new EvolutionAdvisor({ client: new CannedLLM([]) })
-    const md = advisor.renderMarkdown([
-      {
-        operation: 'add-node',
-        confidence: 'medium',
-        title: 'Add licence-check',
-        rationale: 'Findings touched 3rd-party deps; no licence node exists.',
-        diff: '+ - id: licence_check\n+   kind: skill\n',
-      },
-    ], 'run-123')
+    const md = advisor.renderMarkdown(
+      [
+        {
+          operation: 'add-node',
+          confidence: 'medium',
+          title: 'Add licence-check',
+          rationale: 'Findings touched 3rd-party deps; no licence node exists.',
+          diff: '+ - id: licence_check\n+   kind: skill\n',
+        },
+      ],
+      'run-123',
+    )
     expect(md).toContain('# Evolution Proposals for run `run-123`')
     expect(md).toContain('## 1. Add licence-check _(add-node, confidence: medium)_')
     expect(md).toContain('```diff')
@@ -69,7 +75,11 @@ describe('EvolutionAdvisor', () => {
   })
 
   it('returns empty array when LLM did not call structured_output', async () => {
-    const llm: LLMClient = { async complete() { return { text: 'just talking' } } }
+    const llm: LLMClient = {
+      async complete() {
+        return { text: 'just talking' }
+      },
+    }
     const advisor = new EvolutionAdvisor({ client: llm })
     const proposals = await advisor.analyze({
       experienceSpec: spec,

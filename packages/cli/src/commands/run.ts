@@ -91,7 +91,11 @@ export async function runCommand(opts: RunOpts): Promise<number> {
   if (opts.evolve && result.status === 'success') {
     try {
       const { evolveCommand } = await import('./evolve.js')
-      await evolveCommand({ experiencePath: experienceDir, runId: result.runId, logger: opts.logger })
+      await evolveCommand({
+        experiencePath: experienceDir,
+        runId: result.runId,
+        logger: opts.logger,
+      })
     } catch (err) {
       opts.logger.warn({ err: (err as Error).message }, 'evolve trigger failed (non-blocking)')
     }

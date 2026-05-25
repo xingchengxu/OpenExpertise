@@ -28,7 +28,9 @@ export async function evolveCommand(opts: EvolveOpts): Promise<number> {
     return 1
   }
   const events = readFileSync(logPath, 'utf8')
-    .trim().split('\n').filter((l) => l.length > 0)
+    .trim()
+    .split('\n')
+    .filter((l) => l.length > 0)
     .map((l) => JSON.parse(l))
 
   // Compute state diff from history for this run

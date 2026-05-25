@@ -35,18 +35,26 @@ export function buildProgram(): Command {
     .option('--args <json>', 'JSON object passed as args to the experience', '{}')
     .option('--tui', 'show interactive dashboard instead of log output', false)
     .option('--evolve', 'after a successful run, generate evolution proposals', false)
-    .action(async (path: string, cmdOpts: { args: string; tui: boolean; evolve: boolean }, cmd: Command) => {
-      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
-      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
-      let args: Record<string, unknown> = {}
-      try {
-        args = JSON.parse(cmdOpts.args) as Record<string, unknown>
-      } catch {
-        logger.error('--args must be valid JSON')
-        process.exit(2)
-      }
-      process.exit(await runCommand({ path, args, logger, tui: cmdOpts.tui, evolve: cmdOpts.evolve }))
-    })
+    .action(
+      async (
+        path: string,
+        cmdOpts: { args: string; tui: boolean; evolve: boolean },
+        cmd: Command,
+      ) => {
+        const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+        const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+        let args: Record<string, unknown> = {}
+        try {
+          args = JSON.parse(cmdOpts.args) as Record<string, unknown>
+        } catch {
+          logger.error('--args must be valid JSON')
+          process.exit(2)
+        }
+        process.exit(
+          await runCommand({ path, args, logger, tui: cmdOpts.tui, evolve: cmdOpts.evolve }),
+        )
+      },
+    )
 
   program
     .command('inspect')

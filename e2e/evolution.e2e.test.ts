@@ -4,8 +4,12 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { parseExperienceYaml } from '@openexpertise/schema'
 import {
-  DispatcherRegistry, EventBus, runExperience, StateStore,
-  type LLMClient, type LLMCompleteOpts,
+  DispatcherRegistry,
+  EventBus,
+  runExperience,
+  StateStore,
+  type LLMClient,
+  type LLMCompleteOpts,
 } from '@openexpertise/core'
 import { ToolDispatcher } from '@openexpertise/node-kinds-tool'
 import { EvolutionAdvisor } from '@openexpertise/evolution'
@@ -14,47 +18,56 @@ class CannedLLM implements LLMClient {
   async complete(_opts: LLMCompleteOpts) {
     return {
       text: '',
-      tool_calls: [{
-        name: 'structured_output',
-        input: {
-          proposals: [
-            {
-              operation: 'tune-param',
-              confidence: 'high',
-              title: 'Tighten threshold',
-              rationale: 'Saw underflow.',
-              diff: '- threshold: 0.5\n+ threshold: 0.6\n',
-            },
-          ],
+      tool_calls: [
+        {
+          name: 'structured_output',
+          input: {
+            proposals: [
+              {
+                operation: 'tune-param',
+                confidence: 'high',
+                title: 'Tighten threshold',
+                rationale: 'Saw underflow.',
+                diff: '- threshold: 0.5\n+ threshold: 0.6\n',
+              },
+            ],
+          },
         },
-      }],
+      ],
     }
   }
 }
 
 let dir: string
-afterEach(() => { if (dir) rmSync(dir, { recursive: true, force: true }) })
+afterEach(() => {
+  if (dir) rmSync(dir, { recursive: true, force: true })
+})
 
 describe('Evolution end-to-end', () => {
   it('runs an experience, then generates an evolution markdown file', async () => {
     dir = mkdtempSync(join(tmpdir(), 'oe-e2e-evo-'))
     mkdirSync(join(dir, 'tools'), { recursive: true })
-    writeFileSync(join(dir, 'tools/inc.mjs'),
-      `export default async () => ({ state_delta: { count: 1 } })\n`)
-    writeFileSync(join(dir, 'experience.yaml'), [
-      'name: e',
-      'version: 0.1.0',
-      'state:',
-      '  schema:',
-      '    count: { type: number }',
-      'graph:',
-      '  nodes:',
-      '    - id: inc',
-      '      kind: tool',
-      '      impl: ./tools/inc.mjs',
-      '      writes: [count]',
-      '  edges: []',
-    ].join('\n'))
+    writeFileSync(
+      join(dir, 'tools/inc.mjs'),
+      `export default async () => ({ state_delta: { count: 1 } })\n`,
+    )
+    writeFileSync(
+      join(dir, 'experience.yaml'),
+      [
+        'name: e',
+        'version: 0.1.0',
+        'state:',
+        '  schema:',
+        '    count: { type: number }',
+        'graph:',
+        '  nodes:',
+        '    - id: inc',
+        '      kind: tool',
+        '      impl: ./tools/inc.mjs',
+        '      writes: [count]',
+        '  edges: []',
+      ].join('\n'),
+    )
     const yamlSource = readFileSync(join(dir, 'experience.yaml'), 'utf8')
     const spec = parseExperienceYaml(yamlSource)
 
@@ -62,13 +75,20 @@ describe('Evolution end-to-end', () => {
     dispatchers.register(new ToolDispatcher())
 
     const r = await runExperience({
-      spec, experienceDir: dir, dispatchers, events: new EventBus(), args: {},
+      spec,
+      experienceDir: dir,
+      dispatchers,
+      events: new EventBus(),
+      args: {},
     })
     expect(r.status).toBe('success')
 
     const logPath = join(dir, '.openexpertise', 'runs', `${r.runId}.jsonl`)
     expect(existsSync(logPath)).toBe(true)
-    const events = readFileSync(logPath, 'utf8').trim().split('\n').map((l) => JSON.parse(l))
+    const events = readFileSync(logPath, 'utf8')
+      .trim()
+      .split('\n')
+      .map((l) => JSON.parse(l))
 
     const store = new StateStore({
       dbPath: join(dir, '.openexpertise', 'state.sqlite'),

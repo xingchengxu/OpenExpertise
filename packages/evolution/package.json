@@ -4,8 +4,13 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "src/prompts"],
-  "publishConfig": { "access": "public" },
+  "files": [
+    "dist",
+    "src/prompts"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -b && node -e \"require('node:fs').cpSync('src/prompts','dist/prompts',{recursive:true})\"",
     "typecheck": "tsc --noEmit"

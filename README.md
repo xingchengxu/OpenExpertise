@@ -46,17 +46,17 @@ node packages/cli/dist/bin.js run examples/review-branch --args '{"pr_id":"PR-1"
 
 ## All CLI commands
 
-| Command | Purpose |
-|---|---|
-| `oe init <name>` | Scaffold a new experience directory |
-| `oe validate [path]` | Validate `experience.yaml` |
-| `oe run [path]` | Execute an experience (`--tui`, `--evolve` flags) |
-| `oe resume <run-id>` | Re-run with cache replay |
-| `oe inspect <run-id>` | Replay a run's event log |
-| `oe state [field]` | Inspect blackboard |
-| `oe reset-state --yes` | Wipe blackboard |
-| `oe evolve <run-id>` | Generate evolution proposals |
-| `oe diff` | List pending evolution proposals |
+| Command                | Purpose                                           |
+| ---------------------- | ------------------------------------------------- |
+| `oe init <name>`       | Scaffold a new experience directory               |
+| `oe validate [path]`   | Validate `experience.yaml`                        |
+| `oe run [path]`        | Execute an experience (`--tui`, `--evolve` flags) |
+| `oe resume <run-id>`   | Re-run with cache replay                          |
+| `oe inspect <run-id>`  | Replay a run's event log                          |
+| `oe state [field]`     | Inspect blackboard                                |
+| `oe reset-state --yes` | Wipe blackboard                                   |
+| `oe evolve <run-id>`   | Generate evolution proposals                      |
+| `oe diff`              | List pending evolution proposals                  |
 
 ## Authoring with Claude Code
 
