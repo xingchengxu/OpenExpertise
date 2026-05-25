@@ -24,7 +24,7 @@ Worktree note: harness required worktree isolation mid-session. Working in `.cla
 |---|---|---|---|---|
 | 1 | ✅ Complete | `b849fcf` | 39/39 | Walking skeleton (prior session, in main checkout) |
 | 2 | ✅ Complete | `2555cde` | 70/70 | Heterogeneous dispatchers + on_error; 4 new packages |
-| 3 | ⏳ Pending | — | — | Control flow + review-branch |
+| 3 | ✅ Complete | `9feb91a` | 83/83 | Control flow primitives + review-branch demo |
 | 4 | ⏳ Pending | — | — | Cache + resume + TUI + remaining CLI |
 | 5 | ⏳ Pending | — | — | Authoring skill |
 | 6 | ⏳ Pending | — | — | Evolution + distribution |
@@ -46,6 +46,14 @@ Worktree note: harness required worktree isolation mid-session. Working in `.cla
   - Added `mkdirSync` for sub-experience SQLite dir
   - Added node-kinds-tool as devDep to node-kinds-experience for test resolution
   - Added cross-package deps to e2e/package.json for vitest resolution
+
+### Plan 3 (HEAD `9feb91a`)
+- `pnpm clean && pnpm install && pnpm -r build && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test` → all green
+- Test count: 83/83 (24 test files); 13 new tests vs Plan 2 baseline (evaluator 7, foreach 1, when 2, pipeline 1, phase 1, review-branch e2e 1)
+- Plan 3 commits: `948ba4d` (plan doc), `39b52c7` (evaluator), `3a28980` (schema), `aef5ac8` (for_each), `3475966` (when:), `efd7df4` (pipeline), `565203c` (phase), `98af852` (review-branch example), `9fac8a1` (review-branch e2e), `9feb91a` (lint/format cleanup)
+- Deviations:
+  - `verify_finding` in review-branch uses `for_each` instead of `pipeline` because the pipeline pass runs AFTER the topological pass; `score` needs verified_findings before it runs, which `for_each + edge` orders correctly while pipeline doesn't. **Pipeline construct is tested separately in `scheduler-pipeline.test.ts` but not used in the demo.** This is a real design tension worth revisiting in Plan 4.
+  - `verify_finding` schema returns `{ verified_findings: [{is_real}] }` so `array_append` accumulates correctly (agent dispatcher writes `state_delta = structured_input` and we want it to land as one element in an array)
 
 ## Morning checklist (priorities to review first)
 
