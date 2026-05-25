@@ -7,6 +7,9 @@ import type { RunContext } from '../run/context.js'
 import type { NodeDispatcher, NodeInputBundle, NodeOutput } from '../dispatcher/types.js'
 import { resolveExpression } from '../expressions/resolve.js'
 import { evaluateExpression } from '../expressions/evaluate.js'
+import { computeCacheKey } from '../cache/key.js'
+
+const RUNTIME_VERSION = '0.1.0' // bump to invalidate caches on breaking changes
 
 export interface NodeRunResult {
   nodeId: string
@@ -165,6 +168,46 @@ export class SequentialScheduler {
       ...(node.spec.phase ? { phase: node.spec.phase } : {}),
     })
     const bundle = this.assembleBundle(node, edgeBuffer.get(node.id) ?? {}, extraArgs)
+
+    // Cache lookup (Plan 4)
+    let cacheKey: string | undefined
+    if (this.ctx.cache) {
+      cacheKey = computeCacheKey({
+        nodeSpec: node.spec,
+        stateView: bundle.state_view as Record<string, unknown>,
+        edgeInputs: bundle.edge_inputs,
+        args: bundle.args,
+        runtimeVersion: RUNTIME_VERSION,
+      })
+      const hit = this.ctx.cache.get(cacheKey)
+      if (hit) {
+        // Replay cached output without dispatching
+        if (hit.state_delta && Object.keys(hit.state_delta).length > 0) {
+          this.ctx.store.write(hit.state_delta, { runId: this.ctx.runId, nodeId: node.id })
+          for (const field of Object.keys(hit.state_delta)) {
+            this.ctx.events.emit({
+              type: 'state.write', run_id: this.ctx.runId, node_id: node.id, field, ts: this.ctx.now(),
+            })
+          }
+        }
+        if (hit.edge_output !== undefined) {
+          for (const succ of node.successors) {
+            const existing = edgeBuffer.get(succ) ?? {}
+            existing[node.id] = hit.edge_output
+            edgeBuffer.set(succ, existing)
+          }
+        }
+        this.ctx.events.emit({
+          type: 'node.finished', run_id: this.ctx.runId, node_id: node.id,
+          ts: this.ctx.now(),
+          ...(node.spec.phase ? { phase: node.spec.phase } : {}),
+          ...(hit.metrics ? { metrics: hit.metrics } : {}),
+        })
+        results.push({ nodeId: node.id, status: 'success', output: hit })
+        return
+      }
+    }
+
     const dispatcher: NodeDispatcher = this.ctx.dispatchers.get(node.spec.kind)
     this.ctx.events.emit({
       type: 'node.started',
@@ -212,6 +255,9 @@ export class SequentialScheduler {
           ...(node.spec.phase ? { phase: node.spec.phase } : {}),
           ...(output.metrics ? { metrics: output.metrics } : {}),
         })
+        if (cacheKey && this.ctx.cache) {
+          this.ctx.cache.put(cacheKey, output)
+        }
         results.push({ nodeId: node.id, status: 'success', output })
         succeeded = true
         break

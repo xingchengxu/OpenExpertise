@@ -10,6 +10,7 @@ import { buildDag } from './graph/dag.js'
 import { SequentialScheduler } from './graph/scheduler.js'
 import { RunContext } from './run/context.js'
 import { DispatcherRegistry } from './dispatcher/registry.js'
+import { CacheStore } from './cache/store.js'
 
 export interface RunOpts {
   spec: ExperienceSpec
@@ -20,6 +21,7 @@ export interface RunOpts {
   dbPath?: string
   runId?: string
   eventLogPath?: string
+  cache?: boolean
 }
 
 export interface RunResult {
@@ -52,6 +54,13 @@ export async function runExperience(opts: RunOpts): Promise<RunResult> {
       args: opts.args ?? {},
     })
 
+    const cacheEnabled = opts.cache !== false
+    let cache: CacheStore | undefined
+    if (cacheEnabled) {
+      const cacheDir = join(runDir, 'cache')
+      cache = new CacheStore({ dir: cacheDir })
+    }
+
     const dag = buildDag(opts.spec)
     const ctx = new RunContext({
       runId,
@@ -61,6 +70,7 @@ export async function runExperience(opts: RunOpts): Promise<RunResult> {
       events,
       dispatchers: opts.dispatchers,
       args: opts.args ?? {},
+      ...(cache ? { cache } : {}),
     })
     const scheduler = new SequentialScheduler(dag, ctx)
     const { status } = await scheduler.run()
