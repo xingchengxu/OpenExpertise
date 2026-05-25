@@ -10,6 +10,9 @@
     "@openexpertise/cli": "workspace:*",
     "@openexpertise/core": "workspace:*",
     "@openexpertise/schema": "workspace:*",
-    "@openexpertise/node-kinds-tool": "workspace:*"
+    "@openexpertise/node-kinds-tool": "workspace:*",
+    "@openexpertise/node-kinds-agent": "workspace:*",
+    "@openexpertise/node-kinds-dataset": "workspace:*",
+    "@openexpertise/node-kinds-experience": "workspace:*"
   }
 }
