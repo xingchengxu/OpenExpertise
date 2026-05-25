@@ -12,3 +12,6 @@ coverage/
 
 # pnpm lockfile
 pnpm-lock.yaml
+
+# Hand-authored design docs and plans (preserve exact formatting)
+docs/
