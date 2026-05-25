@@ -2,6 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://openexpertise.dev/schemas/experience-v0.1.0.json",
   "title": "ExperienceSpec",
+  "_comment": "TODO Plan 2: tighten node oneOf variants with additionalProperties: false so typos like 'impl_path' don't pass validation and fail later at runtime.",
   "type": "object",
   "required": ["name", "version", "state", "graph"],
   "additionalProperties": false,

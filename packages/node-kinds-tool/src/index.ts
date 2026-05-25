@@ -1,5 +1,10 @@
-import type { NodeDispatcher, NodeInputBundle, NodeOutput, ResolvedImpl } from '@openexpertise/core'
-import { RunContext } from '@openexpertise/core'
+import type {
+  NodeDispatcher,
+  NodeInputBundle,
+  NodeOutput,
+  ResolvedImpl,
+  RunContext,
+} from '@openexpertise/core'
 import type { NodeSpec, ToolNodeSpec } from '@openexpertise/schema'
 import { loadToolModule, type LoadedToolModule } from './loader.js'
 

@@ -85,6 +85,8 @@ export class SequentialScheduler {
         })
         results.push({ nodeId: node.id, status: 'success', output })
       } catch (err) {
+        // TODO Plan 2: honor node.spec.on_error policy (retry / fail_run / skip).
+        // Plan 1 default is always "skip downstream, continue siblings".
         const error = err instanceof Error ? err : new Error(String(err))
         this.ctx.events.emit({
           type: 'node.failed',
