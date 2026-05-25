@@ -3,28 +3,28 @@
 ## Top-level shape
 
 ```yaml
-name: string                  # required, non-empty
-description: string           # optional, human-readable
-version: string               # required, semver "x.y.z"
+name: string # required, non-empty
+description: string # optional, human-readable
+version: string # required, semver "x.y.z"
 
 state:
-  schema:                     # required: map of field-name → schema
+  schema: # required: map of field-name → schema
     <field>:
       type: ...
       merge: ...
       description: ...
-  store: string               # optional, defaults to .openexpertise/state.sqlite
+  store: string # optional, defaults to .openexpertise/state.sqlite
 
-phases:                       # optional, cosmetic grouping for UI/TUI
+phases: # optional, cosmetic grouping for UI/TUI
   - id: collect
   - id: review
   - id: score
 
 graph:
-  nodes: [...]                # required, ≥1
-  edges: [...]                # required (may be empty)
-  pipelines: [...]            # optional
-  loops: [...]                # optional
+  nodes: [...] # required, ≥1
+  edges: [...] # required (may be empty)
+  pipelines: [...] # optional
+  loops: [...] # optional
 ```
 
 ## State schema
@@ -45,6 +45,7 @@ state:
 ```
 
 Merge strategies:
+
 - `array_append` — concat the incoming array onto the existing one
 - `set_once` — only one write allowed; second write throws
 - `last_wins` (default) — overwrite
@@ -56,13 +57,13 @@ Merge strategies:
 ```yaml
 - id: my_tool
   kind: tool
-  phase: collect          # optional
-  impl: ./tools/foo.mjs   # required, path relative to experience.yaml
-  args: { k: v }          # optional, supports $.field interpolation
-  reads: [field1]         # optional
-  writes: [field2]        # optional, declared state fields
+  phase: collect # optional
+  impl: ./tools/foo.mjs # required, path relative to experience.yaml
+  args: { k: v } # optional, supports $.field interpolation
+  reads: [field1] # optional
+  writes: [field2] # optional, declared state fields
   on_error: { policy: retry, attempts: 3, backoff: exponential, base_ms: 500 }
-  for_each: { source: $.list, concurrency: 1 }  # optional
+  for_each: { source: $.list, concurrency: 1 } # optional
 ```
 
 The default export of `impl` is `async (args, ctx) => ({ state_delta, edge_output?, metrics? })`.
@@ -73,8 +74,8 @@ The default export of `impl` is `async (args, ctx) => ({ state_delta, edge_outpu
 - id: bug_review
   kind: agent
   prompt: ./prompts/review.md
-  model: claude-sonnet-4-5         # optional override; default = inherit
-  schema:                          # optional; forces structured output
+  model: claude-sonnet-4-5 # optional override; default = inherit
+  schema: # optional; forces structured output
     type: object
     required: [findings]
     properties:
@@ -95,9 +96,9 @@ Prompt templates support `{{fieldName}}` placeholders. They're filled from the r
 ```yaml
 - id: classify
   kind: skill
-  impl: ./skills/classify     # directory with SKILL.md
+  impl: ./skills/classify # directory with SKILL.md
   inputs: { utterance: $.last_message }
-  model: claude-sonnet-4-5    # optional
+  model: claude-sonnet-4-5 # optional
   writes: [label]
 ```
 
@@ -109,7 +110,7 @@ The SKILL.md body becomes the system prompt; inputs become the user message (JSO
 - id: load_incidents
   kind: dataset
   source:
-    type: sqlite              # or: file | http
+    type: sqlite # or: file | http
     uri: ./datasets/incidents.db
     query: "SELECT * FROM incidents WHERE date > date('now','-180 days')"
   writes: [past_incidents]
@@ -125,8 +126,8 @@ HTTP sources accept `method`, `body` (POST), and return JSON arrays.
   kind: experience
   impl: ./sub-experiences/deep-audit/experience.yaml
   args: { pr_id: $.pr_id }
-  state_scope: isolated       # V1: only isolated supported
-  writes: [audit_result]      # state_delta is {}; edge_output carries child's finalState
+  state_scope: isolated # V1: only isolated supported
+  writes: [audit_result] # state_delta is {}; edge_output carries child's finalState
 ```
 
 ## Edges

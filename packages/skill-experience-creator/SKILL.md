@@ -72,12 +72,12 @@ Write these answers down for the user before drafting.
 Match the user's job to one of these shapes (see `references/patterns.md` for
 the YAML):
 
-| Shape | When |
-|---|---|
-| Linear (a → b → c) | Each step has one predecessor and one successor |
-| Fan-out (`for_each`) | One step runs once per item in a list |
-| Pipeline group | Items stream through multiple stages each |
-| Bounded loop (`repeat:`) | Repeat a step until a condition or max iters |
+| Shape                      | When                                            |
+| -------------------------- | ----------------------------------------------- |
+| Linear (a → b → c)         | Each step has one predecessor and one successor |
+| Fan-out (`for_each`)       | One step runs once per item in a list           |
+| Pipeline group             | Items stream through multiple stages each       |
+| Bounded loop (`repeat:`)   | Repeat a step until a condition or max iters    |
 | Conditional edge (`when:`) | A branch only runs when a state condition holds |
 
 Often you combine two or three (review-branch combines fan-out + conditional).

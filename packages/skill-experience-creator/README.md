@@ -21,12 +21,12 @@ The skill picks up the request, walks through the design (purpose, unit of work,
 
 ## What's inside
 
-| Path | What it is |
-|---|---|
-| `SKILL.md` | The skill entry point Claude reads. |
-| `references/api-reference.md` | Complete `experience.yaml` field reference (every kind, every option). |
-| `references/patterns.md` | Copy-paste shapes for common topologies. |
-| `references/lessons.md` | Hard-won gotchas from V1 development. |
-| `assets/templates/*.yaml` | Five starter templates. |
-| `assets/examples/` | Two full worked examples, with mappings to techniques. |
-| `scripts/validate-experience.mjs` | Standalone validator usable independently of the `oe` CLI. |
+| Path                              | What it is                                                             |
+| --------------------------------- | ---------------------------------------------------------------------- |
+| `SKILL.md`                        | The skill entry point Claude reads.                                    |
+| `references/api-reference.md`     | Complete `experience.yaml` field reference (every kind, every option). |
+| `references/patterns.md`          | Copy-paste shapes for common topologies.                               |
+| `references/lessons.md`           | Hard-won gotchas from V1 development.                                  |
+| `assets/templates/*.yaml`         | Five starter templates.                                                |
+| `assets/examples/`                | Two full worked examples, with mappings to techniques.                 |
+| `scripts/validate-experience.mjs` | Standalone validator usable independently of the `oe` CLI.             |

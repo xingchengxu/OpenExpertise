@@ -13,6 +13,8 @@ describe('validate-experience.mjs', () => {
     expect(out).toContain('OK:')
   })
   it('exits non-zero on a missing file', () => {
-    expect(() => execFileSync('node', [SCRIPT, '/does/not/exist.yaml'], { encoding: 'utf8' })).toThrow()
+    expect(() =>
+      execFileSync('node', [SCRIPT, '/does/not/exist.yaml'], { encoding: 'utf8' }),
+    ).toThrow()
   })
 })
