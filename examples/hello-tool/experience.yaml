@@ -1,0 +1,22 @@
+name: hello-tool
+description: Smallest possible experience. One tool node writes a greeting to state.
+version: 0.1.0
+
+state:
+  schema:
+    name:
+      type: string
+      description: Subject of the greeting; passed in via --args
+    greeting:
+      type: string
+      description: The greeting produced by the tool
+
+graph:
+  nodes:
+    - id: greet
+      kind: tool
+      impl: ./tools/greet.mjs
+      args:
+        name: World
+      writes: [greeting]
+  edges: []
