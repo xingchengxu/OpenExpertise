@@ -6,15 +6,19 @@ export type NodeKind = 'agent' | 'skill' | 'tool' | 'dataset' | 'experience'
 
 export type MergeStrategy = 'array_append' | 'set_once' | 'last_wins'
 
-export interface StateFieldSchema {
-  type: 'string' | 'number' | 'boolean' | 'object' | 'array' | 'null'
-  description?: string
-  items?: StateFieldSchema | { $ref: string }
-  properties?: Record<string, StateFieldSchema>
-  required?: string[]
-  merge?: MergeStrategy
-  $ref?: string
-}
+// A state field is either an inline schema (with `type` and the usual JSON Schema
+// shape) or a $ref to an external schema file. Making this a discriminated union
+// makes invalid states (e.g. both `type` and `$ref` set) unrepresentable.
+export type StateFieldSchema =
+  | {
+      type: 'string' | 'number' | 'boolean' | 'object' | 'array' | 'null'
+      description?: string
+      items?: StateFieldSchema | { $ref: string }
+      properties?: Record<string, StateFieldSchema>
+      required?: string[]
+      merge?: MergeStrategy
+    }
+  | { $ref: string }
 
 export interface StateSpec {
   schema: Record<string, StateFieldSchema>
@@ -45,7 +49,7 @@ export interface AgentNodeSpec {
   phase?: string
   prompt: string
   model?: string
-  schema?: unknown
+  schema?: string | Record<string, unknown>
   reads?: string[]
   writes?: string[]
   args?: Record<string, unknown>
@@ -59,7 +63,7 @@ export interface SkillNodeSpec {
   impl: string
   inputs?: Record<string, unknown>
   model?: string
-  schema?: unknown
+  schema?: string | Record<string, unknown>
   reads?: string[]
   writes?: string[]
   on_error?: ErrorPolicy
