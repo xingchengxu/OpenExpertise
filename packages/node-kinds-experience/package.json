@@ -12,5 +12,8 @@
   "dependencies": {
     "@openexpertise/core": "workspace:*",
     "@openexpertise/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@openexpertise/node-kinds-tool": "workspace:*"
   }
 }
