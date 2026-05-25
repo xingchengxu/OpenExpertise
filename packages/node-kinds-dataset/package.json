@@ -1,0 +1,21 @@
+{
+  "name": "@openexpertise/node-kinds-dataset",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openexpertise/core": "workspace:*",
+    "@openexpertise/schema": "workspace:*",
+    "better-sqlite3": "^11.0.0",
+    "csv-parse": "^5.5.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0"
+  }
+}
