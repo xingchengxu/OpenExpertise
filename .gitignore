@@ -27,8 +27,9 @@ pnpm-debug.log*
 .env
 .env.local
 
-# Excluded folders/files
+# Reference projects (kept locally for browsing, not part of OpenExpertise source)
 claude-code-workflow-creator/
 openhuman/
-docs/
+
+# Source article (kept locally, not part of OpenExpertise source)
 Workflows 正在悄悄改变企业AI的落地方式.md
