@@ -16,6 +16,7 @@ export interface RunOpts {
   args: Record<string, unknown>
   logger: Logger
   tui: boolean
+  evolve: boolean
 }
 
 export async function runCommand(opts: RunOpts): Promise<number> {
@@ -85,6 +86,16 @@ export async function runCommand(opts: RunOpts): Promise<number> {
     { runId: result.runId, status: result.status, finalState: result.finalState },
     'run complete',
   )
+
+  // Plan 6: optional auto-evolve trigger
+  if (opts.evolve && result.status === 'success') {
+    try {
+      const { evolveCommand } = await import('./evolve.js')
+      await evolveCommand({ experiencePath: experienceDir, runId: result.runId, logger: opts.logger })
+    } catch (err) {
+      opts.logger.warn({ err: (err as Error).message }, 'evolve trigger failed (non-blocking)')
+    }
+  }
 
   return result.status === 'success' ? 0 : 1
 }
