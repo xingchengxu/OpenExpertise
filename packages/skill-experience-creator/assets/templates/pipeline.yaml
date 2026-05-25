@@ -1,0 +1,41 @@
+name: <NAME>
+description: Stream items through ordered stages.
+version: 0.1.0
+
+state:
+  schema:
+    items:
+      type: array
+      items: { type: object }
+    _unused_a:
+      type: object
+    final:
+      type: array
+      items: { type: object }
+      merge: array_append
+
+graph:
+  nodes:
+    - id: seed
+      kind: tool
+      impl: ./tools/seed.mjs
+      writes: [items]
+    - id: stage_a
+      kind: agent
+      prompt: ./prompts/stage-a.md
+      writes: [_unused_a]
+    - id: stage_b
+      kind: agent
+      prompt: ./prompts/stage-b.md
+      schema:
+        type: object
+        required: [out]
+        properties:
+          out: { type: object }
+      writes: [final]
+  edges:
+    - { from: seed, to: stage_a }
+  pipelines:
+    - id: pipe
+      items: $.items
+      stages: [stage_a, stage_b]

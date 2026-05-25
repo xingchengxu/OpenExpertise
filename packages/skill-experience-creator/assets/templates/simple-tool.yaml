@@ -1,0 +1,16 @@
+name: <NAME>
+description: <one-line description>
+version: 0.1.0
+
+state:
+  schema:
+    output:
+      type: string
+
+graph:
+  nodes:
+    - id: do_thing
+      kind: tool
+      impl: ./tools/do_thing.mjs
+      writes: [output]
+  edges: []
