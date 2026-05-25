@@ -1,6 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "rootDir": "src", "outDir": "dist" },
-  "references": [{ "path": "../schema" }, { "path": "../core" }, { "path": "../node-kinds-tool" }],
+  "references": [
+    { "path": "../schema" },
+    { "path": "../core" },
+    { "path": "../node-kinds-tool" },
+    { "path": "../node-kinds-agent" },
+    { "path": "../node-kinds-skill" },
+    { "path": "../node-kinds-dataset" },
+    { "path": "../node-kinds-experience" }
+  ],
   "include": ["src/**/*"]
 }
