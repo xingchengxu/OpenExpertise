@@ -27,7 +27,14 @@ export class SequentialScheduler {
     const skipped = new Set<string>()
     let anyFailed = false
 
+    const pipelineStageIds = new Set(
+      (this.ctx.spec.graph.pipelines ?? []).flatMap((p) => p.stages),
+    )
+
     for (const node of this.dag.topoOrder) {
+      if (pipelineStageIds.has(node.id)) {
+        continue // executed by pipeline pass instead
+      }
       // skip if any predecessor was skipped or failed (Plan 1 default = skip downstream)
       const predSkipped = node.predecessors.some((p) => skipped.has(p))
       if (predSkipped) {
@@ -82,6 +89,51 @@ export class SequentialScheduler {
       await this.runNodeOnce(node, {}, skipped, results, edgeBuffer)
       const last = results[results.length - 1]
       if (last?.status === 'failed') anyFailed = true
+    }
+
+    // Pipeline groups: each pipeline reads its `items:` source from state and
+    // runs each item through all stages. Within a pipeline, each item flows
+    // through every stage before the next item starts (sequential V1; Plan 4
+    // can add per-stage barrier semantics for true streaming).
+    const pipelines = this.ctx.spec.graph.pipelines ?? []
+    for (const pg of pipelines) {
+      const fullState = this.ctx.store.snapshot()
+      const itemsVal = resolveExpression(pg.items, fullState)
+      const items: unknown[] = Array.isArray(itemsVal) ? itemsVal : []
+      for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx]
+        let edgeFromPrevStage: unknown = undefined
+        let prevStageId: string | undefined
+        for (const stageId of pg.stages) {
+          const stageNode = this.dag.nodes.get(stageId)
+          if (!stageNode) {
+            throw new Error(`Pipeline "${pg.id}" references unknown stage node "${stageId}"`)
+          }
+          const edgeInputs: Record<string, unknown> =
+            prevStageId !== undefined && edgeFromPrevStage !== undefined
+              ? { [prevStageId]: edgeFromPrevStage }
+              : {}
+          edgeBuffer.set(stageId, edgeInputs)
+          await this.runNodeOnce(
+            stageNode,
+            { $item: item, $index: idx, $pipeline: pg.id },
+            skipped,
+            results,
+            edgeBuffer,
+          )
+          // Recover stage output for next stage's edge_inputs
+          const last = results[results.length - 1]
+          if (last?.status === 'success' && last.output?.edge_output !== undefined) {
+            edgeFromPrevStage = last.output.edge_output
+            prevStageId = stageId
+          } else {
+            edgeFromPrevStage = undefined
+            prevStageId = undefined
+            if (last?.status === 'failed') anyFailed = true
+            break // a stage failed; abort this item, continue with the next
+          }
+        }
+      }
     }
 
     const status = anyFailed
