@@ -18,6 +18,15 @@ export interface PipelineGroupSpec {
   phase?: string
 }
 
+export interface LoopSpec {
+  id: string
+  body: string // node id to repeat
+  until?: string // boolean expression
+  max_iters?: number
+  budget?: number // not enforced in V1; reserved
+  phase?: string
+}
+
 // A state field is either an inline schema (with `type` and the usual JSON Schema
 // shape) or a $ref to an external schema file. Making this a discriminated union
 // makes invalid states (e.g. both `type` and `$ref` set) unrepresentable.
@@ -136,6 +145,7 @@ export interface GraphSpec {
   nodes: NodeSpec[]
   edges: EdgeSpec[]
   pipelines?: PipelineGroupSpec[]
+  loops?: LoopSpec[]
 }
 
 export interface ExperienceSpec {

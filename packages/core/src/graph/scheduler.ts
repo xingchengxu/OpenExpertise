@@ -31,10 +31,11 @@ export class SequentialScheduler {
     let anyFailed = false
 
     const pipelineStageIds = new Set((this.ctx.spec.graph.pipelines ?? []).flatMap((p) => p.stages))
+    const loopBodyIds = new Set((this.ctx.spec.graph.loops ?? []).map((l) => l.body))
 
     for (const node of this.dag.topoOrder) {
-      if (pipelineStageIds.has(node.id)) {
-        continue // executed by pipeline pass instead
+      if (pipelineStageIds.has(node.id) || loopBodyIds.has(node.id)) {
+        continue // executed by pipeline or loop pass instead
       }
       // skip if any predecessor was skipped or failed (Plan 1 default = skip downstream)
       const predSkipped = node.predecessors.some((p) => skipped.has(p))
@@ -141,6 +142,41 @@ export class SequentialScheduler {
             if (last?.status === 'failed') anyFailed = true
             break // a stage failed; abort this item, continue with the next
           }
+        }
+      }
+    }
+
+    // Loop groups (Plan 4 bounded loop). Each loop has a single body node
+    // repeated up to max_iters times, terminating when `until` evaluates true.
+    // Loop bodies must NOT appear in the main topological pass — track them too.
+    const loops = this.ctx.spec.graph.loops ?? []
+    for (const loop of loops) {
+      const bodyNode = this.dag.nodes.get(loop.body)
+      if (!bodyNode) {
+        throw new Error(`Loop "${loop.id}" references unknown body node "${loop.body}"`)
+      }
+      const maxIters = loop.max_iters ?? 100
+      if (!loop.until && !loop.max_iters) {
+        throw new Error(`Loop "${loop.id}" must declare at least one of: until, max_iters`)
+      }
+      let iter = 0
+      while (iter < maxIters) {
+        const fullState = this.ctx.store.snapshot()
+        if (loop.until && evaluateExpression(loop.until, fullState)) {
+          break
+        }
+        await this.runNodeOnce(
+          bodyNode,
+          { $iter: iter, $loop: loop.id },
+          skipped,
+          results,
+          edgeBuffer,
+        )
+        iter++
+        const last = results[results.length - 1]
+        if (last?.status === 'failed') {
+          anyFailed = true
+          break
         }
       }
     }

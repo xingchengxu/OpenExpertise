@@ -61,6 +61,22 @@
               "phase": { "type": "string" }
             }
           }
+        },
+        "loops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "body"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "body": { "type": "string" },
+              "until": { "type": "string" },
+              "max_iters": { "type": "integer", "minimum": 1 },
+              "budget": { "type": "integer", "minimum": 0 },
+              "phase": { "type": "string" }
+            }
+          }
         }
       }
     }
