@@ -25,7 +25,7 @@ Worktree note: harness required worktree isolation mid-session. Working in `.cla
 | 1 | ✅ Complete | `b849fcf` | 39/39 | Walking skeleton (prior session, in main checkout) |
 | 2 | ✅ Complete | `2555cde` | 70/70 | Heterogeneous dispatchers + on_error; 4 new packages |
 | 3 | ✅ Complete | `9feb91a` | 83/83 | Control flow primitives + review-branch demo |
-| 4 | ⏳ Pending | — | — | Cache + resume + TUI + remaining CLI |
+| 4 | ✅ Complete | `f6b4cd2` | 91/91 | Cache + resume + bounded loop + TUI + 4 new CLI commands |
 | 5 | ⏳ Pending | — | — | Authoring skill |
 | 6 | ⏳ Pending | — | — | Evolution + distribution |
 
@@ -54,6 +54,17 @@ Worktree note: harness required worktree isolation mid-session. Working in `.cla
 - Deviations:
   - `verify_finding` in review-branch uses `for_each` instead of `pipeline` because the pipeline pass runs AFTER the topological pass; `score` needs verified_findings before it runs, which `for_each + edge` orders correctly while pipeline doesn't. **Pipeline construct is tested separately in `scheduler-pipeline.test.ts` but not used in the demo.** This is a real design tension worth revisiting in Plan 4.
   - `verify_finding` schema returns `{ verified_findings: [{is_real}] }` so `array_append` accumulates correctly (agent dispatcher writes `state_delta = structured_input` and we want it to land as one element in an array)
+
+### Plan 4 (HEAD `f6b4cd2`)
+- `pnpm clean && pnpm install && pnpm -r build && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test` → all green
+- Test count: 91/91 (28 test files); +8 tests (cache 4, scheduler-cache 1, scheduler-loop 2, e2e cache-resume 1)
+- New CLI commands: `oe resume`, `oe init`, `oe state`, `oe reset-state`, `oe diff` (stub)
+- New package: `@openexpertise/tui` (ink-based dashboard, available via `oe run --tui`)
+- Plan 4 commits: `a953d7c` (plan), `17916f3` (cache key/store), `d0130f1` (scheduler cache), `cea80f6` (bounded loop), `78c6c5f` (resume), `7cab8dc` (init/state/reset-state/diff), `52f6451` (tui pkg), `51dddac` (--tui flag), `0fdf8ed` (e2e cache-resume), `f6b4cd2` (cleanup)
+- Deviations:
+  - `packages/tui/src/index.tsx` instead of `.ts` (contains JSX)
+  - Fixed unused imports from earlier batches during Task 9 cleanup
+  - The Plan 1 TODO note about `oe diff` evolution-advisor is intentionally a stub in Plan 4 — Plan 6 fills it
 
 ## Morning checklist (priorities to review first)
 
