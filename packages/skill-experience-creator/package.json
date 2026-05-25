@@ -1,0 +1,22 @@
+{
+  "name": "@openexpertise/skill-experience-creator",
+  "version": "0.1.0",
+  "type": "module",
+  "private": false,
+  "files": [
+    "SKILL.md",
+    "references",
+    "assets",
+    "scripts"
+  ],
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@openexpertise/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "gray-matter": "^4.0.3",
+    "yaml": "^2.5.0"
+  }
+}
