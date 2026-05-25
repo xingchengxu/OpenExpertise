@@ -21,7 +21,9 @@ export function loadFileSource(opts: FileSourceOpts): unknown[] {
     case 'json': {
       const parsed = JSON.parse(source)
       if (!Array.isArray(parsed)) {
-        throw new Error(`File "${opts.uri}" must contain a top-level JSON array; got ${typeof parsed}`)
+        throw new Error(
+          `File "${opts.uri}" must contain a top-level JSON array; got ${typeof parsed}`,
+        )
       }
       return parsed
     }
@@ -47,5 +49,7 @@ function inferFormat(absPath: string): FileFormat {
   if (ext === '.json') return 'json'
   if (ext === '.jsonl' || ext === '.ndjson') return 'jsonl'
   if (ext === '.csv') return 'csv'
-  throw new Error(`Cannot infer file format from extension "${ext}"; specify source.format explicitly`)
+  throw new Error(
+    `Cannot infer file format from extension "${ext}"; specify source.format explicitly`,
+  )
 }

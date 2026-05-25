@@ -38,12 +38,25 @@ importers:
       '@openexpertise/core':
         specifier: workspace:*
         version: link:../packages/core
+      '@openexpertise/node-kinds-agent':
+        specifier: workspace:*
+        version: link:../packages/node-kinds-agent
+      '@openexpertise/node-kinds-dataset':
+        specifier: workspace:*
+        version: link:../packages/node-kinds-dataset
+      '@openexpertise/node-kinds-experience':
+        specifier: workspace:*
+        version: link:../packages/node-kinds-experience
       '@openexpertise/node-kinds-tool':
         specifier: workspace:*
         version: link:../packages/node-kinds-tool
       '@openexpertise/schema':
         specifier: workspace:*
         version: link:../packages/schema
+
+  examples/agent-echo: {}
+
+  examples/dataset-aggregate: {}
 
   examples/hello-tool: {}
 
@@ -52,6 +65,18 @@ importers:
       '@openexpertise/core':
         specifier: workspace:*
         version: link:../core
+      '@openexpertise/node-kinds-agent':
+        specifier: workspace:*
+        version: link:../node-kinds-agent
+      '@openexpertise/node-kinds-dataset':
+        specifier: workspace:*
+        version: link:../node-kinds-dataset
+      '@openexpertise/node-kinds-experience':
+        specifier: workspace:*
+        version: link:../node-kinds-experience
+      '@openexpertise/node-kinds-skill':
+        specifier: workspace:*
+        version: link:../node-kinds-skill
       '@openexpertise/node-kinds-tool':
         specifier: workspace:*
         version: link:../node-kinds-tool
@@ -114,6 +139,19 @@ importers:
       '@types/better-sqlite3':
         specifier: ^7.6.0
         version: 7.6.13
+
+  packages/node-kinds-experience:
+    dependencies:
+      '@openexpertise/core':
+        specifier: workspace:*
+        version: link:../core
+      '@openexpertise/schema':
+        specifier: workspace:*
+        version: link:../schema
+    devDependencies:
+      '@openexpertise/node-kinds-tool':
+        specifier: workspace:*
+        version: link:../node-kinds-tool
 
   packages/node-kinds-skill:
     dependencies:

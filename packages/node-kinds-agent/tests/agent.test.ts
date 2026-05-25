@@ -31,8 +31,13 @@ beforeEach(() => {
   mkdirSync(join(dir, 'prompts'), { recursive: true })
   const store = new StateStore({ dbPath: join(dir, 's.sqlite'), spec })
   ctx = new RunContext({
-    runId: 'r', spec, experienceDir: dir, store,
-    events: new EventBus(), dispatchers: new DispatcherRegistry(), args: {},
+    runId: 'r',
+    spec,
+    experienceDir: dir,
+    store,
+    events: new EventBus(),
+    dispatchers: new DispatcherRegistry(),
+    args: {},
   })
 })
 
@@ -47,7 +52,8 @@ describe('AgentDispatcher', () => {
     const llm = new FakeLLM(() => ({ text: 'hello Alice' }))
     const dispatcher = new AgentDispatcher({ client: llm })
     const node: AgentNodeSpec = {
-      id: 'a', kind: 'agent',
+      id: 'a',
+      kind: 'agent',
       prompt: './prompts/echo.md',
       writes: ['summary'],
     }
@@ -69,7 +75,8 @@ describe('AgentDispatcher', () => {
     const llm = new FakeLLM(() => ({ text: 'whatever' }))
     const dispatcher = new AgentDispatcher({ client: llm })
     const node: AgentNodeSpec = {
-      id: 'a', kind: 'agent',
+      id: 'a',
+      kind: 'agent',
       prompt: './prompts/p.md',
       writes: ['summary', 'score'],
     }
@@ -91,7 +98,8 @@ describe('AgentDispatcher', () => {
     })
     const dispatcher = new AgentDispatcher({ client: llm })
     const node: AgentNodeSpec = {
-      id: 'a', kind: 'agent',
+      id: 'a',
+      kind: 'agent',
       prompt: './prompts/score.md',
       schema: {
         type: 'object',
@@ -114,7 +122,8 @@ describe('AgentDispatcher', () => {
     }))
     const dispatcher = new AgentDispatcher({ client: llm })
     const node: AgentNodeSpec = {
-      id: 'a', kind: 'agent',
+      id: 'a',
+      kind: 'agent',
       prompt: './prompts/score.md',
       schema: { type: 'object', required: ['score'], properties: { score: { type: 'number' } } },
       writes: ['score'],
@@ -132,7 +141,12 @@ describe('AgentDispatcher', () => {
       usage: { input_tokens: 12, output_tokens: 5 },
     }))
     const dispatcher = new AgentDispatcher({ client: llm })
-    const node: AgentNodeSpec = { id: 'a', kind: 'agent', prompt: './prompts/p.md', writes: ['summary'] }
+    const node: AgentNodeSpec = {
+      id: 'a',
+      kind: 'agent',
+      prompt: './prompts/p.md',
+      writes: ['summary'],
+    }
     const impl = await dispatcher.resolve(node, ctx)
     const output = await dispatcher.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, ctx)
     expect(output.metrics).toEqual({ tokens_in: 12, tokens_out: 5 })

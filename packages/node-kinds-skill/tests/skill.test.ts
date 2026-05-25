@@ -28,20 +28,28 @@ let ctx: RunContext
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), 'oe-skill-'))
   mkdirSync(join(dir, 'skills/classify'), { recursive: true })
-  writeFileSync(join(dir, 'skills/classify/SKILL.md'), [
-    '---',
-    'name: classify',
-    'description: Classifies user utterances',
-    '---',
-    '',
-    '# Classify',
-    '',
-    'You receive a user message. Output one of: greeting, question, farewell.',
-  ].join('\n'))
+  writeFileSync(
+    join(dir, 'skills/classify/SKILL.md'),
+    [
+      '---',
+      'name: classify',
+      'description: Classifies user utterances',
+      '---',
+      '',
+      '# Classify',
+      '',
+      'You receive a user message. Output one of: greeting, question, farewell.',
+    ].join('\n'),
+  )
   const store = new StateStore({ dbPath: join(dir, 's.sqlite'), spec })
   ctx = new RunContext({
-    runId: 'r', spec, experienceDir: dir, store,
-    events: new EventBus(), dispatchers: new DispatcherRegistry(), args: {},
+    runId: 'r',
+    spec,
+    experienceDir: dir,
+    store,
+    events: new EventBus(),
+    dispatchers: new DispatcherRegistry(),
+    args: {},
   })
 })
 
@@ -69,7 +77,8 @@ describe('SkillDispatcher', () => {
     const llm = new FakeLLM()
     const dispatcher = new SkillDispatcher({ client: llm })
     const node: SkillNodeSpec = {
-      id: 's', kind: 'skill',
+      id: 's',
+      kind: 'skill',
       impl: './skills/classify',
       inputs: { utterance: 'hello there' },
       writes: ['label'],

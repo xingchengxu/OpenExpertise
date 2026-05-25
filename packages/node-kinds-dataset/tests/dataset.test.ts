@@ -21,8 +21,13 @@ beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), 'oe-dataset-'))
   const store = new StateStore({ dbPath: join(dir, 's.sqlite'), spec })
   ctx = new RunContext({
-    runId: 'r', spec, experienceDir: dir, store,
-    events: new EventBus(), dispatchers: new DispatcherRegistry(), args: {},
+    runId: 'r',
+    spec,
+    experienceDir: dir,
+    store,
+    events: new EventBus(),
+    dispatchers: new DispatcherRegistry(),
+    args: {},
   })
 })
 
@@ -36,7 +41,8 @@ describe('DatasetDispatcher — file source', () => {
     writeFileSync(join(dir, 'data.json'), JSON.stringify([{ id: 1 }, { id: 2 }]))
     const dispatcher = new DatasetDispatcher()
     const node: DatasetNodeSpec = {
-      id: 'd', kind: 'dataset',
+      id: 'd',
+      kind: 'dataset',
       source: { type: 'file', uri: './data.json', format: 'json' },
       writes: ['rows'],
     }
@@ -49,7 +55,8 @@ describe('DatasetDispatcher — file source', () => {
     writeFileSync(join(dir, 'data.jsonl'), '{"id":1}\n{"id":2}\n')
     const dispatcher = new DatasetDispatcher()
     const node: DatasetNodeSpec = {
-      id: 'd', kind: 'dataset',
+      id: 'd',
+      kind: 'dataset',
       source: { type: 'file', uri: './data.jsonl', format: 'jsonl' },
       writes: ['rows'],
     }
@@ -62,20 +69,27 @@ describe('DatasetDispatcher — file source', () => {
     writeFileSync(join(dir, 'data.csv'), 'id,name\n1,a\n2,b\n')
     const dispatcher = new DatasetDispatcher()
     const node: DatasetNodeSpec = {
-      id: 'd', kind: 'dataset',
+      id: 'd',
+      kind: 'dataset',
       source: { type: 'file', uri: './data.csv', format: 'csv' },
       writes: ['rows'],
     }
     const impl = await dispatcher.resolve(node, ctx)
     const output = await dispatcher.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, ctx)
-    expect(output.state_delta).toEqual({ rows: [{ id: '1', name: 'a' }, { id: '2', name: 'b' }] })
+    expect(output.state_delta).toEqual({
+      rows: [
+        { id: '1', name: 'a' },
+        { id: '2', name: 'b' },
+      ],
+    })
   })
 
   it('infers format from extension if not specified', async () => {
     writeFileSync(join(dir, 'auto.jsonl'), '{"x":1}\n')
     const dispatcher = new DatasetDispatcher()
     const node: DatasetNodeSpec = {
-      id: 'd', kind: 'dataset',
+      id: 'd',
+      kind: 'dataset',
       source: { type: 'file', uri: './auto.jsonl' },
       writes: ['rows'],
     }
@@ -96,28 +110,42 @@ describe('DatasetDispatcher — sqlite source', () => {
 
     const dispatcher = new DatasetDispatcher()
     const node: DatasetNodeSpec = {
-      id: 'd', kind: 'dataset',
-      source: { type: 'sqlite', uri: './incidents.sqlite', query: 'SELECT * FROM incidents ORDER BY id' },
+      id: 'd',
+      kind: 'dataset',
+      source: {
+        type: 'sqlite',
+        uri: './incidents.sqlite',
+        query: 'SELECT * FROM incidents ORDER BY id',
+      },
       writes: ['rows'],
     }
     const impl = await dispatcher.resolve(node, ctx)
     const output = await dispatcher.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, ctx)
     expect(output.state_delta).toEqual({
-      rows: [{ id: 1, kind: 'crash' }, { id: 2, kind: 'leak' }],
+      rows: [
+        { id: 1, kind: 'crash' },
+        { id: 2, kind: 'leak' },
+      ],
     })
   })
 })
 
 describe('DatasetDispatcher — http source', () => {
   it('GETs a URL and parses JSON', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify([{ a: 1 }]), { status: 200, headers: { 'content-type': 'application/json' } }),
-    )
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        new Response(JSON.stringify([{ a: 1 }]), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
     vi.stubGlobal('fetch', fetchMock)
 
     const dispatcher = new DatasetDispatcher()
     const node: DatasetNodeSpec = {
-      id: 'd', kind: 'dataset',
+      id: 'd',
+      kind: 'dataset',
       source: { type: 'http', url: 'https://example.test/data', method: 'GET' },
       writes: ['rows'],
     }

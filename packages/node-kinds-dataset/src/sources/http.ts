@@ -13,7 +13,9 @@ export async function loadHttpSource(opts: HttpSourceOpts): Promise<unknown[]> {
   }
   const response = await fetch(opts.url, init)
   if (!response.ok) {
-    throw new Error(`Dataset http source ${opts.url} returned ${response.status} ${response.statusText}`)
+    throw new Error(
+      `Dataset http source ${opts.url} returned ${response.status} ${response.statusText}`,
+    )
   }
   const parsed = await response.json()
   if (!Array.isArray(parsed)) {

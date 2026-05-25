@@ -36,12 +36,16 @@ export async function runCommand(opts: RunOpts): Promise<number> {
   // We register with a getter-based proxy so construction is lazy.
   dispatchers.register(
     new AgentDispatcher({
-      get client() { return getClient() },
+      get client() {
+        return getClient()
+      },
     } as any),
   )
   dispatchers.register(
     new SkillDispatcher({
-      get client() { return getClient() },
+      get client() {
+        return getClient()
+      },
     } as any),
   )
 

@@ -46,7 +46,9 @@ export class ExperienceDispatcher implements NodeDispatcher {
     }
     const t = node as ExperienceNodeSpec
     if (t.state_scope === 'shared') {
-      throw new Error(`Experience "${t.id}" requests state_scope=shared, which is not implemented in V1`)
+      throw new Error(
+        `Experience "${t.id}" requests state_scope=shared, which is not implemented in V1`,
+      )
     }
     const abs = isAbsolute(t.impl) ? t.impl : resolve(ctx.experienceDir, t.impl)
     if (!existsSync(abs)) {

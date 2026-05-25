@@ -14,8 +14,13 @@ import type { ExperienceSpec, NodeSpec } from '@openexpertise/schema'
 class FailNTimes implements NodeDispatcher {
   readonly kind = 'tool' as const
   private attempts = 0
-  constructor(private failsFirst: number, private finalValue: string) {}
-  async resolve(_n: NodeSpec) { return {} }
+  constructor(
+    private failsFirst: number,
+    private finalValue: string,
+  ) {}
+  async resolve(_n: NodeSpec) {
+    return {}
+  }
   async run(_impl: unknown, _b: NodeInputBundle): Promise<NodeOutput> {
     this.attempts++
     if (this.attempts <= this.failsFirst) {
@@ -27,7 +32,9 @@ class FailNTimes implements NodeDispatcher {
 
 class AlwaysFail implements NodeDispatcher {
   readonly kind = 'tool' as const
-  async resolve(_n: NodeSpec) { return {} }
+  async resolve(_n: NodeSpec) {
+    return {}
+  }
   async run(): Promise<NodeOutput> {
     throw new Error('boom')
   }
@@ -42,16 +49,25 @@ const baseSpec: ExperienceSpec = {
 
 let dir: string
 
-beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'oe-onerror-')) })
-afterEach(() => { rmSync(dir, { recursive: true, force: true }) })
+beforeEach(() => {
+  dir = mkdtempSync(join(tmpdir(), 'oe-onerror-'))
+})
+afterEach(() => {
+  rmSync(dir, { recursive: true, force: true })
+})
 
 function makeCtx(spec: ExperienceSpec, dispatcher: NodeDispatcher): RunContext {
   const store = new StateStore({ dbPath: join(dir, 's.sqlite'), spec })
   const dispatchers = new DispatcherRegistry()
   dispatchers.register(dispatcher)
   return new RunContext({
-    runId: 'r', spec, experienceDir: dir, store,
-    events: new EventBus(), dispatchers, args: {},
+    runId: 'r',
+    spec,
+    experienceDir: dir,
+    store,
+    events: new EventBus(),
+    dispatchers,
+    args: {},
   })
 }
 
@@ -60,10 +76,15 @@ describe('SequentialScheduler on_error policy', () => {
     const spec: ExperienceSpec = {
       ...baseSpec,
       graph: {
-        nodes: [{
-          id: 'x', kind: 'tool', impl: 'x', writes: ['val'],
-          on_error: { policy: 'retry', attempts: 3, backoff: 'linear', base_ms: 1 },
-        }],
+        nodes: [
+          {
+            id: 'x',
+            kind: 'tool',
+            impl: 'x',
+            writes: ['val'],
+            on_error: { policy: 'retry', attempts: 3, backoff: 'linear', base_ms: 1 },
+          },
+        ],
         edges: [],
       },
     }
@@ -80,10 +101,15 @@ describe('SequentialScheduler on_error policy', () => {
     const spec: ExperienceSpec = {
       ...baseSpec,
       graph: {
-        nodes: [{
-          id: 'x', kind: 'tool', impl: 'x', writes: ['val'],
-          on_error: { policy: 'fail_run' },
-        }],
+        nodes: [
+          {
+            id: 'x',
+            kind: 'tool',
+            impl: 'x',
+            writes: ['val'],
+            on_error: { policy: 'fail_run' },
+          },
+        ],
         edges: [],
       },
     }
@@ -109,7 +135,9 @@ describe('SequentialScheduler on_error policy', () => {
     // Instead of inline dispatcher above, use two trivial impls via a kind-aware wrapper:
     class Mixed implements NodeDispatcher {
       readonly kind = 'tool' as const
-      async resolve(node: NodeSpec) { return { id: node.id } }
+      async resolve(node: NodeSpec) {
+        return { id: node.id }
+      }
       async run(impl: { id: string }) {
         if (impl.id === 'x') throw new Error('boom from x')
         calledY = true
@@ -129,10 +157,15 @@ describe('SequentialScheduler on_error policy', () => {
     const spec: ExperienceSpec = {
       ...baseSpec,
       graph: {
-        nodes: [{
-          id: 'x', kind: 'tool', impl: 'x', writes: ['val'],
-          on_error: { policy: 'retry', attempts: 3, backoff: 'exponential', base_ms: 5 },
-        }],
+        nodes: [
+          {
+            id: 'x',
+            kind: 'tool',
+            impl: 'x',
+            writes: ['val'],
+            on_error: { policy: 'retry', attempts: 3, backoff: 'exponential', base_ms: 5 },
+          },
+        ],
         edges: [],
       },
     }

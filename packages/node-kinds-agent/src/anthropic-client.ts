@@ -1,5 +1,10 @@
 import Anthropic from '@anthropic-ai/sdk'
-import type { LLMClient, LLMCompleteOpts, LLMCompleteResult, LLMToolCall } from '@openexpertise/core'
+import type {
+  LLMClient,
+  LLMCompleteOpts,
+  LLMCompleteResult,
+  LLMToolCall,
+} from '@openexpertise/core'
 
 export interface AnthropicLLMClientOpts {
   apiKey?: string

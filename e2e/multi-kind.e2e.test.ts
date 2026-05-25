@@ -40,34 +40,37 @@ describe('multi-kind end-to-end (mocked Anthropic)', () => {
       `export default async (args) => ({ state_delta: { count: args._state.rows.length } })\n`,
     )
     writeFileSync(join(dir, 'prompts/summary.md'), 'There are {{count}} rows. Summarize.')
-    writeFileSync(join(dir, 'experience.yaml'), [
-      'name: mk',
-      'version: 0.1.0',
-      'state:',
-      '  schema:',
-      '    rows: { type: array, items: { type: object } }',
-      '    count: { type: number }',
-      '    summary: { type: string }',
-      'graph:',
-      '  nodes:',
-      '    - id: load',
-      '      kind: dataset',
-      '      source: { type: file, uri: ./data/items.json, format: json }',
-      '      writes: [rows]',
-      '    - id: count',
-      '      kind: tool',
-      '      impl: ./tools/count.mjs',
-      '      reads: [rows]',
-      '      writes: [count]',
-      '    - id: summarize',
-      '      kind: agent',
-      '      prompt: ./prompts/summary.md',
-      '      reads: [count]',
-      '      writes: [summary]',
-      '  edges:',
-      '    - { from: load,  to: count }',
-      '    - { from: count, to: summarize }',
-    ].join('\n'))
+    writeFileSync(
+      join(dir, 'experience.yaml'),
+      [
+        'name: mk',
+        'version: 0.1.0',
+        'state:',
+        '  schema:',
+        '    rows: { type: array, items: { type: object } }',
+        '    count: { type: number }',
+        '    summary: { type: string }',
+        'graph:',
+        '  nodes:',
+        '    - id: load',
+        '      kind: dataset',
+        '      source: { type: file, uri: ./data/items.json, format: json }',
+        '      writes: [rows]',
+        '    - id: count',
+        '      kind: tool',
+        '      impl: ./tools/count.mjs',
+        '      reads: [rows]',
+        '      writes: [count]',
+        '    - id: summarize',
+        '      kind: agent',
+        '      prompt: ./prompts/summary.md',
+        '      reads: [count]',
+        '      writes: [summary]',
+        '  edges:',
+        '    - { from: load,  to: count }',
+        '    - { from: count, to: summarize }',
+      ].join('\n'),
+    )
 
     const spec = parseExperienceYaml(readFileSync(join(dir, 'experience.yaml'), 'utf8'))
 
@@ -79,7 +82,10 @@ describe('multi-kind end-to-end (mocked Anthropic)', () => {
     dispatchers.register(new ExperienceDispatcher({ runExperience }))
 
     const result = await runExperience({
-      spec, experienceDir: dir, dispatchers, events: new EventBus(),
+      spec,
+      experienceDir: dir,
+      dispatchers,
+      events: new EventBus(),
     })
 
     expect(result.status).toBe('success')

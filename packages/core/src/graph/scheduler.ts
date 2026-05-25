@@ -99,7 +99,8 @@ export class SequentialScheduler {
           lastError = err instanceof Error ? err : new Error(String(err))
           if (policy.policy === 'retry' && attempt < maxAttempts) {
             const base = policy.base_ms ?? 100
-            const sleepMs = policy.backoff === 'exponential' ? base * 2 ** (attempt - 1) : base * attempt
+            const sleepMs =
+              policy.backoff === 'exponential' ? base * 2 ** (attempt - 1) : base * attempt
             await sleep(sleepMs)
             continue
           }

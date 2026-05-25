@@ -29,29 +29,37 @@ beforeEach(() => {
     join(dir, 'child/tools/echo.mjs'),
     `export default async () => ({ state_delta: { child_value: 'hello-from-child' } })\n`,
   )
-  writeFileSync(join(dir, 'child/experience.yaml'), [
-    'name: child',
-    'version: 0.1.0',
-    'state:',
-    '  schema:',
-    '    child_value:',
-    '      type: string',
-    'graph:',
-    '  nodes:',
-    '    - id: echo',
-    '      kind: tool',
-    '      impl: ./tools/echo.mjs',
-    '      writes: [child_value]',
-    '  edges: []',
-  ].join('\n'))
+  writeFileSync(
+    join(dir, 'child/experience.yaml'),
+    [
+      'name: child',
+      'version: 0.1.0',
+      'state:',
+      '  schema:',
+      '    child_value:',
+      '      type: string',
+      'graph:',
+      '  nodes:',
+      '    - id: echo',
+      '      kind: tool',
+      '      impl: ./tools/echo.mjs',
+      '      writes: [child_value]',
+      '  edges: []',
+    ].join('\n'),
+  )
 
   const store = new StateStore({ dbPath: join(dir, 's.sqlite'), spec: outerSpec })
   const dispatchers = new DispatcherRegistry()
   // We register a tool dispatcher here for the child to use.
   // Tests bring their own; we'll wire one via the actual ToolDispatcher.
   outerCtx = new RunContext({
-    runId: 'r', spec: outerSpec, experienceDir: dir, store,
-    events: new EventBus(), dispatchers, args: {},
+    runId: 'r',
+    spec: outerSpec,
+    experienceDir: dir,
+    store,
+    events: new EventBus(),
+    dispatchers,
+    args: {},
   })
 })
 
@@ -74,7 +82,11 @@ describe('ExperienceDispatcher', () => {
       state_scope: 'isolated',
     }
     const impl = await dispatcher.resolve(node, outerCtx)
-    const output = await dispatcher.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, outerCtx)
+    const output = await dispatcher.run(
+      impl,
+      { state_view: {}, edge_inputs: {}, args: {} },
+      outerCtx,
+    )
 
     expect(output.edge_output).toMatchObject({
       status: 'success',
