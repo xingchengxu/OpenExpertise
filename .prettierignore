@@ -1,0 +1,11 @@
+# Reference projects (not part of this codebase)
+claude-code-workflow-creator/
+openhuman/
+
+# Build outputs
+dist/
+node_modules/
+coverage/
+
+# pnpm lockfile
+pnpm-lock.yaml
