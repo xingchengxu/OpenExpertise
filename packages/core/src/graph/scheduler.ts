@@ -6,6 +6,7 @@ import type { Dag, DagNode } from './dag.js'
 import type { RunContext } from '../run/context.js'
 import type { NodeDispatcher, NodeInputBundle, NodeOutput } from '../dispatcher/types.js'
 import { resolveExpression } from '../expressions/resolve.js'
+import { evaluateExpression } from '../expressions/evaluate.js'
 
 export interface NodeRunResult {
   nodeId: string
@@ -40,6 +41,27 @@ export class SequentialScheduler {
         })
         results.push({ nodeId: node.id, status: 'skipped' })
         continue
+      }
+
+      // Evaluate any when: conditions on incoming edges. The node runs only if
+      // ALL its incoming edges are "live" (no edge whose when: is false).
+      if (node.incomingEdges.length > 0) {
+        const fullState = this.ctx.store.snapshot()
+        const anyEdgeDead = node.incomingEdges.some(
+          (e) => e.when !== undefined && !Boolean(evaluateExpression(e.when, fullState)),
+        )
+        if (anyEdgeDead) {
+          skipped.add(node.id)
+          this.ctx.events.emit({
+            type: 'node.skipped',
+            run_id: this.ctx.runId,
+            node_id: node.id,
+            ts: this.ctx.now(),
+            reason: 'when: condition false',
+          })
+          results.push({ nodeId: node.id, status: 'skipped' })
+          continue
+        }
       }
 
       const forEach = (node.spec as { for_each?: { source: string } }).for_each
