@@ -6,6 +6,18 @@ export type NodeKind = 'agent' | 'skill' | 'tool' | 'dataset' | 'experience'
 
 export type MergeStrategy = 'array_append' | 'set_once' | 'last_wins'
 
+export interface ForEachClause {
+  source: string // a JSONPath-like expression that resolves to an array
+  concurrency?: number // V1: parsed but ignored; runtime is sequential
+}
+
+export interface PipelineGroupSpec {
+  id: string
+  items: string // JSONPath expression resolving to an array
+  stages: string[] // node ids in order
+  phase?: string
+}
+
 // A state field is either an inline schema (with `type` and the usual JSON Schema
 // shape) or a $ref to an external schema file. Making this a discriminated union
 // makes invalid states (e.g. both `type` and `$ref` set) unrepresentable.
@@ -39,6 +51,7 @@ export interface ToolNodeSpec {
   reads?: string[]
   writes?: string[]
   on_error?: ErrorPolicy
+  for_each?: ForEachClause
 }
 
 // Placeholders for kinds added in later plans. They exist so the parser can
@@ -54,6 +67,7 @@ export interface AgentNodeSpec {
   writes?: string[]
   args?: Record<string, unknown>
   on_error?: ErrorPolicy
+  for_each?: ForEachClause
 }
 
 export interface SkillNodeSpec {
@@ -67,6 +81,7 @@ export interface SkillNodeSpec {
   reads?: string[]
   writes?: string[]
   on_error?: ErrorPolicy
+  for_each?: ForEachClause
 }
 
 export interface DatasetNodeSpec {
@@ -77,6 +92,7 @@ export interface DatasetNodeSpec {
   reads?: string[]
   writes?: string[]
   on_error?: ErrorPolicy
+  for_each?: ForEachClause
 }
 
 export interface ExperienceNodeSpec {
@@ -89,6 +105,7 @@ export interface ExperienceNodeSpec {
   reads?: string[]
   writes?: string[]
   on_error?: ErrorPolicy
+  for_each?: ForEachClause
 }
 
 export type DatasetSource =
@@ -118,6 +135,7 @@ export interface EdgeSpec {
 export interface GraphSpec {
   nodes: NodeSpec[]
   edges: EdgeSpec[]
+  pipelines?: PipelineGroupSpec[]
 }
 
 export interface ExperienceSpec {

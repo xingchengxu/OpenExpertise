@@ -47,6 +47,20 @@
         "edges": {
           "type": "array",
           "items": { "$ref": "#/$defs/edge" }
+        },
+        "pipelines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "items", "stages"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "items": { "type": "string" },
+              "stages": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+              "phase": { "type": "string" }
+            }
+          }
         }
       }
     }
@@ -109,7 +123,16 @@
         "phase": { "type": "string" },
         "reads": { "type": "array", "items": { "type": "string" } },
         "writes": { "type": "array", "items": { "type": "string" } },
-        "on_error": { "$ref": "#/$defs/errorPolicy" }
+        "on_error": { "$ref": "#/$defs/errorPolicy" },
+        "for_each": {
+          "type": "object",
+          "required": ["source"],
+          "properties": {
+            "source": { "type": "string" },
+            "concurrency": { "type": "integer", "minimum": 1 }
+          },
+          "additionalProperties": false
+        }
       }
     },
     "node": {
