@@ -14,3 +14,13 @@ export {
   type ResolvedImpl,
 } from './dispatcher/registry.js'
 export { runExperience } from './runner.js'
+export type {
+  LLMClient,
+  LLMCompleteOpts,
+  LLMCompleteResult,
+  LLMMessage,
+  LLMTool,
+  LLMToolCall,
+  LLMUsage,
+} from './llm/client.js'
+export { interpolatePrompt } from './llm/prompt.js'
