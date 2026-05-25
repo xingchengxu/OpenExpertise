@@ -23,6 +23,7 @@
     "@openexpertise/node-kinds-dataset": "workspace:*",
     "@openexpertise/node-kinds-experience": "workspace:*",
     "@openexpertise/tui": "workspace:*",
+    "@openexpertise/evolution": "workspace:*",
     "commander": "^12.0.0",
     "pino": "^9.0.0",
     "pino-pretty": "^11.0.0"

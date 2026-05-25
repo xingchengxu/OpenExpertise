@@ -6,6 +6,7 @@ import { resumeCommand } from './commands/resume.js'
 import { initCommand } from './commands/init.js'
 import { stateCommand, resetStateCommand } from './commands/state.js'
 import { diffCommand } from './commands/diff.js'
+import { evolveCommand } from './commands/evolve.js'
 import { makeLogger } from './logger.js'
 
 export function buildProgram(): Command {
@@ -110,12 +111,23 @@ export function buildProgram(): Command {
 
   program
     .command('diff')
-    .description('Show evolution advisor suggestions (Plan 6 placeholder)')
+    .description('List pending evolution proposals')
     .option('--experience <path>', 'experience path', '.')
     .action(async (cmdOpts: { experience: string }, cmd: Command) => {
       const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
       const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
       process.exit(await diffCommand({ experiencePath: cmdOpts.experience, logger }))
+    })
+
+  program
+    .command('evolve')
+    .description('Generate evolution proposals for a prior run')
+    .argument('<run-id>', 'prior run id')
+    .option('--experience <path>', 'experience path', '.')
+    .action(async (runId: string, cmdOpts: { experience: string }, cmd: Command) => {
+      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+      process.exit(await evolveCommand({ experiencePath: cmdOpts.experience, runId, logger }))
     })
 
   return program
