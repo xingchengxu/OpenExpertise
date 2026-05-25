@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "rootDir": "src", "outDir": "dist" },
+  "references": [
+    { "path": "../schema" },
+    { "path": "../core" },
+    { "path": "../node-kinds-tool" }
+  ],
+  "include": ["src/**/*"]
+}

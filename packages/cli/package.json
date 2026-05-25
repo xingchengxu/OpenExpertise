@@ -1,0 +1,21 @@
+{
+  "name": "@openexpertise/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": { "oe": "./dist/bin.js" },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openexpertise/core": "workspace:*",
+    "@openexpertise/schema": "workspace:*",
+    "@openexpertise/node-kinds-tool": "workspace:*",
+    "commander": "^12.0.0",
+    "pino": "^9.0.0",
+    "pino-pretty": "^11.0.0"
+  }
+}
