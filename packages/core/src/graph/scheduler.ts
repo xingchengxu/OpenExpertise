@@ -45,6 +45,7 @@ export class SequentialScheduler {
           node_id: node.id,
           ts: this.ctx.now(),
           reason: 'predecessor failed or skipped',
+          ...(node.spec.phase ? { phase: node.spec.phase } : {}),
         })
         results.push({ nodeId: node.id, status: 'skipped' })
         continue
@@ -65,6 +66,7 @@ export class SequentialScheduler {
             node_id: node.id,
             ts: this.ctx.now(),
             reason: 'when: condition false',
+            ...(node.spec.phase ? { phase: node.spec.phase } : {}),
           })
           results.push({ nodeId: node.id, status: 'skipped' })
           continue
@@ -151,10 +153,10 @@ export class SequentialScheduler {
     results: NodeRunResult[],
     edgeBuffer: Map<string, Record<string, unknown>>,
   ): Promise<void> {
-    this.ctx.events.emit({ type: 'node.ready', run_id: this.ctx.runId, node_id: node.id, ts: this.ctx.now() })
+    this.ctx.events.emit({ type: 'node.ready', run_id: this.ctx.runId, node_id: node.id, ts: this.ctx.now(), ...(node.spec.phase ? { phase: node.spec.phase } : {}) })
     const bundle = this.assembleBundle(node, edgeBuffer.get(node.id) ?? {}, extraArgs)
     const dispatcher: NodeDispatcher = this.ctx.dispatchers.get(node.spec.kind)
-    this.ctx.events.emit({ type: 'node.started', run_id: this.ctx.runId, node_id: node.id, ts: this.ctx.now() })
+    this.ctx.events.emit({ type: 'node.started', run_id: this.ctx.runId, node_id: node.id, ts: this.ctx.now(), ...(node.spec.phase ? { phase: node.spec.phase } : {}) })
 
     const policy = node.spec.on_error ?? { policy: 'skip' as const }
     const maxAttempts = policy.policy === 'retry' ? policy.attempts : 1
@@ -191,6 +193,7 @@ export class SequentialScheduler {
           run_id: this.ctx.runId,
           node_id: node.id,
           ts: this.ctx.now(),
+          ...(node.spec.phase ? { phase: node.spec.phase } : {}),
           ...(output.metrics ? { metrics: output.metrics } : {}),
         })
         results.push({ nodeId: node.id, status: 'success', output })
@@ -217,6 +220,7 @@ export class SequentialScheduler {
         node_id: node.id,
         ts: this.ctx.now(),
         error: error.message,
+        ...(node.spec.phase ? { phase: node.spec.phase } : {}),
       })
       results.push({ nodeId: node.id, status: 'failed', error })
       skipped.add(node.id)
