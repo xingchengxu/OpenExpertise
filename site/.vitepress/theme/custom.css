@@ -112,3 +112,55 @@
   background: var(--vp-c-bg-soft);
   color: var(--vp-c-text-2);
 }
+
+/* Example index grid: dl-style listing with a brand-tinted left rule */
+.example-grid dt {
+  font-weight: 600;
+  font-size: 1.05em;
+  margin-top: 18px;
+  margin-bottom: 4px;
+}
+
+.example-grid dt a {
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+}
+
+.example-grid dt a:hover {
+  text-decoration: underline;
+}
+
+.example-grid dd {
+  margin: 0 0 4px 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--vp-c-brand-soft);
+  color: var(--vp-c-text-2);
+  font-size: 0.95em;
+}
+
+/* Cleaner table for compare matrices: zebra + sticky first column */
+.vp-doc table {
+  display: table;
+  width: 100%;
+  margin: 20px 0;
+}
+
+.vp-doc tr:nth-child(even) {
+  background: var(--vp-c-bg-soft);
+}
+
+/* Stronger emphasis on the hero tagline so it doesn't feel like body text */
+.VPHero .tagline {
+  font-size: 1.2em !important;
+  line-height: 1.55;
+  max-width: 640px;
+}
+
+/* Punchy "Used in" callouts on example pages */
+.used-in {
+  background: var(--vp-c-brand-soft);
+  border-left: 3px solid var(--vp-c-brand-1);
+  padding: 12px 16px;
+  border-radius: 0 6px 6px 0;
+  margin: 16px 0;
+}

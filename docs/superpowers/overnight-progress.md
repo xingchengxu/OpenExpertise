@@ -541,6 +541,20 @@ Trigger: User went to sleep at ~midnight saying "明天天亮能发布的状态"
 - `.github/workflows/docs.yml` for GitHub Pages auto-deploy
 - Commits: `387ba91`, `2a5fb01`, `fec6c67`, `529e1b4`, `b2c50c6`, and several follow-ups for site/ WIP that appeared during the session
 
+#### Wave 10 — Deep docs site expansion (overnight parallel)
+- Goal: complete, deploy-ready VitePress docs site with depth across every surface area, dispatched as overnight unattended work
+- Foundation pages hand-written: homepage (hero + 9-feature grid + 60-sec story + tri-CLI YAML + example matrix + decision tree), Getting Started, First Experience, Run with LLM, TUI, 10 concept pages (Experiences, Code-as-Law, Node Kinds, State, Control Flow, Events, Scheduler, Dispatchers, Cache, Evolution Loop)
+- Six parallel subagents dispatched in two waves to write bulk content:
+  - Examples (12 pages, 1,404 LOC) — hello-tool, dataset-aggregate, agent-echo, review-branch hero, oncall-runbook, issue-triage, release-gates, cli-orchestration, tri-cli showcase, deep-research, systematic-debugging, index
+  - CLI reference (11 pages, 1,070 LOC) — init, validate, run, resume, inspect, state, reset-state, evolve, diff, ultra, index
+  - API reference (10 pages, 1,785 LOC) — index, runExperience, LLMClient, NodeDispatcher, EvolutionAdvisor, UltraExpertise, StateStore, EventBus + schema.md (636 LOC)
+  - Operational guides (15 pages, 1,790 LOC) — authoring-yaml/ultra/slash-command, tool-stubs, prompt-files, concurrency, resume-cache, on-error, self-hosted-llm, evolution-advisor, applying-proposals, closed-loop, mcp-server, cli-agent-usage, skills
+  - Compare matrix (7 pages, 423 LOC) — index, vs-workflows, vs-langgraph, vs-crewai, vs-mastra, vs-inngest, vs-claude-code
+  - Operations + node-kind deep dives + doctor (10 pages, 2,365 LOC) — architecture, observability, deployment, node-tool, node-agent, node-skill, node-dataset, node-experience, node-cli-agent, doctor
+- Custom theme polish: indigo→fuchsia hero gradient, brand-tinted inline code, elevated code blocks, `.diagram` block for ASCII art, `.pill` status pills (ok/warn/no/na), `.example-grid` dl-style listings with brand-tinted left rule, zebra-striped tables, sticky hero tagline
+- **Final stats: 80 markdown pages, 11,129 LOC across the site**
+- VitePress build clean throughout — no broken links thanks to `ignoreDeadLinks: true` + canonical sidebar paths shared with subagents
+
 #### Wave 5 — Final regression + MORNING.md
 - Clean rebuild: `pnpm clean && install && build` ✓
 - Typecheck: clean ✓
