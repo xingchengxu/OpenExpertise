@@ -132,11 +132,7 @@ describe('SkillDispatcher emits node.activity + node.tokens', () => {
       args: {},
     })
 
-    afterEach(() => {
-      store.close()
-    })
-
-    const dispatcher = new SkillDispatcher({ client: llm })
+    const dispatcher = new SkillDispatcher({ client: llm, defaultModel: 'fake-model' })
     const node: SkillNodeSpec = {
       id: 'skill-node',
       kind: 'skill',
@@ -145,17 +141,23 @@ describe('SkillDispatcher emits node.activity + node.tokens', () => {
       writes: ['label'],
     }
 
-    const impl = await dispatcher.resolve(node, eventsCtx)
-    await dispatcher.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, eventsCtx)
+    try {
+      const impl = await dispatcher.resolve(node, eventsCtx)
+      await dispatcher.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, eventsCtx)
 
-    store.close()
+      const tokens = captured.filter((e) => e.type === 'node.tokens')
+      expect(tokens.length).toBe(1)
+      expect(tokens[0]).toMatchObject({
+        input_tokens: 5,
+        output_tokens: 3,
+        model: 'fake-model',
+      })
 
-    const tokens = captured.filter((e) => e.type === 'node.tokens')
-    expect(tokens.length).toBe(1)
-    expect(tokens[0]).toMatchObject({ input_tokens: 5, output_tokens: 3 })
-
-    const activities = captured.filter((e) => e.type === 'node.activity')
-    expect(activities.length).toBeGreaterThanOrEqual(1)
-    expect(activities.every((a) => a.node_id === 'skill-node')).toBe(true)
+      const activities = captured.filter((e) => e.type === 'node.activity')
+      expect(activities.length).toBeGreaterThanOrEqual(1)
+      expect(activities.every((a) => a.node_id === 'skill-node')).toBe(true)
+    } finally {
+      store.close()
+    }
   })
 })

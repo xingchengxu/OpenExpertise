@@ -76,12 +76,8 @@ describe('AgentDispatcher emits node.activity + node.tokens', () => {
       args: {},
     })
 
-    afterEach(() => {
-      store.close()
-    })
-
     writeFileSync(join(dir, 'prompts/evt.md'), 'Do something')
-    const dispatcher = new AgentDispatcher({ client: llm })
+    const dispatcher = new AgentDispatcher({ client: llm, defaultModel: 'fake-model' })
     const node: AgentNodeSpec = {
       id: 'evt-node',
       kind: 'agent',
@@ -94,21 +90,23 @@ describe('AgentDispatcher emits node.activity + node.tokens', () => {
       writes: ['summary'],
     }
 
-    const impl = await dispatcher.resolve(node, eventsCtx)
-    await dispatcher.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, eventsCtx)
+    try {
+      const impl = await dispatcher.resolve(node, eventsCtx)
+      await dispatcher.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, eventsCtx)
 
-    store.close()
+      const activities = captured.filter((e) => e.type === 'node.activity')
+      expect(activities.length).toBeGreaterThanOrEqual(1)
 
-    // After running:
-    const activities = captured.filter((e) => e.type === 'node.activity')
-    expect(activities.length).toBeGreaterThanOrEqual(1)
-
-    const tokens = captured.filter((e) => e.type === 'node.tokens')
-    expect(tokens.length).toBe(1)
-    expect(tokens[0]).toMatchObject({
-      type: 'node.tokens',
-      input_tokens: 12,
-      output_tokens: 7,
-    })
+      const tokens = captured.filter((e) => e.type === 'node.tokens')
+      expect(tokens.length).toBe(1)
+      expect(tokens[0]).toMatchObject({
+        type: 'node.tokens',
+        input_tokens: 12,
+        output_tokens: 7,
+        model: 'fake-model',
+      })
+    } finally {
+      store.close()
+    }
   })
 })

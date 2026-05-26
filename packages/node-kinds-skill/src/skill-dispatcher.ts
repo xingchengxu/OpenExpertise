@@ -54,7 +54,7 @@ export class SkillDispatcher implements NodeDispatcher {
       run_id: ctx.runId,
       node_id: si.spec.id,
       ts: ts(),
-      activity: `calling ${completeOpts.model} (skill: ${si.spec.id})`,
+      activity: `calling ${completeOpts.model} (skill: ${si.skill.frontmatter.name ?? si.spec.id})`,
     })
 
     const result = await this.opts.client.complete(completeOpts)
