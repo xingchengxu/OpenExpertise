@@ -25,7 +25,7 @@ describe('mcp-server', () => {
     // Will grow to the full 5 as Tasks 4-8 register tools. Skeleton task asserts
     // the framework is wired and listTools round-trips.
     expect(Array.isArray(names)).toBe(true)
-    expect(names).toContain('oe_validate')
+    expect(names).toEqual(expect.arrayContaining(['oe_validate', 'oe_state']))
   })
 
   it('oe_validate accepts a well-formed experience and reports valid', async () => {
@@ -66,6 +66,29 @@ graph:
       const payload = JSON.parse(content[0]!.text) as { valid: boolean; errors?: string[] }
       expect(payload.valid).toBe(false)
       expect(payload.errors?.length ?? 0).toBeGreaterThan(0)
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it('oe_state returns "no state yet" when no runs have happened', async () => {
+    const { client } = await connectClient()
+    const dir = mkdtempSync(join(tmpdir(), 'oe-mcp-state-'))
+    try {
+      writeFileSync(
+        join(dir, 'experience.yaml'),
+        `name: t
+version: 0.1.0
+state: { schema: { x: { type: string } } }
+graph: { nodes: [{ id: a, kind: tool, impl: ./x.mjs, writes: [x] }], edges: [] }`,
+      )
+      const result = await client.callTool({
+        name: 'oe_state',
+        arguments: { experience_path: dir },
+      })
+      const content = result.content as Array<{ type: string; text: string }>
+      const payload = JSON.parse(content[0]!.text) as { snapshot?: unknown; note?: string }
+      expect(payload.note).toMatch(/no runs/i)
     } finally {
       rmSync(dir, { recursive: true, force: true })
     }
