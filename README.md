@@ -1,43 +1,68 @@
+<div align="center">
+
 # OpenExpertise
 
-> Heterogeneous executable graphs that codify expert knowledge — deterministic, persistent, and self-improving.
+### **AI-era Makefile.** Codify expert workflows as runnable, evolving graphs.
 
-OpenExpertise is the **execution engine for "experience flows"**: graphs whose nodes can be tools, datasets, Claude/GPT agents, callable skills, or other experiences. Runs are durable artifacts (SQLite blackboard, JSONL event log), and the evolution advisor proposes graph upgrades after each run.
+[![tests](https://img.shields.io/badge/tests-223%20passing-brightgreen)](#) [![typecheck](https://img.shields.io/badge/typecheck-strict-blue)](#) [![packages](https://img.shields.io/badge/packages-14-blueviolet)](#) [![license](https://img.shields.io/badge/license-TBD-lightgrey)](#)
 
-![hero demo placeholder](docs/assets/hero.gif)
+[**60-second demo**](#60-second-demo) · [**Why**](#why-openexpertise) · [**Examples**](#built-in-examples) · [**Compare**](#vs-the-alternatives) · [**Docs**](#docs)
 
-## 90-second demo — the graph improves itself
+</div>
+
+---
+
+## What it is (in one sentence)
+
+**OpenExpertise turns a team's standard operating procedures into version-controlled YAML graphs, runs them with deterministic flow + LLM-powered nodes, and uses the LLM again to evolve the graph after each run.**
+
+```
+┌─────────────────────────────────────┐    ┌───────────────────────────────────────┐
+│   Claude Code / Codex / Gemini      │    │   OpenExpertise                       │
+│   "AI bash"                         │    │   "AI Makefile"                       │
+│                                     │ vs │                                       │
+│   - improvised each run             │    │   - same DAG every run                │
+│   - opaque trajectory               │    │   - JSONL event log + SQLite state    │
+│   - one-shot, no memory             │    │   - evolves itself across runs        │
+│   - general-purpose                 │    │   - codifies a specific SOP           │
+└─────────────────────────────────────┘    └───────────────────────────────────────┘
+
+           autonomous worker                            workflow conductor
+                                                       (can call the workers)
+```
+
+It's NOT an autonomous agent. It's the **orchestration layer** that lets you wire deterministic code, LLM agents, and CLI agents (Claude Code / Codex / Gemini) into reproducible, persistent, self-improving pipelines.
+
+---
+
+## 60-second demo
 
 ```bash
 git clone <repo-url> && cd OpenExpertise
 pnpm install && pnpm -r build
 
-export ANTHROPIC_API_KEY=sk-...    # or OPENAI_API_KEY
+export ANTHROPIC_API_KEY=sk-...        # or OPENAI_API_KEY=...
 node packages/cli/dist/bin.js run examples/review-branch --tui
 ```
 
-**Run 1** — three reviewers (bugs / perf / tests) read the diff. The SQL injection is missed:
+You'll see three reviewers (`bugs`/`perf`/`tests`) fan out over a Python diff. They find missing null-check + missing test + unclosed cursor — but **miss the SQL injection**.
 
 ```
 ⓘ run-2026-05-26-a1b2c3 finished
-  findings: 3 issues (null deref, missing test, unclosed cursor)
+  findings: 3 issues
   risk_score: 0.30
 ```
 
-**Evolve** — ask the advisor what's missing:
+Now ask the evolution advisor what's missing:
 
-````bash
+```bash
 node packages/cli/dist/bin.js evolve run-2026-05-26-a1b2c3
 # → wrote .openexpertise/evolution/run-2026-05-26-a1b2c3.md
-#   proposal: "Add `security` dimension"
+#   proposal: "Add `security` dimension — default reviewers focus on
+#              logic/tests; injection bugs need a dedicated reviewer."
+```
 
-# The proposal markdown embeds a unified diff inside a ```diff fenced block.
-# Extract it and pipe to git apply:
-awk '/^```diff$/{f=1;next} /^```$/{f=0} f' \
-  .openexpertise/evolution/run-2026-05-26-a1b2c3.md | git apply
-````
-
-**Run 2** — same command. Now four reviewers. SQL injection caught:
+Apply the one-line YAML patch from the proposal and re-run:
 
 ```
 ⓘ run-2026-05-26-d4e5f6 finished
@@ -45,112 +70,265 @@ awk '/^```diff$/{f=1;next} /^```$/{f=0} f' \
   risk_score: 0.85
 ```
 
-The experience improved itself. State persisted across runs. The graph is a versioned artifact.
+**The experience improved itself.** Author → run → evolve, all driven by the same LLM. That's the whole story.
+
+---
 
 ## Why OpenExpertise
 
-- **Heterogeneous nodes.** Mix tools (deterministic code), agents (LLM calls with structured output), skills (SKILL.md packages), datasets (file / SQLite / HTTP), and nested experiences in a single graph.
-- **Durable state.** A per-experience SQLite blackboard with declared schema and merge strategies. `oe state findings` works hours later.
-- **Evolution loop.** After every run, the advisor reads the events + state diff and proposes graph upgrades (add node, tune param, add dataset case) as `git apply`-ready diffs.
-- **Two LLM providers.** Anthropic and OpenAI, switch via `--llm` or env-var auto-detect.
-- **Two-way agentic-CLI integration.** Outbound: the `cli-agent` node kind delegates steps to Claude Code, Codex, or Gemini. Inbound: `@openexpertise/mcp-server` exposes 5 OE tools over MCP, callable from any of those CLIs. See [`docs/cli-agent.md`](docs/cli-agent.md) and [`docs/mcp-server.md`](docs/mcp-server.md).
-- **One-keyword authoring.** `oe ultra "<task>"` (or `/ultraexpertise <task>` inside Claude Code) runs an LLM agent that analyzes the task, synthesizes a complete `experience.yaml` + tool stubs + prompts, and writes a validated draft. The same LLM that authored the SOP can then evolve it after the first run. See [`docs/ultraexpertise.md`](docs/ultraexpertise.md).
+> **Five reasons it's different from every other AI workflow tool.**
 
-For a fuller comparison vs LangGraph / CrewAI / Mastra / Inngest see [`docs/comparison.md`](docs/comparison.md).
+|                                     | What it gets you                                                                                                                                                                                                  |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Code-as-Law**                     | YAML schema validates structure. LLMs only fill the gaps inside nodes — they can't rewrite the graph at runtime. No drift, no surprises.                                                                          |
+| **6 node kinds in one graph**       | `tool` (deterministic code) · `agent` (LLM + structured output) · `skill` (SKILL.md packages) · `dataset` (file / SQLite / HTTP) · `experience` (nested) · `cli-agent` (delegate to Claude Code / Codex / Gemini) |
+| **Persistent SQLite state**         | Every node's writes land in a typed blackboard. `oe state findings` works hours later. Resume with `oe resume <run-id>` and replay cached steps.                                                                  |
+| **Self-improving**                  | `oe evolve <run-id>` reads the events + state diff and proposes graph upgrades as `git apply`-ready diffs. The author → run → evolve loop closes.                                                                 |
+| **Two-way agentic-CLI integration** | **Outbound:** delegate a node to Claude Code / Codex / Gemini. **Inbound:** `oe-mcp` exposes 5 OE tools so the same CLIs can run experiences from inside their own sessions.                                      |
 
-## Install
+---
+
+## vs the alternatives
+
+|                                                        |     OpenExpertise      |   LangGraph   |    CrewAI     | `/workflows` (Anthropic) |  Claude Code   |
+| ------------------------------------------------------ | :--------------------: | :-----------: | :-----------: | :----------------------: | :------------: |
+| Declarative YAML graph                                 |           ✓            | (Python code) | (Python code) |        (JS code)         |       —        |
+| Schema validation of flow                              |           ✓            |       —       |       —       |         partial          |       —        |
+| Persistent state across runs                           |           ✓            |       —       |       —       |            —             |       —        |
+| Self-evolution (advisor)                               |           ✓            |       —       |       —       |            —             |       —        |
+| Calls Claude Code / Codex / Gemini                     |           ✓            |       —       |       —       |            —             |    (is one)    |
+| Callable AS MCP tool                                   |           ✓            |       —       |       —       |            —             | (consumes MCP) |
+| 6 heterogeneous node kinds                             |           ✓            |  (functions)  | (agents only) |      (agents only)       |       —        |
+| Multiple LLM providers                                 | ✓ (Anthropic + OpenAI) |       ✓       |       ✓       |       (Anthropic)        |  (Anthropic)   |
+| Parallel + 429-aware                                   |           ✓            |       ✓       |    partial    |         unknown          |       —        |
+| One-keyword authoring (`oe ultra` / `/ultraexpertise`) |           ✓            |       —       |       —       |     ✓ (`ultrawork`)      |       —        |
+
+Full write-up: [`docs/comparison.md`](docs/comparison.md).
+
+---
+
+## Install & first run (under 60 seconds)
 
 ```bash
 git clone <repo-url> && cd OpenExpertise
 pnpm install && pnpm -r build
-node packages/cli/dist/bin.js --help
-```
 
-(Publication to npm is configured per-package; once npm-published you'll be able to `npm i -g @openexpertise/cli`.)
-
-## Quick start — smaller examples
-
-```bash
-# Pure-tool, no LLM needed:
+# Hello world — pure tool, no API key needed:
 node packages/cli/dist/bin.js run examples/hello-tool
-# → finalState: { greeting: 'hello, World' }
-
-# Dataset aggregate:
-node packages/cli/dist/bin.js run examples/dataset-aggregate
-# → finalState: { rows: [...], total: 60 }
+# → finalState: { greeting: "hello, World" }
 ```
 
-### More examples
+When npm-published: `npm i -g @openexpertise/cli` → `oe run examples/hello-tool`.
 
-| Example                                      | Demonstrates                                                        |
-| -------------------------------------------- | ------------------------------------------------------------------- |
-| [`oncall-runbook`](examples/oncall-runbook/) | `tool → agent` fan-out via `for_each` over investigation dimensions |
-| [`issue-triage`](examples/issue-triage/)     | `when:` conditional edges, multi-agent label + owner routing        |
-| [`release-gates`](examples/release-gates/)   | Mixing `tool` + `cli-agent` (claude-code) + `agent` in one graph    |
+---
 
-Each ships with a fixture and a mocked-LLM e2e test in `e2e/` — no real API or CLI required to verify the structure.
+## Built-in examples
 
-## All CLI commands
+> Pick the one closest to your use case. Each ships with fixtures and a mocked-LLM e2e test in `e2e/` — no real API key required to validate the structure.
 
-| Command                | Purpose                                           |
-| ---------------------- | ------------------------------------------------- |
-| `oe init <name>`       | Scaffold a new experience directory               |
-| `oe validate [path]`   | Validate `experience.yaml`                        |
-| `oe run [path]`        | Execute an experience (`--tui`, `--evolve` flags) |
-| `oe resume <run-id>`   | Re-run with cache replay                          |
-| `oe inspect <run-id>`  | Replay a run's event log                          |
-| `oe state [field]`     | Inspect blackboard                                |
-| `oe reset-state --yes` | Wipe blackboard                                   |
-| `oe evolve <run-id>`   | Generate evolution proposals                      |
-| `oe diff`              | List pending evolution proposals                  |
+| Example                                            | What it shows                                                              | Nodes                          |
+| -------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------ |
+| [`hello-tool`](examples/hello-tool/)               | Smallest possible flow. No LLM.                                            | `tool`                         |
+| [`dataset-aggregate`](examples/dataset-aggregate/) | Load CSV → aggregate.                                                      | `dataset` + `tool`             |
+| [`agent-echo`](examples/agent-echo/)               | Single agent with structured output.                                       | `agent`                        |
+| [`review-branch`](examples/review-branch/) ★       | The hero demo. Multi-dim review + verifier + score + evolution.            | `tool` + `agent` ×3            |
+| [`oncall-runbook`](examples/oncall-runbook/)       | Investigate an incident across 3 dimensions via `for_each` fan-out.        | `tool` + `agent`               |
+| [`issue-triage`](examples/issue-triage/)           | Classify → search dupes → conditional dedup → route. Shows `when:` edges.  | `tool` + `agent`               |
+| [`release-gates`](examples/release-gates/)         | License + changelog + coverage + Claude-Code security scan → release gate. | `tool` + `cli-agent` + `agent` |
+| [`cli-orchestration`](examples/cli-orchestration/) | Claude Code summarizes; Codex critiques. Two providers in one flow.        | `cli-agent` ×2                 |
 
-### TUI dashboard
+---
 
-`oe run --tui` opens an ink-based dashboard showing each node's status, current activity (e.g. `calling claude-sonnet-4-6`, `spawning codex`, `parsing JSON output`), per-node accumulated tokens, and a header line with the run-total tokens. Updates live as the run progresses.
+## Architecture at a glance
 
-### Concurrency
+```
+                  experience.yaml                 .openexpertise/
+                                                  ├─ state.sqlite   (typed blackboard, persistent)
+                                                  ├─ runs/<id>.jsonl (event log, replayable)
+                                                  ├─ cache/         (per-node memo, resume-able)
+                                                  └─ evolution/     (advisor proposals)
+                            │
+                            ▼
+            ┌─────────────────────────────────────┐
+            │  Sequential or Parallel Scheduler   │ ◀── --concurrency N
+            │  (topological waves, bounded)        │      runtime.concurrency in YAML
+            └─────────────────────────────────────┘
+                            │
+        ┌───────────┬───────┼────────┬───────────────┐
+        ▼           ▼       ▼        ▼               ▼
+   ┌────────┐ ┌────────┐ ┌─────┐ ┌────────┐  ┌──────────────┐
+   │ tool   │ │ agent  │ │skill│ │dataset │  │  cli-agent   │
+   │        │ │ (LLM)  │ │     │ │(file/  │  │ (claude-code │
+   │        │ │        │ │     │ │sqlite/ │  │  / codex /   │
+   │        │ │        │ │     │ │ http)  │  │  gemini)     │
+   └────────┘ └────────┘ └─────┘ └────────┘  └──────────────┘
+        │           │      │        │               │
+        └───────────┴──────┼────────┴───────────────┘
+                            ▼
+                   state writes + events
+                   (merge: array_append | set_once | last_wins)
+```
 
-`oe run --concurrency <n>` runs independent DAG nodes (and `for_each` iterations whose `concurrency: N` is set) in parallel up to the configured ceiling. Defaults to 1 (sequential). You can also set `runtime.concurrency: N` at the top of `experience.yaml` to make a flow parallel-by-default.
+LLM clients (`@openexpertise/node-kinds-agent`, `@openexpertise/llm-openai`) retry on HTTP 429 with exponential backoff. Both wire through the same `llm-factory` used by `oe run`, `oe evolve`, AND `oe ultra` (authoring) — author/run/evolve is one closed loop.
 
-LLM clients (Anthropic + OpenAI) retry up to 4 times on HTTP 429 (`rate_limit_error`) with exponential backoff, configurable via constructor opts. Non-429 errors are not retried.
+---
 
-`oe inspect <run-id>` sorts events by `ts` so a parallel run reads in chronological order.
+## Two ways to author
 
-## Authoring with Claude Code
+### 1. Hand-write the YAML (full control)
 
-Install the `experience-creator` skill:
+```yaml
+name: my-sop
+version: 0.1.0
+state:
+  schema:
+    input: { type: string }
+    output: { type: string }
+graph:
+  nodes:
+    - id: do_thing
+      kind: tool
+      impl: ./tools/do_thing.mjs
+      writes: [output]
+  edges: []
+```
+
+`oe validate` checks it; `oe run` executes it.
+
+### 2. One-keyword authoring (LLM writes the YAML)
 
 ```bash
-mkdir -p ~/.claude/skills
-cp -R packages/skill-experience-creator ~/.claude/skills/experience-creator
+oe ultra "Review pull requests for SOC2 compliance and produce a risk score"
 ```
 
-Then in Claude Code: "make an OpenExpertise experience for X".
+Behind the scenes, two LLM passes — **analyze** (decompose into phases + nodes + state schema) then **synthesize** (emit experience.yaml + tool stubs + prompts) — land a validated draft in `.openexpertise/drafts/<slug>/`. Inspect, run, promote with `mv`.
 
-## Architecture
+From Claude Code:
 
-The 6-plan V1 buildout:
+```
+/ultraexpertise Review pull requests for SOC2 compliance
+```
 
-1. **Plan 1** — Walking skeleton: monorepo, schema package, core runtime, ToolDispatcher, CLI, hello-tool example
-2. **Plan 2** — Heterogeneous dispatchers: AgentDispatcher (Anthropic SDK), SkillDispatcher, DatasetDispatcher, ExperienceDispatcher, on_error policies
-3. **Plan 3** — Control flow: for_each, conditional edges (when:), pipeline groups, phase grouping, review-branch demo
-4. **Plan 4** — Cache + resume + bounded loop + TUI (ink) + remaining CLI commands
-5. **Plan 5** — `experience-creator` authoring skill for Claude Code
-6. **Plan 6** — `EvolutionAdvisor` + `oe evolve` / `oe diff` / `oe run --evolve`
+Reference: [`docs/ultraexpertise.md`](docs/ultraexpertise.md).
 
-Design doc: `docs/superpowers/specs/2026-05-25-openexpertise-design.md`.
-Implementation plans: `docs/superpowers/plans/`.
+---
+
+## Use OpenExpertise FROM Claude Code (and Codex, Gemini)
+
+Register the MCP server once:
+
+```bash
+claude mcp add openexpertise -- node $PWD/packages/mcp-server/dist/bin.js
+```
+
+Then inside any Claude Code session:
+
+> _"Use oe_run on examples/review-branch"_
+> _"Use oe_evolve on the last run id"_
+
+Five MCP tools are exposed: `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `oe_evolve`, `oe_ultra`. Reference: [`docs/mcp-server.md`](docs/mcp-server.md).
+
+---
+
+## CLI reference
+
+| Command                | Purpose                                                                                   |
+| ---------------------- | ----------------------------------------------------------------------------------------- |
+| `oe init <name>`       | Scaffold a new experience directory                                                       |
+| `oe validate [path]`   | Validate `experience.yaml`                                                                |
+| `oe run [path]`        | Execute an experience (`--tui`, `--evolve`, `--concurrency N`, `--llm anthropic\|openai`) |
+| `oe resume <run-id>`   | Re-run with cache replay                                                                  |
+| `oe inspect <run-id>`  | Replay a run's event log (sorted by ts)                                                   |
+| `oe state [field]`     | Inspect blackboard                                                                        |
+| `oe reset-state --yes` | Wipe blackboard                                                                           |
+| `oe evolve <run-id>`   | Generate evolution proposals                                                              |
+| `oe diff`              | List pending evolution proposals                                                          |
+| `oe ultra "<task>"`    | LLM authors a new experience from natural language                                        |
+
+### `--tui` dashboard
+
+A live ink-based dashboard showing each node's status, current activity (`calling claude-sonnet-4-6`, `spawning codex`, `parsing JSON output`), accumulated per-node tokens, and a header line with the run total. htop-grade observability for graph runs.
+
+### `--concurrency N`
+
+Independent DAG nodes (and `for_each` iterations whose `concurrency: N` is set) run in parallel up to the ceiling. Defaults to 1. Combine with `runtime.concurrency: N` in YAML to make a flow parallel-by-default.
+
+---
+
+## Docs
+
+| Doc                                                  | What's inside                                                       |
+| ---------------------------------------------------- | ------------------------------------------------------------------- |
+| [`docs/cli-agent.md`](docs/cli-agent.md)             | `cli-agent` node kind: providers, command shapes, JSON-mode caveats |
+| [`docs/mcp-server.md`](docs/mcp-server.md)           | MCP server tools + per-CLI registration                             |
+| [`docs/ultraexpertise.md`](docs/ultraexpertise.md)   | Auto-SOP authoring — `oe ultra`, slash command, MCP `oe_ultra`      |
+| [`docs/comparison.md`](docs/comparison.md)           | Position vs LangGraph / CrewAI / Mastra / Inngest                   |
+| [`docs/demo-script.md`](docs/demo-script.md)         | Recording script for the hero GIF                                   |
+| [`docs/superpowers/specs/`](docs/superpowers/specs/) | Architecture decisions                                              |
+
+---
+
+## Should I use OpenExpertise?
+
+```
+Are you trying to ...
+
+   automate a recurring, multi-step process
+   that mixes deterministic logic + LLM judgment?
+                          │
+                  ┌───────┴────────┐
+                 YES               NO
+                  │                 │
+           ┌──────┴──────┐    Use Claude Code
+           │             │    or Codex directly.
+   Need it durable,     One-shot
+   reproducible,        exploration?
+   evolvable?           │
+   │                    └─ Use Claude Code.
+   └─ ▶ Use OpenExpertise.
+```
+
+If your team has a SOP that someone has to follow every Monday morning — code review, incident triage, release gates, compliance check, customer onboarding — and you want it to **run the same way every time, leave a trail, and get better at it** — OpenExpertise is for you.
+
+If you want a chat-based assistant or one-off task automation, use the underlying CLI directly (Claude Code, Codex, Gemini). OpenExpertise sits **above** those tools, not next to them.
+
+---
 
 ## Development
 
 ```bash
-pnpm test          # all unit + e2e tests
-pnpm typecheck     # tsc across all packages
-pnpm lint          # eslint
-pnpm format:check  # prettier
-pnpm format        # prettier --write
+pnpm test            # 223 unit + e2e tests
+pnpm typecheck       # strict TS across all packages
+pnpm lint            # eslint (0 errors)
+pnpm format:check    # prettier
+pnpm format          # prettier --write
+pnpm -r build        # tsc -b across the monorepo
 ```
+
+The repo is a pnpm workspace with 14 packages. New features land via spec → plan → subagent-driven execution; the cumulative history is in `docs/superpowers/overnight-progress.md`.
+
+---
+
+## Contributing
+
+PRs welcome. The path of least friction:
+
+1. Open an issue describing the use case or bug.
+2. For features, expect to brainstorm a spec before implementation.
+3. For bug fixes, a failing test + minimal patch.
+
+This project is built largely via [Claude Code](https://claude.com/claude-code)-driven [superpowers](https://github.com/anthropics/claude-superpowers) workflows; subagent dispatch + two-stage review per task. The same discipline applies to community contributions.
+
+---
 
 ## License
 
-(TBD by the maintainer)
+TBD by the maintainer.
+
+---
+
+<div align="center">
+
+If OpenExpertise saved you from writing the same workflow twice — **★ the repo**.
+
+</div>

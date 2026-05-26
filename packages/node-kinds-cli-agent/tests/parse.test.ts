@@ -68,13 +68,13 @@ describe('parseOutput — provider-specific transports', () => {
     expect(out).toEqual({ security_findings: [{ title: 'SQLi', severity: 'high' }] })
   })
 
-  it("strips a markdown ```json fence around JSON", () => {
+  it('strips a markdown ```json fence around JSON', () => {
     const stdout = '```json\n{"a": 1, "b": 2}\n```'
     const out = parseOutput({ stdout, outputFormat: 'json', writes: ['a', 'b'] })
     expect(out).toEqual({ a: 1, b: 2 })
   })
 
-  it("handles a Claude envelope whose .result is itself fenced JSON", () => {
+  it('handles a Claude envelope whose .result is itself fenced JSON', () => {
     const env = JSON.stringify({
       type: 'result',
       result: '```json\n{"security_findings": []}\n```',
