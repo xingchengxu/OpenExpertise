@@ -90,20 +90,49 @@ Apply the one-line YAML patch from the proposal and re-run:
 
 ## vs the alternatives
 
-|                                                        |     OpenExpertise      |   LangGraph   |    CrewAI     | `/workflows` (Anthropic) |  Claude Code   |
-| ------------------------------------------------------ | :--------------------: | :-----------: | :-----------: | :----------------------: | :------------: |
-| Declarative YAML graph                                 |           ✓            | (Python code) | (Python code) |        (JS code)         |       —        |
-| Schema validation of flow                              |           ✓            |       —       |       —       |         partial          |       —        |
-| Persistent state across runs                           |           ✓            |       —       |       —       |            —             |       —        |
-| Self-evolution (advisor)                               |           ✓            |       —       |       —       |            —             |       —        |
-| Calls Claude Code / Codex / Gemini                     |           ✓            |       —       |       —       |            —             |    (is one)    |
-| Callable AS MCP tool                                   |           ✓            |       —       |       —       |            —             | (consumes MCP) |
-| 6 heterogeneous node kinds                             |           ✓            |  (functions)  | (agents only) |      (agents only)       |       —        |
-| Multiple LLM providers                                 | ✓ (Anthropic + OpenAI) |       ✓       |       ✓       |       (Anthropic)        |  (Anthropic)   |
-| Parallel + 429-aware                                   |           ✓            |       ✓       |    partial    |         unknown          |       —        |
-| One-keyword authoring (`oe ultra` / `/ultraexpertise`) |           ✓            |       —       |       —       |     ✓ (`ultrawork`)      |       —        |
+|                                                        |                      OpenExpertise                       |   LangGraph   |    CrewAI     | `/workflows` (Anthropic) |  Claude Code   |
+| ------------------------------------------------------ | :------------------------------------------------------: | :-----------: | :-----------: | :----------------------: | :------------: |
+| Declarative YAML graph                                 |                            ✓                             | (Python code) | (Python code) |        (JS code)         |       —        |
+| Schema validation of flow                              |                            ✓                             |       —       |       —       |         partial          |       —        |
+| Persistent state across runs                           |                            ✓                             |       —       |       —       |            —             |       —        |
+| Self-evolution (advisor)                               |                            ✓                             |       —       |       —       |            —             |       —        |
+| Calls Claude Code / Codex / Gemini                     |                            ✓                             |       —       |       —       |            —             |    (is one)    |
+| Callable AS MCP tool                                   |                            ✓                             |       —       |       —       |            —             | (consumes MCP) |
+| 6 heterogeneous node kinds                             |                            ✓                             |  (functions)  | (agents only) |      (agents only)       |       —        |
+| Multiple LLM providers                                 | ✓ (Anthropic + OpenAI + any OpenAI-compatible self-host) |       ✓       |       ✓       |       (Anthropic)        |  (Anthropic)   |
+| Parallel + 429-aware                                   |                            ✓                             |       ✓       |    partial    |         unknown          |       —        |
+| One-keyword authoring (`oe ultra` / `/ultraexpertise`) |                            ✓                             |       —       |       —       |     ✓ (`ultrawork`)      |       —        |
 
 Full write-up: [`docs/comparison.md`](docs/comparison.md).
+
+---
+
+## Verified end-to-end (not just unit-tested)
+
+Every built-in example has been smoke-run against **real APIs** — not just mocks. Two real framework bugs surfaced by the live runs and both were fixed + regression-tested before this README was written.
+
+| Provider                                                       |        Status         | Verified path                                                                            |
+| -------------------------------------------------------------- | :-------------------: | ---------------------------------------------------------------------------------------- |
+| **Anthropic** (`claude-sonnet-4-6`, `claude-opus-4-7`)         |           ✓           | Default `agent` kind. 429-aware exponential retry.                                       |
+| **OpenAI** (`gpt-4o-2024-11-20`)                               |           ✓           | `--llm openai`. Same `llm-factory`, same lazy proxy.                                     |
+| **Any OpenAI-compatible endpoint** (vLLM / Ollama / LM Studio) |           ✓           | Smoke-tested live against vLLM-served reasoning model. Set `OPENAI_BASE_URL=...` and go. |
+| **Claude Code CLI** (`claude -p`)                              |           ✓           | `cli-agent` provider. Lets the graph delegate a step to a Claude Code subprocess.        |
+| **OpenAI Codex CLI** (`codex exec`)                            |           ✓           | `cli-agent` provider. Same.                                                              |
+| **Gemini CLI** (`gemini --prompt`)                             | unit ✓ / live pending | Dispatcher implemented + tested with mocked subprocess; live smoke deferred.             |
+
+**Smoke-test coverage:** all **8 example experiences** (`hello-tool`, `dataset-aggregate`, `agent-echo`, `oncall-runbook`, `issue-triage`, `review-branch`, `cli-orchestration`, `release-gates`) pass end-to-end with real APIs and real CLIs. The mocked e2e suites are the safety net; the live smokes are the proof.
+
+### Self-host your LLM
+
+Because `--llm openai` honors `OPENAI_BASE_URL`, anything that speaks the OpenAI chat-completions API works as a drop-in — vLLM, Ollama, LM Studio, llama.cpp's server, your own internal endpoint. No code change needed in OpenExpertise.
+
+```bash
+export OPENAI_API_KEY=anything-the-server-accepts
+export OPENAI_BASE_URL=http://your-vllm-host:8000/v1
+node packages/cli/dist/bin.js run examples/oncall-runbook --llm openai
+```
+
+That same flow handles reasoning-style models that prefix tool-call arguments with `<think>...</think>` blocks (auto-stripped by the client) and Claude Code's JSON envelopes (auto-unwrapped by the cli-agent parser).
 
 ---
 
