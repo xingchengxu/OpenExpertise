@@ -141,3 +141,45 @@ describe('cli-agent node kind', () => {
     expect(() => validateExperienceSpec(spec)).not.toThrow()
   })
 })
+
+describe('runtime.concurrency', () => {
+  const base = {
+    name: 'r',
+    version: '0.1.0',
+    state: { schema: { x: { type: 'string' } } },
+    graph: {
+      nodes: [{ id: 'n', kind: 'tool', impl: './n.mjs', writes: ['x'] }],
+      edges: [],
+    },
+  }
+
+  it('accepts a missing runtime block', () => {
+    expect(() => validateExperienceSpec(structuredClone(base))).not.toThrow()
+  })
+
+  it('accepts runtime.concurrency: integer ≥ 1', () => {
+    for (const c of [1, 2, 8, 64]) {
+      const spec = structuredClone(base) as Record<string, unknown>
+      spec.runtime = { concurrency: c }
+      expect(() => validateExperienceSpec(spec)).not.toThrow()
+    }
+  })
+
+  it('rejects runtime.concurrency: 0', () => {
+    const spec = structuredClone(base) as Record<string, unknown>
+    spec.runtime = { concurrency: 0 }
+    expect(() => validateExperienceSpec(spec)).toThrow(/Schema validation failed/)
+  })
+
+  it('rejects runtime.concurrency: -1', () => {
+    const spec = structuredClone(base) as Record<string, unknown>
+    spec.runtime = { concurrency: -1 }
+    expect(() => validateExperienceSpec(spec)).toThrow(/Schema validation failed/)
+  })
+
+  it('rejects runtime.concurrency: "4" (string)', () => {
+    const spec = structuredClone(base) as Record<string, unknown>
+    spec.runtime = { concurrency: '4' }
+    expect(() => validateExperienceSpec(spec)).toThrow(/Schema validation failed/)
+  })
+})

@@ -167,6 +167,10 @@ export interface GraphSpec {
   loops?: LoopSpec[]
 }
 
+export interface RuntimeSpec {
+  concurrency?: number // node-level concurrency ceiling; default 1
+}
+
 export interface ExperienceSpec {
   name: string
   description?: string
@@ -174,4 +178,5 @@ export interface ExperienceSpec {
   state: StateSpec
   phases?: PhaseSpec[]
   graph: GraphSpec
+  runtime?: RuntimeSpec
 }
