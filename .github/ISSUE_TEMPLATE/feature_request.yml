@@ -1,0 +1,46 @@
+name: Feature request
+description: Propose a new capability or behavior change
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Non-trivial features land via the spec → plan → execute rhythm. This issue is the start of that conversation. Expect to write a short spec before any code.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Describe the situation that motivates this. What can't you do today? Who feels the pain?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed shape
+      description: Rough sketch of the API / YAML / CLI change. Don't worry about exact syntax.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds you've tried; similar features in other tools; why those don't fit.
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Estimated scope
+      options:
+        - Small (single file, < 100 LOC)
+        - Medium (new node kind / dispatcher / CLI command)
+        - Large (architectural — new scheduler, new runtime concept)
+        - Not sure
+    validations:
+      required: true
+  - type: checkboxes
+    id: willing
+    attributes:
+      label: Will you contribute?
+      options:
+        - label: I'm willing to write the spec and implementation plan.
+        - label: I'm willing to implement once the plan is reviewed.
+        - label: I'm requesting; happy to help review.
