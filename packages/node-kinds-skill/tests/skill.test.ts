@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { SkillDispatcher, loadSkillFile } from '../src/index.js'
 import type { LLMClient, LLMCompleteOpts } from '@openexpertise/core'
-import { RunContext, StateStore, EventBus, DispatcherRegistry } from '@openexpertise/core'
+import { RunContext, StateStore, EventBus, DispatcherRegistry, type RunEvent } from '@openexpertise/core'
 import type { SkillNodeSpec, ExperienceSpec } from '@openexpertise/schema'
 
 class FakeLLM implements LLMClient {
@@ -94,5 +94,62 @@ describe('SkillDispatcher', () => {
     expect(llm.calls[0]?.system).toContain('# Classify')
     expect(llm.calls[0]?.messages[0]?.content).toContain('hello there')
     expect(output.state_delta).toEqual({ label: 'classified: greeting' })
+  })
+})
+
+describe('SkillDispatcher emits node.activity + node.tokens', () => {
+  it('emits activity + tokens around the LLM call', async () => {
+    const events = new EventBus()
+    const captured: RunEvent[] = []
+    events.subscribe((e) => captured.push(e))
+
+    class FakeLLMWithUsage implements LLMClient {
+      public calls: LLMCompleteOpts[] = []
+      async complete(opts: LLMCompleteOpts) {
+        this.calls.push(opts)
+        return {
+          text: 'classified: greeting',
+          usage: { input_tokens: 5, output_tokens: 3 },
+        }
+      }
+    }
+
+    const llm = new FakeLLMWithUsage()
+    const store = new StateStore({ dbPath: join(dir, 'events-s.sqlite'), spec })
+    const eventsCtx = new RunContext({
+      runId: 'r2',
+      spec,
+      experienceDir: dir,
+      store,
+      events,
+      dispatchers: new DispatcherRegistry(),
+      args: {},
+    })
+
+    afterEach(() => {
+      store.close()
+    })
+
+    const dispatcher = new SkillDispatcher({ client: llm })
+    const node: SkillNodeSpec = {
+      id: 'skill-node',
+      kind: 'skill',
+      impl: './skills/classify',
+      inputs: {},
+      writes: ['label'],
+    }
+
+    const impl = await dispatcher.resolve(node, eventsCtx)
+    await dispatcher.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, eventsCtx)
+
+    store.close()
+
+    const tokens = captured.filter((e) => e.type === 'node.tokens')
+    expect(tokens.length).toBe(1)
+    expect(tokens[0]).toMatchObject({ input_tokens: 5, output_tokens: 3 })
+
+    const activities = captured.filter((e) => e.type === 'node.activity')
+    expect(activities.length).toBeGreaterThanOrEqual(1)
+    expect(activities.every((a) => a.node_id === 'skill-node')).toBe(true)
   })
 })
