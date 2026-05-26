@@ -79,6 +79,8 @@ importers:
 
   examples/review-branch: {}
 
+  examples/tri-cli-orchestration: {}
+
   packages/authoring:
     dependencies:
       '@openexpertise/core':
