@@ -1,0 +1,82 @@
+name: oncall-runbook
+description: When an incident fires — fetch it, investigate across multiple dimensions, prioritize, and produce a one-page summary for the oncall.
+version: 0.1.0
+
+state:
+  schema:
+    incident: { type: object }
+    dimensions: { type: array, items: { type: object } }
+    findings: { type: array, items: { type: object }, merge: array_append }
+    prioritized_findings: { type: array, items: { type: object } }
+    summary: { type: string }
+
+phases:
+  - { id: triage }
+  - { id: synthesis }
+
+graph:
+  nodes:
+    - id: fetch_incident
+      kind: tool
+      phase: triage
+      impl: ./tools/fetch_incident.mjs
+      writes: [incident]
+    - id: seed_dimensions
+      kind: tool
+      phase: triage
+      impl: ./tools/list_dimensions.mjs
+      writes: [dimensions]
+    - id: investigate
+      kind: agent
+      phase: triage
+      prompt: ./prompts/investigate.md
+      reads: [incident]
+      schema:
+        type: object
+        required: [findings]
+        properties:
+          findings:
+            type: array
+            items:
+              type: object
+              required: [title, evidence, impact]
+              properties:
+                title: { type: string }
+                evidence: { type: string }
+                impact: { type: string }
+      for_each: { source: $.dimensions }
+      writes: [findings]
+    - id: prioritize
+      kind: agent
+      phase: synthesis
+      prompt: ./prompts/prioritize.md
+      reads: [findings, incident]
+      schema:
+        type: object
+        required: [prioritized_findings]
+        properties:
+          prioritized_findings:
+            type: array
+            items:
+              type: object
+              required: [title, priority]
+              properties:
+                title: { type: string }
+                priority: { type: string }
+      writes: [prioritized_findings]
+    - id: summary
+      kind: agent
+      phase: synthesis
+      prompt: ./prompts/summary.md
+      reads: [incident, prioritized_findings]
+      schema:
+        type: object
+        required: [summary]
+        properties:
+          summary: { type: string }
+      writes: [summary]
+  edges:
+    - { from: fetch_incident, to: seed_dimensions }
+    - { from: seed_dimensions, to: investigate }
+    - { from: investigate, to: prioritize }
+    - { from: prioritize, to: summary }
