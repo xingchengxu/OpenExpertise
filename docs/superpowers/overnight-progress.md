@@ -309,3 +309,27 @@ The same `llm-factory` underlies all three of: `oe run` (when agent/skill/cli-ag
 1. Merge `feat/ultraexpertise` into `main`.
 2. Manually smoke with a real API key: `export ANTHROPIC_API_KEY=...; node packages/cli/dist/bin.js ultra "summarize the docs in this repo"` — verify the draft validates and the YAML is sensible.
 3. Move to Plan B (TUI upgrade — live tokens + activity).
+
+---
+
+## Plan B (V2) — TUI Upgrade (2026-05-26)
+
+Branch: `feat/tui-upgrade` (off `main`)
+Spec: `docs/superpowers/specs/2026-05-26-ultraexpertise-and-v2-polish-design.md` (Plan B section)
+Plan: `docs/superpowers/plans/2026-05-26-tui-upgrade.md`
+
+### What shipped
+
+| Area | Result |
+|---|---|
+| Event types | `node.tokens` + `node.activity` added to `RunEvent` |
+| Dispatchers | AgentDispatcher + SkillDispatcher emit tokens+activity; CliAgentDispatcher emits activity (CLIs don't expose usage) |
+| TUI reducer | Extracted to `packages/tui/src/reducer.ts` as a pure function; 11 unit tests |
+| TUI render | Per-node activity (truncated), per-node tokens (in/out), header line with run totals |
+| Tests | 1 agent + 1 skill + 1 cli-agent + 11 reducer = 14 new |
+
+### Next concrete actions
+
+1. Merge `feat/tui-upgrade` into `main`.
+2. Manual smoke with a real API key on `oe run examples/review-branch --tui` — confirm tokens tick up live and activity strings are readable.
+3. Move to Plan C (examples library expansion).

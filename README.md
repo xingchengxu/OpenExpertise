@@ -94,6 +94,10 @@ node packages/cli/dist/bin.js run examples/dataset-aggregate
 | `oe evolve <run-id>`   | Generate evolution proposals                      |
 | `oe diff`              | List pending evolution proposals                  |
 
+### TUI dashboard
+
+`oe run --tui` opens an ink-based dashboard showing each node's status, current activity (e.g. `calling claude-sonnet-4-6`, `spawning codex`, `parsing JSON output`), per-node accumulated tokens, and a header line with the run-total tokens. Updates live as the run progresses.
+
 ## Authoring with Claude Code
 
 Install the `experience-creator` skill:
