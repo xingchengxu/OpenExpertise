@@ -44,9 +44,31 @@ export class OpenAILLMClient implements LLMClient {
       max_tokens: opts.max_tokens ?? 4096,
     }
 
+    if (opts.tools && opts.tools.length > 0) {
+      request.tools = opts.tools.map((t) => ({
+        type: 'function' as const,
+        function: {
+          name: t.name,
+          description: t.description,
+          parameters: t.input_schema,
+        },
+      }))
+      request.tool_choice =
+        opts.tools.length === 1
+          ? { type: 'function' as const, function: { name: opts.tools[0]!.name } }
+          : ('required' as const)
+    }
+
     const response = (await this.sdk.chat.completions.create(request as never)) as {
       choices?: Array<{
-        message?: { content?: string | null; tool_calls?: unknown[] }
+        message?: {
+          content?: string | null
+          tool_calls?: Array<{
+            id?: string
+            type?: string
+            function?: { name?: string; arguments?: string }
+          }>
+        }
         finish_reason?: string
       }>
       usage?: { prompt_tokens?: number; completion_tokens?: number }
@@ -55,6 +77,18 @@ export class OpenAILLMClient implements LLMClient {
     const choice = response.choices?.[0]
     const text = choice?.message?.content ?? ''
     const result: LLMCompleteResult = { text }
+
+    const rawCalls = choice?.message?.tool_calls ?? []
+    if (rawCalls.length > 0) {
+      const tool_calls = rawCalls
+        .filter((c) => c.type === 'function' && c.function?.name)
+        .map((c) => ({
+          name: c.function!.name!,
+          input: this.parseArguments(c.function!.arguments ?? ''),
+        }))
+      if (tool_calls.length > 0) result.tool_calls = tool_calls
+    }
+
     if (response.usage) {
       result.usage = {
         input_tokens: response.usage.prompt_tokens ?? 0,
@@ -67,5 +101,14 @@ export class OpenAILLMClient implements LLMClient {
 
   private mapInbound(m: LLMMessage): ChatMessage {
     return { role: m.role, content: m.content }
+  }
+
+  private parseArguments(raw: string): unknown {
+    if (!raw) return {}
+    try {
+      return JSON.parse(raw)
+    } catch {
+      return { _raw: raw }
+    }
   }
 }

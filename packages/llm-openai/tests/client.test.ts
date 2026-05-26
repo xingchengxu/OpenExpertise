@@ -47,3 +47,70 @@ describe('OpenAILLMClient — text only', () => {
     if (prev !== undefined) process.env.OPENAI_API_KEY = prev
   })
 })
+
+describe('OpenAILLMClient — tool round-trip', () => {
+  it('maps LLMTool[] to OpenAI tools and forces tool_choice when exactly one tool', async () => {
+    const sdk = fakeSdk({
+      choices: [
+        {
+          message: {
+            content: null,
+            tool_calls: [
+              {
+                id: 'call_1',
+                type: 'function',
+                function: { name: 'structured_output', arguments: '{"x":42}' },
+              },
+            ],
+          },
+          finish_reason: 'tool_calls',
+        },
+      ],
+    })
+    const client = new OpenAILLMClient({ sdkClient: sdk as never })
+
+    const result = await client.complete({
+      model: 'gpt-4o-2024-11-20',
+      messages: [{ role: 'user', content: 'give me x' }],
+      tools: [
+        {
+          name: 'structured_output',
+          description: 'return structured data',
+          input_schema: { type: 'object', properties: { x: { type: 'number' } } },
+        },
+      ],
+    })
+
+    expect(result.tool_calls).toEqual([{ name: 'structured_output', input: { x: 42 } }])
+    expect(result.stop_reason).toBe('tool_calls')
+    const req: any = (fakeSdk as any).lastReq
+    expect(req.tools).toEqual([
+      {
+        type: 'function',
+        function: {
+          name: 'structured_output',
+          description: 'return structured data',
+          parameters: { type: 'object', properties: { x: { type: 'number' } } },
+        },
+      },
+    ])
+    expect(req.tool_choice).toEqual({
+      type: 'function',
+      function: { name: 'structured_output' },
+    })
+  })
+
+  it("uses tool_choice 'required' when multiple tools given", async () => {
+    const sdk = fakeSdk({ choices: [{ message: { content: '', tool_calls: [] } }] })
+    const client = new OpenAILLMClient({ sdkClient: sdk as never })
+    await client.complete({
+      model: 'gpt-4o-2024-11-20',
+      messages: [{ role: 'user', content: 'x' }],
+      tools: [
+        { name: 'a', description: '', input_schema: {} },
+        { name: 'b', description: '', input_schema: {} },
+      ],
+    })
+    expect((fakeSdk as any).lastReq.tool_choice).toBe('required')
+  })
+})
