@@ -42,4 +42,15 @@ describe('GeminiProvider', () => {
     })
     expect(spec.args).toContain('--debug')
   })
+
+  it('passes --skip-trust so gemini does not refuse to run in untrusted dirs', () => {
+    const spec = provider.buildCommand({
+      prompt: 'p',
+      workdir: '/tmp/x',
+      outputFormat: 'text',
+    })
+    // Real gemini 0.43 exits 55 in any /tmp dir without --skip-trust, AND
+    // silently downgrades --yolo to 'default' approval if the dir is untrusted.
+    expect(spec.args).toContain('--skip-trust')
+  })
 })

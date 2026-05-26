@@ -5,10 +5,16 @@ export class GeminiProvider implements CliAgentProvider {
   readonly name = 'gemini' as const
 
   buildCommand(opts: BuildCommandOpts): SpawnSpec {
-    // --yolo bypasses interactive permission prompts so the CLI can run
-    // non-interactively. Users can override via extra_args if they want
-    // a stricter permission mode.
-    const args: string[] = ['--yolo', '--prompt', opts.prompt]
+    // Flags explained:
+    //   --yolo        : bypass interactive tool-approval prompts (non-interactive runs)
+    //   --skip-trust  : bypass the "current folder is not trusted" gate.
+    //                   Without this, gemini exits 55 in any non-whitelisted dir
+    //                   (including all /tmp/* and most experience workdirs),
+    //                   AND silently downgrades --yolo to "default" approval
+    //                   mode even when the trust gate is satisfied. Both
+    //                   conditions are real (observed against gemini 0.43).
+    // Users can still override via extra_args if they want stricter behavior.
+    const args: string[] = ['--yolo', '--skip-trust', '--prompt', opts.prompt]
     if (opts.model) {
       args.push('--model', opts.model)
     }
