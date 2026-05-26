@@ -250,3 +250,68 @@ describe('OpenAILLMClient — 429 retry', () => {
     expect(callCount).toBe(1)
   })
 })
+
+describe('OpenAILLMClient — reasoning-prefixed tool arguments', () => {
+  it('strips a leading <think>...</think> block from function.arguments before parsing', async () => {
+    // Observed against vLLM-served minimax: the tool-call arguments string is
+    // prefixed with a think-block before the actual JSON.
+    const sdk = fakeSdk({
+      choices: [
+        {
+          message: {
+            content: null,
+            tool_calls: [
+              {
+                id: 't1',
+                type: 'function',
+                function: {
+                  name: 'structured_output',
+                  arguments:
+                    '<think>The user wants findings.\nLet me identify them.</think>\n{"findings":[{"title":"x","severity":"high"}]}',
+                },
+              },
+            ],
+          },
+          finish_reason: 'tool_calls',
+        },
+      ],
+    })
+    const client = new OpenAILLMClient({ sdkClient: sdk as never })
+    const result = await client.complete({
+      model: 'm',
+      messages: [{ role: 'user', content: 'x' }],
+      tools: [{ name: 'structured_output', description: '', input_schema: {} }],
+    })
+    expect(result.tool_calls).toEqual([
+      { name: 'structured_output', input: { findings: [{ title: 'x', severity: 'high' }] } },
+    ])
+  })
+
+  it('still falls back to { _raw } when stripping does not yield valid JSON', async () => {
+    const sdk = fakeSdk({
+      choices: [
+        {
+          message: {
+            content: null,
+            tool_calls: [
+              {
+                id: 't1',
+                type: 'function',
+                function: { name: 'structured_output', arguments: 'not json at all' },
+              },
+            ],
+          },
+        },
+      ],
+    })
+    const client = new OpenAILLMClient({ sdkClient: sdk as never })
+    const result = await client.complete({
+      model: 'm',
+      messages: [{ role: 'user', content: 'x' }],
+      tools: [{ name: 'structured_output', description: '', input_schema: {} }],
+    })
+    expect(result.tool_calls).toEqual([
+      { name: 'structured_output', input: { _raw: 'not json at all' } },
+    ])
+  })
+})
