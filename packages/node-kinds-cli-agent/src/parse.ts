@@ -25,8 +25,9 @@ export function parseOutput(opts: ParseOpts): Record<string, unknown> {
   }
 
   let parsed: unknown
+  const candidate = extractJsonCandidate(opts.stdout)
   try {
-    parsed = JSON.parse(opts.stdout)
+    parsed = JSON.parse(candidate)
   } catch (err) {
     throw new Error(
       `cli-agent${tag}: stdout was not valid JSON (${(err as Error).message}); raw start: ${opts.stdout.slice(0, 120)}`,
@@ -50,4 +51,39 @@ export function parseOutput(opts: ParseOpts): Record<string, unknown> {
     )
   }
   return parsed as Record<string, unknown>
+}
+
+/**
+ * Extracts a JSON candidate string from raw cli stdout that may be wrapped in
+ * agent-specific transports:
+ *
+ *  - Claude Code's `--output-format json` returns an envelope shaped like
+ *    `{type:"result", result: string, ...}` where `result` carries the actual
+ *    model output as a string. We unwrap once.
+ *  - Many models emit JSON inside a markdown fence:  ```json\n{...}\n``` .
+ *    We strip the fence.
+ *  - Otherwise the input is assumed to already be the JSON.
+ *
+ * Returns the best candidate for JSON.parse. The caller still wraps parse in
+ * try/catch for safety.
+ */
+function extractJsonCandidate(raw: string): string {
+  const trimmed = raw.trim()
+  // 1) Try parsing the whole thing as a known envelope shape with a string
+  //    `result` field. If so, recurse on result.
+  try {
+    const env = JSON.parse(trimmed) as unknown
+    if (env && typeof env === 'object' && !Array.isArray(env)) {
+      const r = (env as { result?: unknown }).result
+      if (typeof r === 'string') {
+        return extractJsonCandidate(r)
+      }
+    }
+  } catch {
+    // not an envelope; fall through
+  }
+  // 2) Strip a markdown fence — accept ```json or bare ```
+  const fence = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+  if (fence && fence[1]) return fence[1].trim()
+  return trimmed
 }
