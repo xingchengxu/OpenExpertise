@@ -48,6 +48,11 @@ The provider field is enforced by the schema; unknown values are rejected at `oe
 - **text mode (default):** stdout is written to a single field — the first entry in `writes:`. If `writes:` is empty, the output is dropped. If `writes:` has more than one entry, the dispatcher refuses to run (ambiguous mapping).
 - **json mode:** stdout is `JSON.parse`'d. If `schema:` is set, AJV validates the result. Validation failures throw, triggering the node's `on_error` policy.
 
+> ⚠️ **V1 caveat — json mode by provider:**
+>
+> - `claude-code` translates `output_format: json` into `claude --output-format json`, which makes the CLI emit a JSON envelope.
+> - `codex` and `gemini` have no equivalent flag — `output_format: json` is honored by the parser (`JSON.parse(stdout)` + optional schema) but the CLI is not told to emit JSON. Instruct the agent inside the prompt itself (e.g. "Reply with JSON matching this schema: …"). If the CLI replies in prose, `JSON.parse` will throw and the node's `on_error` kicks in.
+
 ## Error policy interaction
 
 - Subprocess exits non-zero → throws → `on_error` applies

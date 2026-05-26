@@ -18,7 +18,11 @@ graph:
         no preamble.
 
         Topic: {{topic}}
-      reads: [topic]
+      # Node-level args populate bundle.args, which interpolatePrompt reads.
+      # Run-level args from `oe run --args '{...}'` are NOT auto-propagated
+      # into node bundles in V1; if you need that, seed state via a tool node.
+      args:
+        topic: 'In-memory caching strategies for HTTP APIs'
       writes: [summary]
       timeout_ms: 120000
     - id: critique

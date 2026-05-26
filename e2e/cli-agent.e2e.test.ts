@@ -35,6 +35,7 @@ graph:
       kind: cli-agent
       provider: claude-code
       prompt: "summarize {{topic}}"
+      args: { topic: "caching" }
       writes: [summary]
     - id: critique
       kind: cli-agent
@@ -70,12 +71,18 @@ describe('cli-agent end-to-end (mocked runner)', () => {
       experienceDir: dir,
       dispatchers,
       events: new EventBus(),
-      args: { topic: 'caching' },
+      args: {},
     })
 
     expect(result.status).toBe('success')
     expect(result.finalState.summary).toBe('a three sentence summary about caching.')
     expect(result.finalState.critique).toBe('the summary missed L1/L2 cache hierarchy.')
+
+    // Verify the summarize node received the interpolated topic (run-level args
+    // require `reads:` to flow into the prompt template).
+    const claudeCall = runner.calls.find((c) => c.spec.cmd === 'claude')
+    expect(claudeCall).toBeDefined()
+    expect(claudeCall!.spec.args.some((a) => a.includes('caching'))).toBe(true)
 
     // Verify the critique node received the interpolated summary.
     const codexCall = runner.calls.find((c) => c.spec.cmd === 'codex')
