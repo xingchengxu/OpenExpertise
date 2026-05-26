@@ -109,18 +109,20 @@ Full write-up: [`docs/comparison.md`](docs/comparison.md).
 
 ## Verified end-to-end (not just unit-tested)
 
-Every built-in example has been smoke-run against **real APIs** — not just mocks. Two real framework bugs surfaced by the live runs and both were fixed + regression-tested before this README was written.
+Every built-in example has been smoke-run against **real APIs** — not just mocks. Three real framework bugs surfaced by the live runs and all three were fixed + regression-tested before this README was written.
 
-| Provider                                                       |        Status         | Verified path                                                                            |
-| -------------------------------------------------------------- | :-------------------: | ---------------------------------------------------------------------------------------- |
-| **Anthropic** (`claude-sonnet-4-6`, `claude-opus-4-7`)         |           ✓           | Default `agent` kind. 429-aware exponential retry.                                       |
-| **OpenAI** (`gpt-4o-2024-11-20`)                               |           ✓           | `--llm openai`. Same `llm-factory`, same lazy proxy.                                     |
-| **Any OpenAI-compatible endpoint** (vLLM / Ollama / LM Studio) |           ✓           | Smoke-tested live against vLLM-served reasoning model. Set `OPENAI_BASE_URL=...` and go. |
-| **Claude Code CLI** (`claude -p`)                              |           ✓           | `cli-agent` provider. Lets the graph delegate a step to a Claude Code subprocess.        |
-| **OpenAI Codex CLI** (`codex exec`)                            |           ✓           | `cli-agent` provider. Same.                                                              |
-| **Gemini CLI** (`gemini --prompt`)                             | unit ✓ / live pending | Dispatcher implemented + tested with mocked subprocess; live smoke deferred.             |
+| Provider                                                       | Status | Verified path                                                                                                                                                      |
+| -------------------------------------------------------------- | :----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Anthropic** (`claude-sonnet-4-6`, `claude-opus-4-7`)         |   ✓    | Default `agent` kind. 429-aware exponential retry.                                                                                                                 |
+| **OpenAI** (`gpt-4o-2024-11-20`)                               |   ✓    | `--llm openai`. Same `llm-factory`, same lazy proxy.                                                                                                               |
+| **Any OpenAI-compatible endpoint** (vLLM / Ollama / LM Studio) |   ✓    | Smoke-tested live against vLLM-served reasoning model. Set `OPENAI_BASE_URL=...` and go.                                                                           |
+| **Claude Code CLI** (`claude -p`)                              |   ✓    | `cli-agent` provider. Lets the graph delegate a step to a Claude Code subprocess.                                                                                  |
+| **OpenAI Codex CLI** (`codex exec`)                            |   ✓    | `cli-agent` provider. Same.                                                                                                                                        |
+| **Gemini CLI** (`gemini --prompt`)                             |   ✓    | `cli-agent` provider. Live-tested in a 3-CLI chain: Claude summarized → Codex critiqued → **Gemini delivered the final verdict**, state flowing between all three. |
 
 **Smoke-test coverage:** all **8 example experiences** (`hello-tool`, `dataset-aggregate`, `agent-echo`, `oncall-runbook`, `issue-triage`, `review-branch`, `cli-orchestration`, `release-gates`) pass end-to-end with real APIs and real CLIs. The mocked e2e suites are the safety net; the live smokes are the proof.
+
+> **One graph, three rival AI coding CLIs, talking to each other** — Claude Code, OpenAI Codex, and Google Gemini chained sequentially with shared SQLite state. No other workflow framework does this today.
 
 ### Self-host your LLM
 
