@@ -30,3 +30,14 @@ The skill picks up the request, walks through the design (purpose, unit of work,
 | `assets/templates/*.yaml`         | Five starter templates.                                                |
 | `assets/examples/`                | Two full worked examples, with mappings to techniques.                 |
 | `scripts/validate-experience.mjs` | Standalone validator usable independently of the `oe` CLI.             |
+
+## Slash command
+
+The package also ships a Claude Code slash command at `commands/ultraexpertise.md`. After installing:
+
+```bash
+mkdir -p ~/.claude/commands
+cp packages/skill-experience-creator/commands/ultraexpertise.md ~/.claude/commands/
+```
+
+You can then type `/ultraexpertise <task description>` inside any Claude Code session and the assistant will drive `oe ultra` for you, surfacing the analysis + draft path + open questions.

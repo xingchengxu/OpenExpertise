@@ -12,6 +12,7 @@
     { "path": "../node-kinds-experience" },
     { "path": "../tui" },
     { "path": "../evolution" },
+    { "path": "../authoring" },
     { "path": "../llm-openai" }
   ],
   "include": ["src/**/*"]

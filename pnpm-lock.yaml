@@ -32,6 +32,9 @@ importers:
 
   e2e:
     dependencies:
+      '@openexpertise/authoring':
+        specifier: workspace:*
+        version: link:../packages/authoring
       '@openexpertise/cli':
         specifier: workspace:*
         version: link:../packages/cli
@@ -70,8 +73,23 @@ importers:
 
   examples/review-branch: {}
 
+  packages/authoring:
+    dependencies:
+      '@openexpertise/core':
+        specifier: workspace:*
+        version: link:../core
+      '@openexpertise/schema':
+        specifier: workspace:*
+        version: link:../schema
+      ajv:
+        specifier: ^8.17.0
+        version: 8.20.0
+
   packages/cli:
     dependencies:
+      '@openexpertise/authoring':
+        specifier: workspace:*
+        version: link:../authoring
       '@openexpertise/core':
         specifier: workspace:*
         version: link:../core
@@ -157,6 +175,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.0.0
         version: 1.29.0(zod@4.4.3)
+      '@openexpertise/authoring':
+        specifier: workspace:*
+        version: link:../authoring
       '@openexpertise/cli':
         specifier: workspace:*
         version: link:../cli

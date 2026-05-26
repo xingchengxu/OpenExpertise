@@ -54,6 +54,7 @@ The experience improved itself. State persisted across runs. The graph is a vers
 - **Evolution loop.** After every run, the advisor reads the events + state diff and proposes graph upgrades (add node, tune param, add dataset case) as `git apply`-ready diffs.
 - **Two LLM providers.** Anthropic and OpenAI, switch via `--llm` or env-var auto-detect.
 - **Two-way agentic-CLI integration.** Outbound: the `cli-agent` node kind delegates steps to Claude Code, Codex, or Gemini. Inbound: `@openexpertise/mcp-server` exposes 5 OE tools over MCP, callable from any of those CLIs. See [`docs/cli-agent.md`](docs/cli-agent.md) and [`docs/mcp-server.md`](docs/mcp-server.md).
+- **One-keyword authoring.** `oe ultra "<task>"` (or `/ultraexpertise <task>` inside Claude Code) runs an LLM agent that analyzes the task, synthesizes a complete `experience.yaml` + tool stubs + prompts, and writes a validated draft. The same LLM that authored the SOP can then evolve it after the first run. See [`docs/ultraexpertise.md`](docs/ultraexpertise.md).
 
 For a fuller comparison vs LangGraph / CrewAI / Mastra / Inngest see [`docs/comparison.md`](docs/comparison.md).
 

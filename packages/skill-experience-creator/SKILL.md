@@ -194,3 +194,7 @@ If the request is "explain how OpenExpertise works" rather than "make me one",
 walk them through `references/api-reference.md` top-to-bottom. Then offer to
 scaffold their first experience from a template so they have something
 runnable to poke at.
+
+---
+
+For a one-shot autonomous version of this workflow that bypasses the back-and-forth — the LLM analyzes the task, decides on the structure, and writes the SOP in one go — install the `/ultraexpertise` slash command from `commands/ultraexpertise.md`.
