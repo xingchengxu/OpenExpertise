@@ -1,5 +1,16 @@
 #!/usr/bin/env node
-// Placeholder — Task 9 wires StdioServerTransport.
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { createServer } from './server.js'
 
-void createServer()
+async function main() {
+  const server = createServer({})
+  const transport = new StdioServerTransport()
+  await server.connect(transport)
+  // Stay alive; transport keeps the process running until stdin closes.
+}
+
+main().catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error(`oe-mcp failed to start: ${(err as Error).message}`)
+  process.exit(1)
+})
