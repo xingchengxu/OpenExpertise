@@ -8,6 +8,7 @@ import { SkillDispatcher } from '@openexpertise/node-kinds-skill'
 import { DatasetDispatcher } from '@openexpertise/node-kinds-dataset'
 import { ExperienceDispatcher } from '@openexpertise/node-kinds-experience'
 import type { Logger } from 'pino'
+import type { LLMClient } from '@openexpertise/core'
 
 export interface ResumeOpts {
   experiencePath: string
@@ -41,20 +42,11 @@ export async function resumeCommand(opts: ResumeOpts): Promise<number> {
     if (!lazyClient) lazyClient = new AnthropicLLMClient()
     return lazyClient
   }
-  dispatchers.register(
-    new AgentDispatcher({
-      get client() {
-        return getClient()
-      },
-    } as any),
-  )
-  dispatchers.register(
-    new SkillDispatcher({
-      get client() {
-        return getClient()
-      },
-    } as any),
-  )
+  const clientProxy: LLMClient = {
+    complete: (opts) => getClient().complete(opts),
+  }
+  dispatchers.register(new AgentDispatcher({ client: clientProxy }))
+  dispatchers.register(new SkillDispatcher({ client: clientProxy }))
   dispatchers.register(new DatasetDispatcher())
   dispatchers.register(new ExperienceDispatcher({ runExperience }))
 

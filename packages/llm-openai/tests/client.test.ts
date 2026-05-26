@@ -1,12 +1,14 @@
 import { describe, it, expect } from 'vitest'
 import { OpenAILLMClient } from '../src/index.js'
 
+let lastReq: unknown
+
 function fakeSdk(scripted: unknown) {
   return {
     chat: {
       completions: {
         create: async (req: unknown) => {
-          ;(fakeSdk as any).lastReq = req
+          lastReq = req
           return scripted as never
         },
       },
@@ -31,7 +33,7 @@ describe('OpenAILLMClient — text only', () => {
     expect(result.text).toBe('hi there')
     expect(result.tool_calls).toBeUndefined()
     expect(result.usage).toEqual({ input_tokens: 7, output_tokens: 3 })
-    expect((fakeSdk as any).lastReq).toMatchObject({
+    expect(lastReq).toMatchObject({
       model: 'gpt-4o-2024-11-20',
       messages: [
         { role: 'system', content: 'be terse' },
@@ -83,7 +85,7 @@ describe('OpenAILLMClient — tool round-trip', () => {
 
     expect(result.tool_calls).toEqual([{ name: 'structured_output', input: { x: 42 } }])
     expect(result.stop_reason).toBe('tool_calls')
-    const req: any = (fakeSdk as any).lastReq
+    const req = lastReq as Record<string, unknown>
     expect(req.tools).toEqual([
       {
         type: 'function',
@@ -111,7 +113,7 @@ describe('OpenAILLMClient — tool round-trip', () => {
         { name: 'b', description: '', input_schema: {} },
       ],
     })
-    expect((fakeSdk as any).lastReq.tool_choice).toBe('required')
+    expect((lastReq as Record<string, unknown>).tool_choice).toBe('required')
   })
 })
 
@@ -165,7 +167,7 @@ describe('OpenAILLMClient — edge cases', () => {
       messages: [{ role: 'user', content: 'x' }],
       max_tokens: 100,
     })
-    expect((fakeSdk as any).lastReq.max_tokens).toBe(100)
+    expect((lastReq as Record<string, unknown>).max_tokens).toBe(100)
   })
 })
 
