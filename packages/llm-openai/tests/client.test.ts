@@ -114,3 +114,57 @@ describe('OpenAILLMClient — tool round-trip', () => {
     expect((fakeSdk as any).lastReq.tool_choice).toBe('required')
   })
 })
+
+describe('OpenAILLMClient — edge cases', () => {
+  it('returns empty result.tool_calls when no function call in response', async () => {
+    const sdk = fakeSdk({
+      choices: [{ message: { content: 'just talking', tool_calls: [] }, finish_reason: 'stop' }],
+    })
+    const client = new OpenAILLMClient({ sdkClient: sdk as never })
+    const result = await client.complete({
+      model: 'gpt-4o-2024-11-20',
+      messages: [{ role: 'user', content: 'hi' }],
+      tools: [{ name: 't', description: '', input_schema: {} }],
+    })
+    expect(result.text).toBe('just talking')
+    expect(result.tool_calls).toBeUndefined()
+    expect(result.stop_reason).toBe('stop')
+  })
+
+  it('falls back to raw string when function.arguments is not valid JSON', async () => {
+    const sdk = fakeSdk({
+      choices: [
+        {
+          message: {
+            content: null,
+            tool_calls: [
+              {
+                id: '1',
+                type: 'function',
+                function: { name: 'x', arguments: '{not valid json' },
+              },
+            ],
+          },
+        },
+      ],
+    })
+    const client = new OpenAILLMClient({ sdkClient: sdk as never })
+    const result = await client.complete({
+      model: 'gpt-4o-2024-11-20',
+      messages: [{ role: 'user', content: 'x' }],
+      tools: [{ name: 'x', description: '', input_schema: {} }],
+    })
+    expect(result.tool_calls).toEqual([{ name: 'x', input: { _raw: '{not valid json' } }])
+  })
+
+  it('honors max_tokens override', async () => {
+    const sdk = fakeSdk({ choices: [{ message: { content: 'ok' } }] })
+    const client = new OpenAILLMClient({ sdkClient: sdk as never })
+    await client.complete({
+      model: 'gpt-4o-2024-11-20',
+      messages: [{ role: 'user', content: 'x' }],
+      max_tokens: 100,
+    })
+    expect((fakeSdk as any).lastReq.max_tokens).toBe(100)
+  })
+})
