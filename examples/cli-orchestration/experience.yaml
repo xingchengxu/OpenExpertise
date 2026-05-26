@@ -18,6 +18,7 @@ graph:
         no preamble.
 
         Topic: {{topic}}
+      reads: [topic]
       writes: [summary]
       timeout_ms: 120000
     - id: critique
@@ -28,6 +29,7 @@ graph:
         or wrong. Just the critique, no preamble.
 
         Summary: {{summary}}
+      reads: [summary]
       writes: [critique]
       timeout_ms: 120000
   edges:
