@@ -79,6 +79,13 @@
           }
         }
       }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "concurrency": { "type": "integer", "minimum": 1 }
+      }
     }
   },
   "$defs": {

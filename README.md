@@ -108,6 +108,14 @@ Each ships with a fixture and a mocked-LLM e2e test in `e2e/` — no real API or
 
 `oe run --tui` opens an ink-based dashboard showing each node's status, current activity (e.g. `calling claude-sonnet-4-6`, `spawning codex`, `parsing JSON output`), per-node accumulated tokens, and a header line with the run-total tokens. Updates live as the run progresses.
 
+### Concurrency
+
+`oe run --concurrency <n>` runs independent DAG nodes (and `for_each` iterations whose `concurrency: N` is set) in parallel up to the configured ceiling. Defaults to 1 (sequential). You can also set `runtime.concurrency: N` at the top of `experience.yaml` to make a flow parallel-by-default.
+
+LLM clients (Anthropic + OpenAI) retry up to 4 times on HTTP 429 (`rate_limit_error`) with exponential backoff, configurable via constructor opts. Non-429 errors are not retried.
+
+`oe inspect <run-id>` sorts events by `ts` so a parallel run reads in chronological order.
+
 ## Authoring with Claude Code
 
 Install the `experience-creator` skill:

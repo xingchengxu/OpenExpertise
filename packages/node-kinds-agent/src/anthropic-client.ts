@@ -6,16 +6,24 @@ import type {
   LLMToolCall,
 } from '@openexpertise/core'
 
+export interface AnthropicRetryOpts {
+  max_attempts?: number // default 4
+  base_ms?: number // default 1000
+}
+
 export interface AnthropicLLMClientOpts {
   apiKey?: string
   // Inject an alternative SDK client (used in tests to avoid network).
   sdkClient?: Pick<Anthropic, 'messages'>
+  retry?: AnthropicRetryOpts
 }
 
 export class AnthropicLLMClient implements LLMClient {
   private readonly sdk: Pick<Anthropic, 'messages'>
+  private readonly retryOpts: AnthropicRetryOpts
 
   constructor(opts: AnthropicLLMClientOpts = {}) {
+    this.retryOpts = opts.retry ?? {}
     if (opts.sdkClient) {
       this.sdk = opts.sdkClient
       return
@@ -46,7 +54,11 @@ export class AnthropicLLMClient implements LLMClient {
         : {}),
     }
 
-    const response = await this.sdk.messages.create(request)
+    const retry = {
+      max_attempts: this.retryOpts.max_attempts ?? 4,
+      base_ms: this.retryOpts.base_ms ?? 1000,
+    }
+    const response = await this.callWithRetry(retry, () => this.sdk.messages.create(request))
 
     let text = ''
     const tool_calls: LLMToolCall[] = []
@@ -65,5 +77,34 @@ export class AnthropicLLMClient implements LLMClient {
     }
     if (response.stop_reason) result.stop_reason = response.stop_reason
     return result
+  }
+
+  private async callWithRetry<T>(
+    retry: { max_attempts: number; base_ms: number },
+    fn: () => Promise<T>,
+  ): Promise<T> {
+    let lastErr: unknown
+    for (let attempt = 1; attempt <= retry.max_attempts; attempt++) {
+      try {
+        return await fn()
+      } catch (err) {
+        lastErr = err
+        if (!this.is429(err) || attempt === retry.max_attempts) {
+          throw err
+        }
+        const wait = retry.base_ms * Math.pow(2, attempt - 1)
+        await new Promise((r) => setTimeout(r, wait))
+      }
+    }
+    throw lastErr
+  }
+
+  private is429(err: unknown): boolean {
+    if (err && typeof err === 'object') {
+      const e = err as { status?: number; name?: string }
+      if (e.status === 429) return true
+      if (e.name === 'RateLimitError') return true
+    }
+    return false
   }
 }

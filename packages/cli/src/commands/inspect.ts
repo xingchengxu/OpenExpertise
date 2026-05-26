@@ -16,8 +16,17 @@ export async function inspectCommand(opts: InspectOpts): Promise<number> {
     return 1
   }
   const lines = readFileSync(logPath, 'utf8').trim().split('\n')
-  for (const line of lines) {
-    const event = JSON.parse(line) as { type: string }
+  const events: Array<{ type: string; ts?: string; [k: string]: unknown }> = lines
+    .filter((l) => l.length > 0)
+    .map((l) => JSON.parse(l))
+  // Stable sort by ts ascending. Events without a ts go to the end.
+  events.sort((a, b) => {
+    if (!a.ts && !b.ts) return 0
+    if (!a.ts) return 1
+    if (!b.ts) return -1
+    return a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0
+  })
+  for (const event of events) {
     opts.logger.info(event, event.type)
   }
   return 0

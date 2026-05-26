@@ -1,9 +1,15 @@
 import OpenAI from 'openai'
 import type { LLMClient, LLMCompleteOpts, LLMCompleteResult, LLMMessage } from '@openexpertise/core'
 
+export interface OpenAIRetryOpts {
+  max_attempts?: number // default 4
+  base_ms?: number // default 1000
+}
+
 export interface OpenAILLMClientOpts {
   apiKey?: string
   sdkClient?: Pick<OpenAI, 'chat'>
+  retry?: OpenAIRetryOpts
 }
 
 type ChatMessage =
@@ -13,8 +19,10 @@ type ChatMessage =
 
 export class OpenAILLMClient implements LLMClient {
   private readonly sdk: Pick<OpenAI, 'chat'>
+  private readonly retryOpts: OpenAIRetryOpts
 
   constructor(opts: OpenAILLMClientOpts = {}) {
+    this.retryOpts = opts.retry ?? {}
     if (opts.sdkClient) {
       this.sdk = opts.sdkClient
       return
@@ -54,7 +62,13 @@ export class OpenAILLMClient implements LLMClient {
           : ('required' as const)
     }
 
-    const response = (await this.sdk.chat.completions.create(request as never)) as {
+    const retry = {
+      max_attempts: this.retryOpts.max_attempts ?? 4,
+      base_ms: this.retryOpts.base_ms ?? 1000,
+    }
+    const response = (await this.callWithRetry(retry, () =>
+      this.sdk.chat.completions.create(request as never),
+    )) as {
       choices?: Array<{
         message?: {
           content?: string | null
@@ -105,5 +119,34 @@ export class OpenAILLMClient implements LLMClient {
     } catch {
       return { _raw: raw }
     }
+  }
+
+  private async callWithRetry<T>(
+    retry: { max_attempts: number; base_ms: number },
+    fn: () => Promise<T>,
+  ): Promise<T> {
+    let lastErr: unknown
+    for (let attempt = 1; attempt <= retry.max_attempts; attempt++) {
+      try {
+        return await fn()
+      } catch (err) {
+        lastErr = err
+        if (!this.is429(err) || attempt === retry.max_attempts) {
+          throw err
+        }
+        const wait = retry.base_ms * Math.pow(2, attempt - 1)
+        await new Promise((r) => setTimeout(r, wait))
+      }
+    }
+    throw lastErr
+  }
+
+  private is429(err: unknown): boolean {
+    if (err && typeof err === 'object') {
+      const e = err as { status?: number; name?: string }
+      if (e.status === 429) return true
+      if (e.name === 'RateLimitError') return true
+    }
+    return false
   }
 }

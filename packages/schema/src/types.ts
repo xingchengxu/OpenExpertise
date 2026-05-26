@@ -8,7 +8,7 @@ export type MergeStrategy = 'array_append' | 'set_once' | 'last_wins'
 
 export interface ForEachClause {
   source: string // a JSONPath-like expression that resolves to an array
-  concurrency?: number // V1: parsed but ignored; runtime is sequential
+  concurrency?: number // V2: honored via runWithLimit; default 1 (sequential)
 }
 
 export interface PipelineGroupSpec {
@@ -167,6 +167,10 @@ export interface GraphSpec {
   loops?: LoopSpec[]
 }
 
+export interface RuntimeSpec {
+  concurrency?: number // node-level concurrency ceiling; default 1
+}
+
 export interface ExperienceSpec {
   name: string
   description?: string
@@ -174,4 +178,5 @@ export interface ExperienceSpec {
   state: StateSpec
   phases?: PhaseSpec[]
   graph: GraphSpec
+  runtime?: RuntimeSpec
 }

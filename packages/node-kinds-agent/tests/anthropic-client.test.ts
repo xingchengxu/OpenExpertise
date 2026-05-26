@@ -60,3 +60,80 @@ describe('AnthropicLLMClient.complete', () => {
     if (prev) process.env.ANTHROPIC_API_KEY = prev
   })
 })
+
+describe('AnthropicLLMClient — 429 retry', () => {
+  it('retries on 429 and succeeds after backoff', async () => {
+    let callCount = 0
+    const sdkClient = {
+      messages: {
+        create: async () => {
+          callCount++
+          if (callCount === 1) {
+            const err: Error & { status?: number } = new Error('rate limited')
+            err.status = 429
+            throw err
+          }
+          return {
+            content: [{ type: 'text', text: 'ok' }],
+            usage: { input_tokens: 1, output_tokens: 1 },
+            stop_reason: 'end_turn',
+          } as never
+        },
+      },
+    }
+    const client = new AnthropicLLMClient({
+      sdkClient: sdkClient as never,
+      retry: { max_attempts: 3, base_ms: 1 },
+    })
+    const result = await client.complete({
+      model: 'm',
+      messages: [{ role: 'user', content: 'x' }],
+    })
+    expect(callCount).toBe(2)
+    expect(result.text).toBe('ok')
+  })
+
+  it('throws after exhausting retries', async () => {
+    let callCount = 0
+    const sdkClient = {
+      messages: {
+        create: async () => {
+          callCount++
+          const err: Error & { status?: number } = new Error('rate limited')
+          err.status = 429
+          throw err
+        },
+      },
+    }
+    const client = new AnthropicLLMClient({
+      sdkClient: sdkClient as never,
+      retry: { max_attempts: 3, base_ms: 1 },
+    })
+    await expect(
+      client.complete({ model: 'm', messages: [{ role: 'user', content: 'x' }] }),
+    ).rejects.toThrow(/rate limited|429/)
+    expect(callCount).toBe(3)
+  })
+
+  it('does not retry on non-429 errors', async () => {
+    let callCount = 0
+    const sdkClient = {
+      messages: {
+        create: async () => {
+          callCount++
+          const err: Error & { status?: number } = new Error('internal')
+          err.status = 500
+          throw err
+        },
+      },
+    }
+    const client = new AnthropicLLMClient({
+      sdkClient: sdkClient as never,
+      retry: { max_attempts: 3, base_ms: 1 },
+    })
+    await expect(
+      client.complete({ model: 'm', messages: [{ role: 'user', content: 'x' }] }),
+    ).rejects.toThrow(/internal/)
+    expect(callCount).toBe(1)
+  })
+})

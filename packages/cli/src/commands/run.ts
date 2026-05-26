@@ -21,6 +21,7 @@ export interface RunOpts {
   tui: boolean
   evolve: boolean
   llm?: string
+  concurrency?: number
 }
 
 export async function runCommand(opts: RunOpts): Promise<number> {
@@ -81,6 +82,7 @@ export async function runCommand(opts: RunOpts): Promise<number> {
       dispatchers,
       events,
       args: opts.args,
+      ...(opts.concurrency !== undefined ? { concurrency: opts.concurrency } : {}),
     })
     // Give the TUI a tick to render the final state, then unmount.
     await new Promise((r) => setTimeout(r, 100))
@@ -90,7 +92,14 @@ export async function runCommand(opts: RunOpts): Promise<number> {
 
   events.subscribe((e) => opts.logger.info(e, e.type))
 
-  const result = await runExperience({ spec, experienceDir, dispatchers, events, args: opts.args })
+  const result = await runExperience({
+    spec,
+    experienceDir,
+    dispatchers,
+    events,
+    args: opts.args,
+    ...(opts.concurrency !== undefined ? { concurrency: opts.concurrency } : {}),
+  })
   opts.logger.info(
     { runId: result.runId, status: result.status, finalState: result.finalState },
     'run complete',

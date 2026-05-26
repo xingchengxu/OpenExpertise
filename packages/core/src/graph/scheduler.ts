@@ -11,6 +11,31 @@ import { computeCacheKey } from '../cache/key.js'
 
 const RUNTIME_VERSION = '0.1.0' // bump to invalidate caches on breaking changes
 
+export async function runWithLimit<T>(
+  items: T[],
+  limit: number,
+  fn: (item: T, index: number) => Promise<void>,
+): Promise<void> {
+  if (limit <= 1 || items.length <= 1) {
+    for (let i = 0; i < items.length; i++) {
+      await fn(items[i]!, i)
+    }
+    return
+  }
+  let nextIdx = 0
+  const startWorker = async (): Promise<void> => {
+    while (true) {
+      const idx = nextIdx++
+      if (idx >= items.length) return
+      await fn(items[idx]!, idx)
+    }
+  }
+  const n = Math.min(limit, items.length)
+  const workers: Promise<void>[] = []
+  for (let i = 0; i < n; i++) workers.push(startWorker())
+  await Promise.all(workers)
+}
+
 export interface NodeRunResult {
   nodeId: string
   status: 'success' | 'failed' | 'skipped'
@@ -20,8 +45,8 @@ export interface NodeRunResult {
 
 export class SequentialScheduler {
   constructor(
-    private readonly dag: Dag,
-    private readonly ctx: RunContext,
+    protected readonly dag: Dag,
+    protected readonly ctx: RunContext,
   ) {}
 
   async run(): Promise<{ status: 'success' | 'failed' | 'partial'; results: NodeRunResult[] }> {
@@ -75,31 +100,60 @@ export class SequentialScheduler {
         }
       }
 
-      const forEach = (node.spec as { for_each?: { source: string } }).for_each
-      if (forEach) {
-        const fullState = this.ctx.store.snapshot()
-        const sourceVal = resolveExpression(forEach.source, fullState)
-        const items: unknown[] = Array.isArray(sourceVal) ? sourceVal : []
-        let anyFanFailed = false
-        for (let idx = 0; idx < items.length; idx++) {
-          await this.runNodeOnce(
-            node,
-            { $item: items[idx], $index: idx },
-            skipped,
-            results,
-            edgeBuffer,
-          )
-          const last = results[results.length - 1]
-          if (last?.status === 'failed') anyFanFailed = true
-        }
-        if (anyFanFailed) anyFailed = true
-        continue
-      }
-
-      await this.runNodeOnce(node, {}, skipped, results, edgeBuffer)
-      const last = results[results.length - 1]
-      if (last?.status === 'failed') anyFailed = true
+      const { anyFanFailed } = await this.runSingleNodeWithForEach(
+        node,
+        edgeBuffer,
+        skipped,
+        results,
+      )
+      if (anyFanFailed) anyFailed = true
     }
+
+    const tailResult = await this.runPipelineAndLoopPasses(edgeBuffer, skipped, results)
+    if (tailResult.anyFailed) anyFailed = true
+
+    const status = anyFailed
+      ? results.every((r) => r.status === 'failed' || r.status === 'skipped')
+        ? 'failed'
+        : 'partial'
+      : 'success'
+    return { status, results }
+  }
+
+  protected async runSingleNodeWithForEach(
+    node: DagNode,
+    edgeBuffer: Map<string, Record<string, unknown>>,
+    skipped: Set<string>,
+    results: NodeRunResult[],
+  ): Promise<{ anyFanFailed: boolean }> {
+    const forEach = (node.spec as { for_each?: { source: string; concurrency?: number } }).for_each
+    if (forEach) {
+      const fullState = this.ctx.store.snapshot()
+      const sourceVal = resolveExpression(forEach.source, fullState)
+      const items: unknown[] = Array.isArray(sourceVal) ? sourceVal : []
+      const concurrency = forEach.concurrency ?? 1
+      const resultsBefore = results.length
+      await runWithLimit(items, concurrency, async (item, idx) => {
+        await this.runNodeOnce(node, { $item: item, $index: idx }, skipped, results, edgeBuffer)
+      })
+      // After all iterations, check whether any of the results added by THIS
+      // for_each saw 'failed'. (In sequential mode the last result is for this
+      // node; in parallel mode the order is not guaranteed.)
+      const anyFanFailed = results.slice(resultsBefore).some((r) => r.status === 'failed')
+      return { anyFanFailed }
+    }
+
+    await this.runNodeOnce(node, {}, skipped, results, edgeBuffer)
+    const last = results[results.length - 1]
+    return { anyFanFailed: last?.status === 'failed' }
+  }
+
+  protected async runPipelineAndLoopPasses(
+    edgeBuffer: Map<string, Record<string, unknown>>,
+    skipped: Set<string>,
+    results: NodeRunResult[],
+  ): Promise<{ anyFailed: boolean }> {
+    let anyFailed = false
 
     // Pipeline groups: each pipeline reads its `items:` source from state and
     // runs each item through all stages. Within a pipeline, each item flows
@@ -181,15 +235,10 @@ export class SequentialScheduler {
       }
     }
 
-    const status = anyFailed
-      ? results.every((r) => r.status === 'failed' || r.status === 'skipped')
-        ? 'failed'
-        : 'partial'
-      : 'success'
-    return { status, results }
+    return { anyFailed }
   }
 
-  private async runNodeOnce(
+  protected async runNodeOnce(
     node: DagNode,
     extraArgs: Record<string, unknown>,
     skipped: Set<string>,
@@ -334,7 +383,7 @@ export class SequentialScheduler {
     }
   }
 
-  private assembleBundle(
+  protected assembleBundle(
     node: DagNode,
     edgeInputs: Record<string, unknown>,
     extraArgs: Record<string, unknown> = {},
