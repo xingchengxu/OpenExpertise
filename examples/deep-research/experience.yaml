@@ -1,0 +1,184 @@
+name: deep-research
+description: Multi-vendor deep research — Claude Code does academic/general search, Gemini does current-events/news search, both feed a synthesis agent that produces a cited cross-referenced summary.
+version: 0.1.0
+
+state:
+  schema:
+    question: { type: string }
+    clarified_question: { type: string }
+    research_plan: { type: object }
+    claude_subqs: { type: array, items: { type: object } }
+    gemini_subqs: { type: array, items: { type: object } }
+    raw_findings: { type: array, items: { type: object }, merge: array_append }
+    citations: { type: array, items: { type: string } }
+    cross_referenced: { type: object }
+
+phases:
+  - { id: scoping }
+  - { id: search }
+  - { id: synthesis }
+
+graph:
+  nodes:
+    - id: load_question
+      kind: tool
+      phase: scoping
+      impl: ./tools/load_question.mjs
+      writes: [question]
+
+    - id: clarify
+      kind: agent
+      phase: scoping
+      prompt: ./prompts/clarify.md
+      reads: [question]
+      schema:
+        type: object
+        required: [clarified_question]
+        properties:
+          clarified_question: { type: string }
+          assumptions: { type: array, items: { type: string } }
+      writes: [clarified_question]
+
+    - id: decompose
+      kind: agent
+      phase: scoping
+      prompt: ./prompts/decompose.md
+      reads: [clarified_question]
+      schema:
+        type: object
+        required: [research_plan, claude_subqs, gemini_subqs]
+        properties:
+          research_plan:
+            type: object
+            properties:
+              rationale: { type: string }
+              parallelism_strategy: { type: string }
+          claude_subqs:
+            type: array
+            items:
+              type: object
+              required: [id, text]
+              properties:
+                id: { type: string }
+                text: { type: string }
+                rationale: { type: string }
+          gemini_subqs:
+            type: array
+            items:
+              type: object
+              required: [id, text]
+              properties:
+                id: { type: string }
+                text: { type: string }
+                rationale: { type: string }
+      writes: [research_plan, claude_subqs, gemini_subqs]
+
+    - id: search_claude
+      kind: cli-agent
+      provider: claude-code
+      phase: search
+      prompt: |
+        You are researching sub-question "{{$item.id}}" using the WebSearch tool. Be thorough — at least 3 high-quality sources.
+
+        Sub-question: {{$item.text}}
+        Rationale: {{$item.rationale}}
+
+        For each finding, capture the exact source URL. Return JSON matching this schema:
+
+        {"findings": [{"sub_question_id": "{{$item.id}}", "claim": "...", "evidence": "...", "url": "..."}]}
+
+        Do not include findings without a URL.
+      for_each: { source: $.claude_subqs, concurrency: 2 }
+      reads: [claude_subqs]
+      output_format: json
+      schema:
+        type: object
+        required: [findings]
+        properties:
+          findings:
+            type: array
+            items:
+              type: object
+              required: [sub_question_id, claim, evidence, url]
+              properties:
+                sub_question_id: { type: string }
+                claim: { type: string }
+                evidence: { type: string }
+                url: { type: string }
+      writes: [raw_findings]
+      timeout_ms: 300000
+
+    - id: search_gemini
+      kind: cli-agent
+      provider: gemini
+      phase: search
+      prompt: |
+        Use Google Search to research this sub-question. Prioritize recent (last 12 months) and authoritative sources.
+
+        Sub-question: {{$item.text}}
+        Rationale: {{$item.rationale}}
+
+        Return JSON: {"findings": [{"sub_question_id": "{{$item.id}}", "claim": "...", "evidence": "...", "url": "..."}]}
+
+        Every finding must have a URL.
+      for_each: { source: $.gemini_subqs, concurrency: 2 }
+      reads: [gemini_subqs]
+      output_format: json
+      schema:
+        type: object
+        required: [findings]
+        properties:
+          findings:
+            type: array
+            items:
+              type: object
+              required: [sub_question_id, claim, evidence, url]
+              properties:
+                sub_question_id: { type: string }
+                claim: { type: string }
+                evidence: { type: string }
+                url: { type: string }
+      writes: [raw_findings]
+      timeout_ms: 300000
+
+    - id: extract_citations
+      kind: tool
+      phase: synthesis
+      impl: ./tools/extract_citations.mjs
+      reads: [raw_findings]
+      writes: [citations]
+
+    - id: cross_reference
+      kind: agent
+      phase: synthesis
+      prompt: ./prompts/cross_reference.md
+      reads: [clarified_question, raw_findings, citations]
+      schema:
+        type: object
+        required: [cross_referenced]
+        properties:
+          cross_referenced:
+            type: object
+            required: [executive_summary, key_findings, open_questions]
+            properties:
+              executive_summary: { type: string }
+              key_findings:
+                type: array
+                items:
+                  type: object
+                  required: [claim, supporting_urls]
+                  properties:
+                    claim: { type: string }
+                    supporting_urls: { type: array, items: { type: string } }
+                    conflicts: { type: string }
+              open_questions: { type: array, items: { type: string } }
+      writes: [cross_referenced]
+
+  edges:
+    - { from: load_question, to: clarify }
+    - { from: clarify, to: decompose }
+    - { from: decompose, to: search_claude }
+    - { from: decompose, to: search_gemini }
+    - { from: search_claude, to: extract_citations }
+    - { from: search_gemini, to: extract_citations }
+    - { from: extract_citations, to: cross_reference }

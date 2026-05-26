@@ -1,0 +1,3 @@
+{
+  "question": "What are the practical trade-offs between in-memory caching and Redis for HTTP API response caching in 2026, and when does each become the wrong choice?"
+}
