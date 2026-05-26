@@ -55,9 +55,7 @@ class ScriptedLLM implements LLMClient {
     if (prompt.includes('most likely owner')) {
       return {
         text: '',
-        tool_calls: [
-          { name: 'structured_output', input: { suggested_owner: '@security-team' } },
-        ],
+        tool_calls: [{ name: 'structured_output', input: { suggested_owner: '@security-team' } }],
       }
     }
     return { text: 'unknown prompt' }

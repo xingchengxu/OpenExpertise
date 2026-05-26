@@ -71,6 +71,12 @@ importers:
 
   examples/hello-tool: {}
 
+  examples/issue-triage: {}
+
+  examples/oncall-runbook: {}
+
+  examples/release-gates: {}
+
   examples/review-branch: {}
 
   packages/authoring:

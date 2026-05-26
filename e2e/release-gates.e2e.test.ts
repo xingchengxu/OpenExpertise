@@ -99,7 +99,10 @@ describe('release-gates end-to-end (mocked)', () => {
     // security_findings: scripted runner returned one high-severity finding
     expect((result.finalState.security_findings as unknown[]).length).toBe(1)
     // Final decision: not ready, with blocking issues
-    const decision = result.finalState.decision as { ready_to_release: boolean; blocking_issues: string[] }
+    const decision = result.finalState.decision as {
+      ready_to_release: boolean
+      blocking_issues: string[]
+    }
     expect(decision.ready_to_release).toBe(false)
     expect(decision.blocking_issues.length).toBeGreaterThan(0)
   })

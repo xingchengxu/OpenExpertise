@@ -26,9 +26,7 @@ class ScriptedLLM implements LLMClient {
           {
             name: 'structured_output',
             input: {
-              findings: [
-                { title: 'p99 latency spike', evidence: 'monitor #7421', impact: 'high' },
-              ],
+              findings: [{ title: 'p99 latency spike', evidence: 'monitor #7421', impact: 'high' }],
             },
           },
         ],
