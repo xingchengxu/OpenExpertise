@@ -69,6 +69,8 @@ importers:
 
   examples/dataset-aggregate: {}
 
+  examples/deep-research: {}
+
   examples/hello-tool: {}
 
   examples/issue-triage: {}
@@ -78,6 +80,8 @@ importers:
   examples/release-gates: {}
 
   examples/review-branch: {}
+
+  examples/systematic-debugging: {}
 
   examples/tri-cli-orchestration: {}
 

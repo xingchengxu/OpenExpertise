@@ -4,7 +4,7 @@
 
 ### **AI-era Makefile.** Codify expert workflows as runnable, evolving graphs.
 
-[![tests](https://img.shields.io/badge/tests-225%20passing-brightgreen)](#) [![typecheck](https://img.shields.io/badge/typecheck-strict-blue)](#) [![packages](https://img.shields.io/badge/packages-14-blueviolet)](#) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![tests](https://img.shields.io/badge/tests-227%20passing-brightgreen)](#) [![typecheck](https://img.shields.io/badge/typecheck-strict-blue)](#) [![packages](https://img.shields.io/badge/packages-14-blueviolet)](#) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 [**60-second demo**](#60-second-demo) · [**Why**](#why-openexpertise) · [**Examples**](#built-in-examples) · [**Compare**](#vs-the-alternatives) · [**Docs**](#docs)
 
@@ -202,17 +202,19 @@ When npm-published: `npm i -g @openexpertise/cli` → `oe run examples/hello-too
 
 > Pick the one closest to your use case. Each ships with fixtures and a mocked-LLM e2e test in `e2e/` — no real API key required to validate the structure.
 
-| Example                                                      | What it shows                                                              | Nodes                          |
-| ------------------------------------------------------------ | -------------------------------------------------------------------------- | ------------------------------ |
-| [`hello-tool`](examples/hello-tool/)                         | Smallest possible flow. No LLM.                                            | `tool`                         |
-| [`dataset-aggregate`](examples/dataset-aggregate/)           | Load CSV → aggregate.                                                      | `dataset` + `tool`             |
-| [`agent-echo`](examples/agent-echo/)                         | Single agent with structured output.                                       | `agent`                        |
-| [`review-branch`](examples/review-branch/) ★                 | The hero demo. Multi-dim review + verifier + score + evolution.            | `tool` + `agent` ×3            |
-| [`oncall-runbook`](examples/oncall-runbook/)                 | Investigate an incident across 3 dimensions via `for_each` fan-out.        | `tool` + `agent`               |
-| [`issue-triage`](examples/issue-triage/)                     | Classify → search dupes → conditional dedup → route. Shows `when:` edges.  | `tool` + `agent`               |
-| [`release-gates`](examples/release-gates/)                   | License + changelog + coverage + Claude-Code security scan → release gate. | `tool` + `cli-agent` + `agent` |
-| [`cli-orchestration`](examples/cli-orchestration/)           | Claude Code summarizes; Codex critiques. Two providers in one flow.        | `cli-agent` ×2                 |
-| [`tri-cli-orchestration`](examples/tri-cli-orchestration/) ★ | Claude → Codex → Gemini in one DAG. The headline cross-vendor demo.        | `cli-agent` ×3                 |
+| Example                                                      | What it shows                                                                                                      | Nodes                             |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | --------------------------------- |
+| [`hello-tool`](examples/hello-tool/)                         | Smallest possible flow. No LLM.                                                                                    | `tool`                            |
+| [`dataset-aggregate`](examples/dataset-aggregate/)           | Load CSV → aggregate.                                                                                              | `dataset` + `tool`                |
+| [`agent-echo`](examples/agent-echo/)                         | Single agent with structured output.                                                                               | `agent`                           |
+| [`review-branch`](examples/review-branch/) ★                 | The hero demo. Multi-dim review + verifier + score + evolution.                                                    | `tool` + `agent` ×3               |
+| [`oncall-runbook`](examples/oncall-runbook/)                 | Investigate an incident across 3 dimensions via `for_each` fan-out.                                                | `tool` + `agent`                  |
+| [`issue-triage`](examples/issue-triage/)                     | Classify → search dupes → conditional dedup → route. Shows `when:` edges.                                          | `tool` + `agent`                  |
+| [`release-gates`](examples/release-gates/)                   | License + changelog + coverage + Claude-Code security scan → release gate.                                         | `tool` + `cli-agent` + `agent`    |
+| [`cli-orchestration`](examples/cli-orchestration/)           | Claude Code summarizes; Codex critiques. Two providers in one flow.                                                | `cli-agent` ×2                    |
+| [`tri-cli-orchestration`](examples/tri-cli-orchestration/) ★ | Claude → Codex → Gemini in one DAG. The headline cross-vendor demo.                                                | `cli-agent` ×3                    |
+| [`deep-research`](examples/deep-research/)                   | Multi-vendor research: Claude Code WebSearch + Gemini Google Search → cited synthesis.                             | `tool` + `agent` + `cli-agent` ×2 |
+| [`systematic-debugging`](examples/systematic-debugging/)     | The superpowers `systematic-debugging` skill as a YAML flow. Hypothesize → verify → fix via Claude Code → re-test. | `tool` ×2 + `agent` + `cli-agent` |
 
 ---
 

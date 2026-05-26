@@ -442,3 +442,45 @@ Three real bugs surfaced when running the examples against actual provider APIs 
 
 1. Plan E — Launch Readiness (community docs + CI matrix + CHANGELOG + launch checklist).
 2. After Plan E: `npm publish` all 14 packages + tag v0.1.0 + write launch post.
+
+---
+
+## Plan F — Real-world examples (2026-05-26)
+
+Branch: `feat/real-world-examples` (off `main`)
+Plan: `docs/superpowers/plans/2026-05-26-real-world-examples.md`
+
+### What shipped
+
+Two flagship examples that demonstrate OE running real cognitive work, not toy DAGs:
+
+| Example | Highlights |
+|---|---|
+| `deep-research` | 7-node pipeline: clarify → decompose → parallel search (Claude Code WebSearch + Gemini Google Search) → extract_citations → cross_reference. Multi-vendor + `for_each.concurrency: 2` for parallel iterations. The only OSS workflow tool that orchestrates rival LLM CLIs' search builtins in one DAG. |
+| `systematic-debugging` | 6-node pipeline mapping the superpowers `systematic-debugging` skill into YAML. `capture_symptoms` (tool) → `hypothesize` (agent) → `verify_hypothesis` (cli-agent for_each) → `localize` (agent) → `propose_fix` (cli-agent, edits files) → `verify_fix` (tool re-runs the failing test). Ships with a self-contained buggy_repo fixture (off-by-one in validateUserId) that's debuggable end-to-end. |
+
+### Tests
+
+| File | Coverage |
+|---|---|
+| `e2e/deep-research.e2e.test.ts` | Scripted LLM + scripted cli-agent runner — full pipeline produces clarified_question + 2 raw_findings + 2 citations + cross_referenced summary. |
+| `e2e/systematic-debugging.e2e.test.ts` | Scripted LLM + scripted cli-agent runner; verify_fix runs for real against the fixture and correctly reports `failed` (the mock didn't actually edit). |
+
+Test count: 225 baseline → 227 passing (+2 e2e).
+
+### Positioning
+
+These two examples complete the "real cognitive workflows" story:
+
+- The other 9 examples teach a specific OE primitive (for_each, when:, cli-agent, etc.).
+- These two are END-USER pitches: "I have a research question / a failing test — what does OE do for me?"
+
+`deep-research` is the multi-vendor headline beyond `tri-cli-orchestration` — same three-CLI palette but doing actual research with shared state and citations. `systematic-debugging` is the bridge between the superpowers ecosystem and OE: anyone using superpowers sees how OE adds persistence + replay + evolution on top.
+
+### Next concrete actions
+
+1. Merge `feat/real-world-examples` into `main`.
+2. Optional manual smoke against real CLIs:
+   - `node packages/cli/dist/bin.js run examples/deep-research --tui --concurrency 4` with a real question
+   - `node packages/cli/dist/bin.js run examples/systematic-debugging --tui` against the bundled buggy_repo
+3. After merge: project has **11 examples**, ready for the v0.1.0 launch.
