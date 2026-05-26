@@ -400,7 +400,7 @@ This project is built largely via [Claude Code](https://claude.com/claude-code)-
 
 ## License
 
-[MIT](LICENSE) © 2026 OpenClaw Foundation.
+[MIT](LICENSE) © 2026 OpenExpertise.
 
 ---
 
