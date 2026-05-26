@@ -1,0 +1,4 @@
+[
+  { "name": "lodash", "version": "4.17.21", "license": "MIT" },
+  { "name": "tslib", "version": "2.6.0", "license": "0BSD" }
+]

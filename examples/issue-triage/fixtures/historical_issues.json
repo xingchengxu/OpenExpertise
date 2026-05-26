@@ -1,0 +1,20 @@
+[
+  {
+    "number": 412,
+    "title": "Login button stuck on slow connections",
+    "resolved": true,
+    "closed_at": "2025-08-12T00:00:00Z"
+  },
+  {
+    "number": 901,
+    "title": "Spinner does not stop after error response",
+    "resolved": true,
+    "closed_at": "2026-01-04T00:00:00Z"
+  },
+  {
+    "number": 502,
+    "title": "Unrelated documentation typo",
+    "resolved": true,
+    "closed_at": "2025-11-01T00:00:00Z"
+  }
+]

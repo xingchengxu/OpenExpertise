@@ -1,0 +1,7 @@
+{
+  "number": 1287,
+  "title": "Login button hangs after typing wrong password",
+  "body": "Steps:\n1. Open /login\n2. Enter known-bad password\n3. Click Login\n\nExpected: error message immediately.\nActual: button spins for ~30s then times out.",
+  "author": "external-user",
+  "created_at": "2026-05-26T09:00:00Z"
+}

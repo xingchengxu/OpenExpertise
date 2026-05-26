@@ -1,0 +1,12 @@
+{
+  "id": "INC-2026-05-26-001",
+  "title": "API 500 errors spiking on /v2/users",
+  "severity": "P2",
+  "started_at": "2026-05-26T14:32:00Z",
+  "service": "user-api",
+  "alert_count": 12,
+  "annotations": [
+    "PagerDuty alert from Datadog monitor #7421",
+    "p99 latency 1240ms → 4880ms over 8 minutes"
+  ]
+}

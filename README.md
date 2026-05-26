@@ -80,6 +80,16 @@ node packages/cli/dist/bin.js run examples/dataset-aggregate
 # → finalState: { rows: [...], total: 60 }
 ```
 
+### More examples
+
+| Example                                      | Demonstrates                                                        |
+| -------------------------------------------- | ------------------------------------------------------------------- |
+| [`oncall-runbook`](examples/oncall-runbook/) | `tool → agent` fan-out via `for_each` over investigation dimensions |
+| [`issue-triage`](examples/issue-triage/)     | `when:` conditional edges, multi-agent label + owner routing        |
+| [`release-gates`](examples/release-gates/)   | Mixing `tool` + `cli-agent` (claude-code) + `agent` in one graph    |
+
+Each ships with a fixture and a mocked-LLM e2e test in `e2e/` — no real API or CLI required to verify the structure.
+
 ## All CLI commands
 
 | Command                | Purpose                                           |

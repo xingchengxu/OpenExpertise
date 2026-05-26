@@ -1,0 +1,79 @@
+name: release-gates
+description: Pre-release checks — license compliance, changelog breaking-change scan, test-coverage delta, and a Claude Code security review — combined into a release/no-release recommendation.
+version: 0.1.0
+
+state:
+  schema:
+    license_issues: { type: array, items: { type: object }, merge: array_append }
+    breaking_changes: { type: array, items: { type: object }, merge: array_append }
+    coverage_delta: { type: object }
+    security_findings: { type: array, items: { type: object }, merge: array_append }
+    decision: { type: object }
+
+phases:
+  - { id: scan }
+  - { id: gate }
+
+graph:
+  nodes:
+    - id: license_check
+      kind: tool
+      phase: scan
+      impl: ./tools/license_check.mjs
+      writes: [license_issues]
+    - id: changelog_scan
+      kind: tool
+      phase: scan
+      impl: ./tools/changelog_scan.mjs
+      writes: [breaking_changes]
+    - id: coverage_diff
+      kind: tool
+      phase: scan
+      impl: ./tools/coverage_diff.mjs
+      writes: [coverage_delta]
+    - id: security_scan
+      kind: cli-agent
+      phase: scan
+      provider: claude-code
+      prompt: |
+        Review the diff at fixtures/diff.txt for security issues. Return JSON
+        matching this schema: {"security_findings": [{"title": "...", "severity": "low|medium|high"}]}.
+        If you find none, return {"security_findings": []}.
+      output_format: json
+      schema:
+        type: object
+        required: [security_findings]
+        properties:
+          security_findings:
+            type: array
+            items:
+              type: object
+              required: [title, severity]
+              properties:
+                title: { type: string }
+                severity: { type: string }
+      writes: [security_findings]
+      timeout_ms: 300000
+    - id: score
+      kind: agent
+      phase: gate
+      prompt: ./prompts/score.md
+      reads: [license_issues, breaking_changes, coverage_delta, security_findings]
+      schema:
+        type: object
+        required: [decision]
+        properties:
+          decision:
+            type: object
+            required: [ready_to_release, score, blocking_issues]
+            properties:
+              ready_to_release: { type: boolean }
+              score: { type: number }
+              blocking_issues: { type: array, items: { type: string } }
+              recommendation: { type: string }
+      writes: [decision]
+  edges:
+    - { from: license_check, to: score }
+    - { from: changelog_scan, to: score }
+    - { from: coverage_diff, to: score }
+    - { from: security_scan, to: score }
