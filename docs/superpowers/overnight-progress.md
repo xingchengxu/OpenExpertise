@@ -365,3 +365,36 @@ Test count: 198 baseline + 3 new e2e = **201 passing**.
 1. Merge `feat/examples-library` into `main`.
 2. Optionally smoke each example end-to-end with a real API key.
 3. Move to Plan D (parallel scheduler + 429 handling) — the most invasive of the V2 plans.
+
+---
+
+## Plan D (V2) — Parallel Scheduler + 429 Handling (2026-05-26)
+
+Branch: `feat/parallel-scheduler` (off `main`)
+Spec: `docs/superpowers/specs/2026-05-26-ultraexpertise-and-v2-polish-design.md` (Plan D section)
+Plan: `docs/superpowers/plans/2026-05-26-parallel-scheduler.md`
+
+### What shipped
+
+| Area | Result |
+|---|---|
+| Schema | `runtime.concurrency: integer ≥ 1` added under root spec. |
+| Sequential `for_each` parallelism | `for_each.concurrency: N` finally honored (was parsed-but-ignored in V1). Bounded-parallel iteration via `runWithLimit`. |
+| ParallelScheduler | New wave-based DAG executor. Subclasses SequentialScheduler so pipeline + loop passes are inherited untouched. |
+| runner.ts | Picks Sequential or Parallel based on `cli --concurrency`, then `runtime.concurrency`, defaulting to 1. |
+| CLI | `oe run --concurrency <n>` flag (integer). |
+| LLM clients | Both Anthropic + OpenAI clients retry up to N attempts on HTTP 429 with exponential backoff. Configurable via `retry: { max_attempts, base_ms }` constructor opt. Defaults: 4 / 1000ms. |
+| `oe inspect` | Sorts events by `ts` ascending — parallel runs read chronologically. |
+| Tests | 5 schema + 2 for_each concurrency + 2 parallel scheduler + 3 anthropic retry + 3 openai retry + 1 inspect sort = 16 new (218 total). |
+
+### Non-goals (per spec)
+
+- No global token-bucket / leaky-bucket queue spanning the whole process.
+- No streaming responses.
+- No work-stealing scheduler.
+
+### Next concrete actions
+
+1. Merge `feat/parallel-scheduler` into `main`.
+2. Manual smoke: run an example with `--concurrency 4` and verify TUI shows multiple nodes "▶" simultaneously.
+3. V2 sprint complete after merge. Project should now exceed `/workflows`' published feature set on every architectural axis.
