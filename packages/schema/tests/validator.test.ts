@@ -27,7 +27,13 @@ describe('validateExperienceSpec', () => {
       ...validSpec,
       graph: {
         ...validSpec.graph,
-        nodes: [{ id: 'x', kind: 'weird', impl: 'x' } as unknown as ExperienceSpec['graph']['nodes'][number]],
+        nodes: [
+          {
+            id: 'x',
+            kind: 'weird',
+            impl: 'x',
+          } as unknown as ExperienceSpec['graph']['nodes'][number],
+        ],
       },
     }
     expect(() => validateExperienceSpec(bad)).toThrow(ValidationError)
