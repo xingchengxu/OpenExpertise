@@ -45,8 +45,8 @@ export interface NodeRunResult {
 
 export class SequentialScheduler {
   constructor(
-    private readonly dag: Dag,
-    private readonly ctx: RunContext,
+    protected readonly dag: Dag,
+    protected readonly ctx: RunContext,
   ) {}
 
   async run(): Promise<{ status: 'success' | 'failed' | 'partial'; results: NodeRunResult[] }> {
@@ -100,34 +100,61 @@ export class SequentialScheduler {
         }
       }
 
-      const forEach = (node.spec as { for_each?: { source: string; concurrency?: number } }).for_each
-      if (forEach) {
-        const fullState = this.ctx.store.snapshot()
-        const sourceVal = resolveExpression(forEach.source, fullState)
-        const items: unknown[] = Array.isArray(sourceVal) ? sourceVal : []
-        const concurrency = forEach.concurrency ?? 1
-        const resultsBefore = results.length
-        await runWithLimit(items, concurrency, async (item, idx) => {
-          await this.runNodeOnce(
-            node,
-            { $item: item, $index: idx },
-            skipped,
-            results,
-            edgeBuffer,
-          )
-        })
-        // After all iterations, check whether any of the results added by THIS
-        // for_each saw 'failed'. (In sequential mode the last result is for this
-        // node; in parallel mode the order is not guaranteed.)
-        const anyFanFailed = results.slice(resultsBefore).some((r) => r.status === 'failed')
-        if (anyFanFailed) anyFailed = true
-        continue
-      }
-
-      await this.runNodeOnce(node, {}, skipped, results, edgeBuffer)
-      const last = results[results.length - 1]
-      if (last?.status === 'failed') anyFailed = true
+      const { anyFanFailed } = await this.runSingleNodeWithForEach(node, edgeBuffer, skipped, results)
+      if (anyFanFailed) anyFailed = true
     }
+
+    const tailResult = await this.runPipelineAndLoopPasses(edgeBuffer, skipped, results)
+    if (tailResult.anyFailed) anyFailed = true
+
+    const status = anyFailed
+      ? results.every((r) => r.status === 'failed' || r.status === 'skipped')
+        ? 'failed'
+        : 'partial'
+      : 'success'
+    return { status, results }
+  }
+
+  protected async runSingleNodeWithForEach(
+    node: DagNode,
+    edgeBuffer: Map<string, Record<string, unknown>>,
+    skipped: Set<string>,
+    results: NodeRunResult[],
+  ): Promise<{ anyFanFailed: boolean }> {
+    const forEach = (node.spec as { for_each?: { source: string; concurrency?: number } }).for_each
+    if (forEach) {
+      const fullState = this.ctx.store.snapshot()
+      const sourceVal = resolveExpression(forEach.source, fullState)
+      const items: unknown[] = Array.isArray(sourceVal) ? sourceVal : []
+      const concurrency = forEach.concurrency ?? 1
+      const resultsBefore = results.length
+      await runWithLimit(items, concurrency, async (item, idx) => {
+        await this.runNodeOnce(
+          node,
+          { $item: item, $index: idx },
+          skipped,
+          results,
+          edgeBuffer,
+        )
+      })
+      // After all iterations, check whether any of the results added by THIS
+      // for_each saw 'failed'. (In sequential mode the last result is for this
+      // node; in parallel mode the order is not guaranteed.)
+      const anyFanFailed = results.slice(resultsBefore).some((r) => r.status === 'failed')
+      return { anyFanFailed }
+    }
+
+    await this.runNodeOnce(node, {}, skipped, results, edgeBuffer)
+    const last = results[results.length - 1]
+    return { anyFanFailed: last?.status === 'failed' }
+  }
+
+  protected async runPipelineAndLoopPasses(
+    edgeBuffer: Map<string, Record<string, unknown>>,
+    skipped: Set<string>,
+    results: NodeRunResult[],
+  ): Promise<{ anyFailed: boolean }> {
+    let anyFailed = false
 
     // Pipeline groups: each pipeline reads its `items:` source from state and
     // runs each item through all stages. Within a pipeline, each item flows
@@ -209,15 +236,10 @@ export class SequentialScheduler {
       }
     }
 
-    const status = anyFailed
-      ? results.every((r) => r.status === 'failed' || r.status === 'skipped')
-        ? 'failed'
-        : 'partial'
-      : 'success'
-    return { status, results }
+    return { anyFailed }
   }
 
-  private async runNodeOnce(
+  protected async runNodeOnce(
     node: DagNode,
     extraArgs: Record<string, unknown>,
     skipped: Set<string>,
@@ -362,7 +384,7 @@ export class SequentialScheduler {
     }
   }
 
-  private assembleBundle(
+  protected assembleBundle(
     node: DagNode,
     edgeInputs: Record<string, unknown>,
     extraArgs: Record<string, unknown> = {},

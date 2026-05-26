@@ -5,7 +5,8 @@ export { StateStore } from './state/store.js'
 export { EventBus, type RunEvent } from './events/bus.js'
 export { JsonlEventSink } from './events/sink.js'
 export { buildDag, type Dag } from './graph/dag.js'
-export { SequentialScheduler } from './graph/scheduler.js'
+export { SequentialScheduler, runWithLimit, type NodeRunResult } from './graph/scheduler.js'
+export { ParallelScheduler } from './graph/parallel-scheduler.js'
 export { RunContext } from './run/context.js'
 export {
   DispatcherRegistry,

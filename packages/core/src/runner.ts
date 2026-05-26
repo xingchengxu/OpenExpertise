@@ -8,6 +8,7 @@ import { EventBus } from './events/bus.js'
 import { JsonlEventSink } from './events/sink.js'
 import { buildDag } from './graph/dag.js'
 import { SequentialScheduler } from './graph/scheduler.js'
+import { ParallelScheduler } from './graph/parallel-scheduler.js'
 import { RunContext } from './run/context.js'
 import { DispatcherRegistry } from './dispatcher/registry.js'
 import { CacheStore } from './cache/store.js'
@@ -72,7 +73,11 @@ export async function runExperience(opts: RunOpts): Promise<RunResult> {
       args: opts.args ?? {},
       ...(cache ? { cache } : {}),
     })
-    const scheduler = new SequentialScheduler(dag, ctx)
+    const yamlConc = opts.spec.runtime?.concurrency ?? 1
+    const scheduler =
+      yamlConc > 1
+        ? new ParallelScheduler(dag, ctx, yamlConc)
+        : new SequentialScheduler(dag, ctx)
     const { status } = await scheduler.run()
 
     events.emit({ type: 'run.finished', run_id: runId, ts: new Date().toISOString(), status })
