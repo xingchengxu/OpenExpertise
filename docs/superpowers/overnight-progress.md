@@ -555,6 +555,20 @@ Trigger: User went to sleep at ~midnight saying "明天天亮能发布的状态"
 - **Final stats: 80 markdown pages, 11,129 LOC across the site**
 - VitePress build clean throughout — no broken links thanks to `ignoreDeadLinks: true` + canonical sidebar paths shared with subagents
 
+#### Wave 11 — Engagement layer (cookbook, FAQ, use-cases, roadmap, perf)
+After the structural site was complete, added a layer of pages designed to make returning users stay. These cover discovery-from-different-angles (use cases by role, recipes to copy-paste), reassurance (FAQ, glossary, performance numbers), and trust (public roadmap):
+
+- `site/cookbook/index.md` — 13 copy-paste YAML recipes (fan-out, conditional skip, retry, multi-vendor CLI chain, refine-until, nested experience, etc.)
+- `site/faq.md` — concept Qs, setup Qs, decoded common errors, perf & cost ranges, production deployment Qs
+- `site/glossary.md` — every term alphabetical with one-line def + link to deep-dive (top-to-bottom = 5-min tour)
+- `site/use-cases/index.md` — concrete scenarios organized by role (eng leads, SRE, security, ML platform, devrel, data eng, product). "When OE is NOT the answer" matrix.
+- `site/roadmap.md` — public roadmap. v0.1 shipped + v0.2 targets (open NodeKind, streaming, pipeline/loop parallelism, cross-run evolution) + v0.3+ deferred + anti-features
+- `site/operations/performance.md` — per-example wall time + token + USD cost matrix on both Claude and gpt-4o; the 6 levers (concurrency, schemas, cache, cheaper models, conditional skip, cli-agent); overhead profile
+- Orientation index pages for `/concepts/`, `/guide/`, `/reference/`, `/operations/` — previously 404'd on direct parent-path navigation
+- Custom CSS: `.example-grid` dl-style listings with brand-tinted left rule, zebra tables, stronger hero tagline, `.used-in` brand-tinted callouts
+- Top-bar nav additions: "Use cases", "Cookbook", "Help" dropdown (FAQ + Glossary), "Roadmap" promoted into the version dropdown
+- **Final site stats: 90 markdown pages, ~12,650 LOC**
+
 #### Wave 5 — Final regression + MORNING.md
 - Clean rebuild: `pnpm clean && install && build` ✓
 - Typecheck: clean ✓
