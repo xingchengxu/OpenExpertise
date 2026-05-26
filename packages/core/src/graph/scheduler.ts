@@ -11,6 +11,31 @@ import { computeCacheKey } from '../cache/key.js'
 
 const RUNTIME_VERSION = '0.1.0' // bump to invalidate caches on breaking changes
 
+export async function runWithLimit<T>(
+  items: T[],
+  limit: number,
+  fn: (item: T, index: number) => Promise<void>,
+): Promise<void> {
+  if (limit <= 1 || items.length <= 1) {
+    for (let i = 0; i < items.length; i++) {
+      await fn(items[i]!, i)
+    }
+    return
+  }
+  let nextIdx = 0
+  const startWorker = async (): Promise<void> => {
+    while (true) {
+      const idx = nextIdx++
+      if (idx >= items.length) return
+      await fn(items[idx]!, idx)
+    }
+  }
+  const n = Math.min(limit, items.length)
+  const workers: Promise<void>[] = []
+  for (let i = 0; i < n; i++) workers.push(startWorker())
+  await Promise.all(workers)
+}
+
 export interface NodeRunResult {
   nodeId: string
   status: 'success' | 'failed' | 'skipped'
@@ -75,23 +100,26 @@ export class SequentialScheduler {
         }
       }
 
-      const forEach = (node.spec as { for_each?: { source: string } }).for_each
+      const forEach = (node.spec as { for_each?: { source: string; concurrency?: number } }).for_each
       if (forEach) {
         const fullState = this.ctx.store.snapshot()
         const sourceVal = resolveExpression(forEach.source, fullState)
         const items: unknown[] = Array.isArray(sourceVal) ? sourceVal : []
-        let anyFanFailed = false
-        for (let idx = 0; idx < items.length; idx++) {
+        const concurrency = forEach.concurrency ?? 1
+        const resultsBefore = results.length
+        await runWithLimit(items, concurrency, async (item, idx) => {
           await this.runNodeOnce(
             node,
-            { $item: items[idx], $index: idx },
+            { $item: item, $index: idx },
             skipped,
             results,
             edgeBuffer,
           )
-          const last = results[results.length - 1]
-          if (last?.status === 'failed') anyFanFailed = true
-        }
+        })
+        // After all iterations, check whether any of the results added by THIS
+        // for_each saw 'failed'. (In sequential mode the last result is for this
+        // node; in parallel mode the order is not guaranteed.)
+        const anyFanFailed = results.slice(resultsBefore).some((r) => r.status === 'failed')
         if (anyFanFailed) anyFailed = true
         continue
       }
