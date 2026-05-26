@@ -44,6 +44,9 @@ importers:
       '@openexpertise/node-kinds-agent':
         specifier: workspace:*
         version: link:../packages/node-kinds-agent
+      '@openexpertise/node-kinds-cli-agent':
+        specifier: workspace:*
+        version: link:../packages/node-kinds-cli-agent
       '@openexpertise/node-kinds-dataset':
         specifier: workspace:*
         version: link:../packages/node-kinds-dataset
@@ -58,6 +61,8 @@ importers:
         version: link:../packages/schema
 
   examples/agent-echo: {}
+
+  examples/cli-orchestration: {}
 
   examples/dataset-aggregate: {}
 
