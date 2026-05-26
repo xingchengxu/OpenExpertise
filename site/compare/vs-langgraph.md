@@ -21,17 +21,17 @@ LangGraph Studio provides a visual debugger that lets you inspect, replay, and i
 
 ## Where OpenExpertise differs
 
-| Dimension | OpenExpertise | LangGraph |
-|---|---|---|
-| Graph definition | Declarative YAML — readable by non-engineers, diff-able in PRs | Python code — full expressiveness, requires Python developer |
-| Schema validation | AJV validates `state.schema` and node structure before execution | Runtime type checking via TypedDict / Pydantic; no pre-run graph validation |
-| Node heterogeneity | 6 kinds: `tool`, `agent`, `skill`, `dataset`, `experience`, `cli-agent` | Nodes are Python functions; heterogeneity is modeled in code |
-| CLI integration | `cli-agent` node delegates to Claude Code / Codex / Gemini subprocess | No native CLI delegation; calls LLMs via LangChain model interfaces |
-| Evolution loop | `oe evolve` reads event log, proposes YAML graph patches | No equivalent; graph changes require code edits |
-| Runtime | TypeScript / Node.js | Python |
-| Authoring | `oe ultra "<task>"` or `/ultraexpertise` in Claude Code | Code-first; no LLM authoring of the graph itself |
-| Ecosystem | Small; early-stage | Large; LangChain tool ecosystem, community integrations |
-| Cycles | Not supported (DAG only) | First-class support for cycles and iterative loops |
+| Dimension          | OpenExpertise                                                           | LangGraph                                                                   |
+| ------------------ | ----------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Graph definition   | Declarative YAML — readable by non-engineers, diff-able in PRs          | Python code — full expressiveness, requires Python developer                |
+| Schema validation  | AJV validates `state.schema` and node structure before execution        | Runtime type checking via TypedDict / Pydantic; no pre-run graph validation |
+| Node heterogeneity | 6 kinds: `tool`, `agent`, `skill`, `dataset`, `experience`, `cli-agent` | Nodes are Python functions; heterogeneity is modeled in code                |
+| CLI integration    | `cli-agent` node delegates to Claude Code / Codex / Gemini subprocess   | No native CLI delegation; calls LLMs via LangChain model interfaces         |
+| Evolution loop     | `oe evolve` reads event log, proposes YAML graph patches                | No equivalent; graph changes require code edits                             |
+| Runtime            | TypeScript / Node.js                                                    | Python                                                                      |
+| Authoring          | `oe ultra "<task>"` or `/ultraexpertise` in Claude Code                 | Code-first; no LLM authoring of the graph itself                            |
+| Ecosystem          | Small; early-stage                                                      | Large; LangChain tool ecosystem, community integrations                     |
+| Cycles             | Not supported (DAG only)                                                | First-class support for cycles and iterative loops                          |
 
 ## When to pick LangGraph over OpenExpertise
 

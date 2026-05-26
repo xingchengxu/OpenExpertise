@@ -20,16 +20,16 @@ CrewAI also ships "Flows," a lightweight state machine layer on top of crews, wh
 
 ## Where OpenExpertise differs
 
-| Dimension | OpenExpertise | CrewAI |
-|---|---|---|
-| Fundamental unit | An _experience_: a graph of mixed node kinds | A _crew_: a team of role-playing agents |
-| Non-LLM nodes | First-class: `tool` (pure code) and `dataset` nodes can be most of the graph | Tasks are generally LLM-driven; deterministic logic lives outside the crew abstraction |
-| State persistence | SQLite blackboard, typed schema, survives process exit, resumable | Per-run memory; not persistent across runs by default |
-| Determinism | `tool` and `dataset` nodes have cache keys; reruns don't pay LLM cost for cached steps | Agent outputs are re-generated each run |
-| Graph definition | Declarative YAML with AJV schema validation | Python code (Agents, Tasks, Crew objects) |
-| Evolution loop | `oe evolve` proposes graph upgrades from runtime traces | No equivalent |
-| CLI integration | `cli-agent` delegates to Claude Code / Codex / Gemini subprocesses | No equivalent |
-| Authoring | `oe ultra "<task>"` generates YAML | Code-first |
+| Dimension         | OpenExpertise                                                                          | CrewAI                                                                                 |
+| ----------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Fundamental unit  | An _experience_: a graph of mixed node kinds                                           | A _crew_: a team of role-playing agents                                                |
+| Non-LLM nodes     | First-class: `tool` (pure code) and `dataset` nodes can be most of the graph           | Tasks are generally LLM-driven; deterministic logic lives outside the crew abstraction |
+| State persistence | SQLite blackboard, typed schema, survives process exit, resumable                      | Per-run memory; not persistent across runs by default                                  |
+| Determinism       | `tool` and `dataset` nodes have cache keys; reruns don't pay LLM cost for cached steps | Agent outputs are re-generated each run                                                |
+| Graph definition  | Declarative YAML with AJV schema validation                                            | Python code (Agents, Tasks, Crew objects)                                              |
+| Evolution loop    | `oe evolve` proposes graph upgrades from runtime traces                                | No equivalent                                                                          |
+| CLI integration   | `cli-agent` delegates to Claude Code / Codex / Gemini subprocesses                     | No equivalent                                                                          |
+| Authoring         | `oe ultra "<task>"` generates YAML                                                     | Code-first                                                                             |
 
 ## When to pick CrewAI over OpenExpertise
 

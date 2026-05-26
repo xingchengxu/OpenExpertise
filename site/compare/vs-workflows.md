@@ -20,17 +20,17 @@ The `/workflows` TUI is notably polished for a preview feature: a htop-style int
 
 ## Where OpenExpertise differs
 
-| Dimension | OpenExpertise | Anthropic /workflows |
-|---|---|---|
-| Format | Declarative YAML — human-readable, diff-able, version-controlled | JS script generated per-run; not inherently VCS-friendly |
-| Schema validation | `oe validate` checks AJV schema before any code runs | No pre-run validation; errors surface at runtime |
-| Persistent state | SQLite blackboard, resumable via `oe resume <run-id>` | Ephemeral by default; 3-day TTL unless manually promoted |
-| Self-evolution | `oe evolve` reads event log + state diff, proposes YAML patches | Not present |
-| Multi-CLI | Calls Claude Code, OpenAI Codex, and Gemini CLI as node kinds | Anthropic-only |
-| Multiple LLM providers | Anthropic + OpenAI + any OpenAI-compatible endpoint | Anthropic only |
-| Availability | Stable, open-source, npm-installable today | Unreleased preview; no public ETA |
-| Authoring artifact | A YAML file you own and evolve over time | LLM-generated JS script; may or may not survive 3 days |
-| MCP server | Exposes 6 OE tools so Claude Code can orchestrate OE | Runs inside Claude Code; not callable externally |
+| Dimension              | OpenExpertise                                                    | Anthropic /workflows                                     |
+| ---------------------- | ---------------------------------------------------------------- | -------------------------------------------------------- |
+| Format                 | Declarative YAML — human-readable, diff-able, version-controlled | JS script generated per-run; not inherently VCS-friendly |
+| Schema validation      | `oe validate` checks AJV schema before any code runs             | No pre-run validation; errors surface at runtime         |
+| Persistent state       | SQLite blackboard, resumable via `oe resume <run-id>`            | Ephemeral by default; 3-day TTL unless manually promoted |
+| Self-evolution         | `oe evolve` reads event log + state diff, proposes YAML patches  | Not present                                              |
+| Multi-CLI              | Calls Claude Code, OpenAI Codex, and Gemini CLI as node kinds    | Anthropic-only                                           |
+| Multiple LLM providers | Anthropic + OpenAI + any OpenAI-compatible endpoint              | Anthropic only                                           |
+| Availability           | Stable, open-source, npm-installable today                       | Unreleased preview; no public ETA                        |
+| Authoring artifact     | A YAML file you own and evolve over time                         | LLM-generated JS script; may or may not survive 3 days   |
+| MCP server             | Exposes 6 OE tools so Claude Code can orchestrate OE             | Runs inside Claude Code; not callable externally         |
 
 ## When to pick /workflows over OpenExpertise
 

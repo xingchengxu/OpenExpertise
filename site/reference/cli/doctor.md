@@ -21,9 +21,9 @@ Exits with code `0` if all required checks pass, `1` if any required check fails
 
 ## Options
 
-| Flag | Description |
-|---|---|
-| `--json` | Output results as JSON |
+| Flag      | Description                             |
+| --------- | --------------------------------------- |
+| `--json`  | Output results as JSON                  |
 | `--quiet` | Suppress output; use only the exit code |
 
 ## Example

@@ -52,15 +52,15 @@ oe run examples/agent-echo
 
 **Node fields** common to every kind:
 
-| Field | Required | Description |
-|---|---|---|
-| `id` | yes | Unique identifier; `[a-zA-Z_][a-zA-Z0-9_]*` |
-| `kind` | yes | `tool \| agent \| skill \| dataset \| experience \| cli-agent` |
-| `reads` | no | State fields the node may read (visible in `bundle._state`) |
-| `writes` | no | State fields the node may write |
-| `phase` | no | Groups nodes visually in the TUI |
-| `on_error` | no | `{ policy: skip }` (default), `fail_run`, or `retry` |
-| `for_each` | no | `{ source: '$.list_field', concurrency?: N }` |
+| Field      | Required | Description                                                    |
+| ---------- | -------- | -------------------------------------------------------------- |
+| `id`       | yes      | Unique identifier; `[a-zA-Z_][a-zA-Z0-9_]*`                    |
+| `kind`     | yes      | `tool \| agent \| skill \| dataset \| experience \| cli-agent` |
+| `reads`    | no       | State fields the node may read (visible in `bundle._state`)    |
+| `writes`   | no       | State fields the node may write                                |
+| `phase`    | no       | Groups nodes visually in the TUI                               |
+| `on_error` | no       | `{ policy: skip }` (default), `fail_run`, or `retry`           |
+| `for_each` | no       | `{ source: '$.list_field', concurrency?: N }`                  |
 
 ## Variations
 

@@ -55,20 +55,20 @@ Each example has a `README.md`, an `experience.yaml`, fixtures, and a mocked-LLM
 
 ## All examples at a glance
 
-| Example | Featuring | LLM required? | CLIs required? |
-|---|---|---|---|
-| [hello-tool](/examples/hello-tool) | `tool` node | no | no |
-| [dataset-aggregate](/examples/dataset-aggregate) | `dataset` + `tool` | no | no |
-| [agent-echo](/examples/agent-echo) | `agent` node | yes | no |
-| [review-branch ★](/examples/review-branch) | `for_each`, `when:`, `array_append`, multi-phase | yes | no |
-| [oncall-runbook](/examples/oncall-runbook) | `for_each` fan-out, synthesis pipeline | yes | no |
-| [issue-triage](/examples/issue-triage) | `when:` conditional, skip-cascade | yes | no |
-| [release-gates](/examples/release-gates) | `tool + cli-agent + agent` mix, fan-in | yes | `claude` |
-| [cli-orchestration](/examples/cli-orchestration) | `cli-agent` chain, 2 providers | no | `claude`, `codex` |
-| [tri-cli-orchestration ★](/examples/tri-cli-orchestration) | 3-provider CLI chain | no | `claude`, `codex`, `gemini` |
-| [deep-research](/examples/deep-research) | dual `for_each`, fan-in, multi-vendor search | yes | `claude`, `gemini` |
-| [systematic-debugging](/examples/systematic-debugging) | `cli-agent for_each`, 6-phase fix loop | yes | `claude` |
-| [brainstorming](/examples/brainstorming) | `cli-agent` fan-out ×2, cluster + synthesize | yes | `claude` |
+| Example                                                    | Featuring                                        | LLM required? | CLIs required?              |
+| ---------------------------------------------------------- | ------------------------------------------------ | ------------- | --------------------------- |
+| [hello-tool](/examples/hello-tool)                         | `tool` node                                      | no            | no                          |
+| [dataset-aggregate](/examples/dataset-aggregate)           | `dataset` + `tool`                               | no            | no                          |
+| [agent-echo](/examples/agent-echo)                         | `agent` node                                     | yes           | no                          |
+| [review-branch ★](/examples/review-branch)                 | `for_each`, `when:`, `array_append`, multi-phase | yes           | no                          |
+| [oncall-runbook](/examples/oncall-runbook)                 | `for_each` fan-out, synthesis pipeline           | yes           | no                          |
+| [issue-triage](/examples/issue-triage)                     | `when:` conditional, skip-cascade                | yes           | no                          |
+| [release-gates](/examples/release-gates)                   | `tool + cli-agent + agent` mix, fan-in           | yes           | `claude`                    |
+| [cli-orchestration](/examples/cli-orchestration)           | `cli-agent` chain, 2 providers                   | no            | `claude`, `codex`           |
+| [tri-cli-orchestration ★](/examples/tri-cli-orchestration) | 3-provider CLI chain                             | no            | `claude`, `codex`, `gemini` |
+| [deep-research](/examples/deep-research)                   | dual `for_each`, fan-in, multi-vendor search     | yes           | `claude`, `gemini`          |
+| [systematic-debugging](/examples/systematic-debugging)     | `cli-agent for_each`, 6-phase fix loop           | yes           | `claude`                    |
+| [brainstorming](/examples/brainstorming)                   | `cli-agent` fan-out ×2, cluster + synthesize     | yes           | `claude`                    |
 
 ## Running any example
 

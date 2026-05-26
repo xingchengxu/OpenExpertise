@@ -10,16 +10,16 @@ Every meaningful runtime moment in an OpenExpertise run fires an **event**. Even
 
 ```ts
 type RunEvent =
-  | { type: 'run.started';    run_id; ts; args? }
-  | { type: 'run.finished';   run_id; ts; status: 'success' | 'failed' | 'partial' }
-  | { type: 'node.ready';     run_id; node_id; ts; phase? }
-  | { type: 'node.started';   run_id; node_id; ts; phase? }
-  | { type: 'node.finished';  run_id; node_id; ts; phase?; metrics? }
-  | { type: 'node.failed';    run_id; node_id; ts; phase?; error: string }
-  | { type: 'node.skipped';   run_id; node_id; ts; phase?; reason: string }
-  | { type: 'state.write';    run_id; node_id; field;     ts }
-  | { type: 'node.tokens';    run_id; node_id; ts; input_tokens; output_tokens; model? }
-  | { type: 'node.activity';  run_id; node_id; ts; activity: string }
+  | { type: 'run.started'; run_id; ts; args? }
+  | { type: 'run.finished'; run_id; ts; status: 'success' | 'failed' | 'partial' }
+  | { type: 'node.ready'; run_id; node_id; ts; phase? }
+  | { type: 'node.started'; run_id; node_id; ts; phase? }
+  | { type: 'node.finished'; run_id; node_id; ts; phase?; metrics? }
+  | { type: 'node.failed'; run_id; node_id; ts; phase?; error: string }
+  | { type: 'node.skipped'; run_id; node_id; ts; phase?; reason: string }
+  | { type: 'state.write'; run_id; node_id; field; ts }
+  | { type: 'node.tokens'; run_id; node_id; ts; input_tokens; output_tokens; model? }
+  | { type: 'node.activity'; run_id; node_id; ts; activity: string }
 ```
 
 Every event has `type` and `ts`. Every node-scoped event has `node_id`. The schema is exhaustive — adding a new event type is a deliberate change to `packages/core/src/events/bus.ts`.

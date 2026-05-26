@@ -15,7 +15,7 @@ Write focused, reusable prompt templates for `agent` and `skill` nodes using `{{
 
 `examples/review-branch/prompts/review.md`:
 
-```markdown
+````markdown
 You are reviewing a code change. You are the **{{$item.key}}** reviewer.
 
 Focus ONLY on {{$item.focus}}. Do NOT report issues outside this scope —
@@ -27,6 +27,7 @@ Code under review:
 ```diff
 {{diff}}
 ```
+````
 
 Return findings via the `structured_output` tool. Each finding needs:
 
@@ -34,7 +35,8 @@ Return findings via the `structured_output` tool. Each finding needs:
 - `severity` (one of `low`, `medium`, `high`)
 
 If there are no in-scope issues, return `{ "findings": [] }`.
-```
+
+````
 
 Referenced in `experience.yaml`:
 
@@ -52,7 +54,7 @@ Referenced in `experience.yaml`:
     properties:
       findings:
         type: array
-```
+````
 
 ## How it works
 

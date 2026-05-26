@@ -59,8 +59,8 @@ A `when:` clause that evaluates false skips the **target** node. If you want to 
 - id: investigate
   kind: agent
   for_each:
-    source: $.dimensions       # JSONPath into state — must be array
-    concurrency: 4              # optional; default 1 = sequential
+    source: $.dimensions # JSONPath into state — must be array
+    concurrency: 4 # optional; default 1 = sequential
   reads: [incident]
   writes: [findings]
 ```
@@ -92,13 +92,13 @@ A `pipeline` groups several nodes into a per-item pass:
 ```yaml
 graph:
   nodes:
-    - { id: load,    kind: dataset, ... }
-    - { id: filter,  kind: tool, ... }
-    - { id: enrich,  kind: agent, ... }
+    - { id: load, kind: dataset, ... }
+    - { id: filter, kind: tool, ... }
+    - { id: enrich, kind: agent, ... }
     - { id: persist, kind: tool, ... }
   pipelines:
     - id: row_pipeline
-      items: $.rows          # JSONPath to the items array
+      items: $.rows # JSONPath to the items array
       stages: [filter, enrich, persist]
       phase: process
 ```
@@ -118,8 +118,8 @@ graph:
   loops:
     - id: refine_loop
       body: refine
-      until: '$.refined_count >= 3'      # boolean expression
-      max_iters: 10                       # safety cap
+      until: '$.refined_count >= 3' # boolean expression
+      max_iters: 10 # safety cap
       phase: refine
 ```
 
@@ -134,14 +134,14 @@ To **break the cascade** — keep a downstream node running even when an interme
 ```yaml
 graph:
   nodes:
-    - { id: classify,       ... }
+    - { id: classify, ... }
     - { id: search_similar, ... }
-    - { id: dedup,          ... }       # conditional on similar_issues > 0
-    - { id: assign_labels,  ... }       # we still want this even when dedup is skipped
+    - { id: dedup, ... } # conditional on similar_issues > 0
+    - { id: assign_labels, ... } # we still want this even when dedup is skipped
   edges:
-    - { from: classify,       to: search_similar }
+    - { from: classify, to: search_similar }
     - { from: search_similar, to: dedup, when: 'length($.similar_issues) > 0' }
-    - { from: classify,       to: assign_labels }     # ← direct edge, bypasses dedup
+    - { from: classify, to: assign_labels } # ← direct edge, bypasses dedup
 ```
 
 See [issue-triage](/examples/issue-triage) for the exact pattern.
@@ -189,8 +189,8 @@ graph:
     - { from: load, to: process }
     - { from: process, to: aggregate }
     - { from: aggregate, to: refine, when: 'length($.summary.flags) > 0' }
-    - { from: aggregate, to: persist }    # persist regardless
-    - { from: refine,   to: persist }     # if refine ran, persist after it
+    - { from: aggregate, to: persist } # persist regardless
+    - { from: refine, to: persist } # if refine ran, persist after it
 ```
 
 See [oncall-runbook](/examples/oncall-runbook) for a real working version.

@@ -37,23 +37,23 @@ OpenExpertise is a YAML-driven DAG runner for heterogeneous AI workflows. This p
 
 ## Package map (15 packages)
 
-| Package | NPM name | What it exports |
-|---|---|---|
-| `packages/schema` | `@openexpertise/schema` | TypeScript types, JSON Schema, `parseExperienceYaml`, `validateExperienceSpec` |
-| `packages/core` | `@openexpertise/core` | `runExperience`, `EventBus`, `StateStore`, `DispatcherRegistry`, `SequentialScheduler`, `ParallelScheduler`, `CacheStore`, `interpolatePrompt`, all core types |
-| `packages/node-kinds-tool` | `@openexpertise/node-kinds-tool` | `ToolDispatcher` — resolves `.mjs` modules and calls their default export |
-| `packages/node-kinds-agent` | `@openexpertise/node-kinds-agent` | `AgentDispatcher`, `AnthropicLLMClient` — LLM call + AJV structured-output validation |
-| `packages/node-kinds-skill` | `@openexpertise/node-kinds-skill` | `SkillDispatcher`, `loadSkillFile` — SKILL.md-backed LLM nodes |
-| `packages/node-kinds-dataset` | `@openexpertise/node-kinds-dataset` | `DatasetDispatcher` — file (JSON/JSONL/CSV), SQLite, HTTP, mcp-resource sources |
-| `packages/node-kinds-experience` | `@openexpertise/node-kinds-experience` | `ExperienceDispatcher` — nested sub-experience runner with isolated SQLite state |
-| `packages/node-kinds-cli-agent` | `@openexpertise/node-kinds-cli-agent` | `CliAgentDispatcher`, `ClaudeCodeProvider`, `CodexProvider`, `GeminiProvider`, JSON output parser |
-| `packages/llm-openai` | `@openexpertise/llm-openai` | `OpenAILLMClient` — wraps any OpenAI-compatible endpoint (Azure, vLLM, Ollama) with 429 retry |
-| `packages/evolution` | `@openexpertise/evolution` | `EvolutionAdvisor` — reads event log + state diff and proposes YAML patches |
-| `packages/authoring` | `@openexpertise/authoring` | Schema-aware scaffold, validate, and edit helpers for `oe ultra` and `oe init` |
-| `packages/tui` | `@openexpertise/tui` | Ink-based terminal dashboard for `oe run --tui` — live node status, token counter, activity feed |
-| `packages/mcp-server` | `@openexpertise/mcp-server` | `oe-mcp` MCP server exposing `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `oe_evolve`, `oe_ultra` |
-| `packages/cli` | `@openexpertise/cli` | The `oe` CLI binary — all commands wired via Commander |
-| `packages/skill-experience-creator` | `@openexpertise/skill-experience-creator` | SKILL.md package teaching an LLM how to author experiences (used by `oe ultra`) |
+| Package                             | NPM name                                  | What it exports                                                                                                                                                |
+| ----------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/schema`                   | `@openexpertise/schema`                   | TypeScript types, JSON Schema, `parseExperienceYaml`, `validateExperienceSpec`                                                                                 |
+| `packages/core`                     | `@openexpertise/core`                     | `runExperience`, `EventBus`, `StateStore`, `DispatcherRegistry`, `SequentialScheduler`, `ParallelScheduler`, `CacheStore`, `interpolatePrompt`, all core types |
+| `packages/node-kinds-tool`          | `@openexpertise/node-kinds-tool`          | `ToolDispatcher` — resolves `.mjs` modules and calls their default export                                                                                      |
+| `packages/node-kinds-agent`         | `@openexpertise/node-kinds-agent`         | `AgentDispatcher`, `AnthropicLLMClient` — LLM call + AJV structured-output validation                                                                          |
+| `packages/node-kinds-skill`         | `@openexpertise/node-kinds-skill`         | `SkillDispatcher`, `loadSkillFile` — SKILL.md-backed LLM nodes                                                                                                 |
+| `packages/node-kinds-dataset`       | `@openexpertise/node-kinds-dataset`       | `DatasetDispatcher` — file (JSON/JSONL/CSV), SQLite, HTTP, mcp-resource sources                                                                                |
+| `packages/node-kinds-experience`    | `@openexpertise/node-kinds-experience`    | `ExperienceDispatcher` — nested sub-experience runner with isolated SQLite state                                                                               |
+| `packages/node-kinds-cli-agent`     | `@openexpertise/node-kinds-cli-agent`     | `CliAgentDispatcher`, `ClaudeCodeProvider`, `CodexProvider`, `GeminiProvider`, JSON output parser                                                              |
+| `packages/llm-openai`               | `@openexpertise/llm-openai`               | `OpenAILLMClient` — wraps any OpenAI-compatible endpoint (Azure, vLLM, Ollama) with 429 retry                                                                  |
+| `packages/evolution`                | `@openexpertise/evolution`                | `EvolutionAdvisor` — reads event log + state diff and proposes YAML patches                                                                                    |
+| `packages/authoring`                | `@openexpertise/authoring`                | Schema-aware scaffold, validate, and edit helpers for `oe ultra` and `oe init`                                                                                 |
+| `packages/tui`                      | `@openexpertise/tui`                      | Ink-based terminal dashboard for `oe run --tui` — live node status, token counter, activity feed                                                               |
+| `packages/mcp-server`               | `@openexpertise/mcp-server`               | `oe-mcp` MCP server exposing `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `oe_evolve`, `oe_ultra`                                                        |
+| `packages/cli`                      | `@openexpertise/cli`                      | The `oe` CLI binary — all commands wired via Commander                                                                                                         |
+| `packages/skill-experience-creator` | `@openexpertise/skill-experience-creator` | SKILL.md package teaching an LLM how to author experiences (used by `oe ultra`)                                                                                |
 
 ---
 
@@ -127,10 +127,10 @@ Circular dependency risk: `node-kinds-experience` calls `runExperience` from `co
 
 Two tables in `state.sqlite`:
 
-| Table | Purpose |
-|---|---|
+| Table            | Purpose                                                                                             |
+| ---------------- | --------------------------------------------------------------------------------------------------- |
 | `state_snapshot` | One row per field. Current value (JSON-encoded). `updated_by_node`, `updated_by_run`, `updated_at`. |
-| `state_history` | Append-only audit log. Previous value, new value, node id, run id, timestamp. |
+| `state_history`  | Append-only audit log. Previous value, new value, node id, run id, timestamp.                       |
 
 WAL mode is set on open. Reads are read-only snapshots. Writes are wrapped in a transaction (one per `state_delta`).
 

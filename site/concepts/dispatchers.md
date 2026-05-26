@@ -2,14 +2,14 @@
 
 A **dispatcher** is the runtime component that knows how to execute one specific node kind. The scheduler doesn't care what a node does — it just hands the node to the right dispatcher. There's one dispatcher per node kind:
 
-| Kind         | Dispatcher                                      | Package                                  |
-| ------------ | ----------------------------------------------- | ---------------------------------------- |
-| `tool`       | `ToolDispatcher`                                | `@openexpertise/node-kinds-tool`         |
-| `agent`      | `AgentDispatcher`                               | `@openexpertise/node-kinds-agent`        |
-| `skill`      | `SkillDispatcher`                               | `@openexpertise/node-kinds-skill`        |
-| `dataset`    | `DatasetDispatcher`                             | `@openexpertise/node-kinds-dataset`      |
-| `experience` | `ExperienceDispatcher`                          | `@openexpertise/node-kinds-experience`   |
-| `cli-agent`  | `CliAgentDispatcher`                            | `@openexpertise/node-kinds-cli-agent`    |
+| Kind         | Dispatcher             | Package                                |
+| ------------ | ---------------------- | -------------------------------------- |
+| `tool`       | `ToolDispatcher`       | `@openexpertise/node-kinds-tool`       |
+| `agent`      | `AgentDispatcher`      | `@openexpertise/node-kinds-agent`      |
+| `skill`      | `SkillDispatcher`      | `@openexpertise/node-kinds-skill`      |
+| `dataset`    | `DatasetDispatcher`    | `@openexpertise/node-kinds-dataset`    |
+| `experience` | `ExperienceDispatcher` | `@openexpertise/node-kinds-experience` |
+| `cli-agent`  | `CliAgentDispatcher`   | `@openexpertise/node-kinds-cli-agent`  |
 
 ## The interface
 
@@ -17,13 +17,11 @@ Every dispatcher implements `NodeDispatcher`:
 
 ```ts
 interface NodeDispatcher {
-  readonly kind: NodeKind                        // 'tool' | 'agent' | ...
+  readonly kind: NodeKind // 'tool' | 'agent' | ...
 
-  resolve(node: NodeSpec, ctx: RunContext):
-    Promise<ResolvedImpl>
+  resolve(node: NodeSpec, ctx: RunContext): Promise<ResolvedImpl>
 
-  run(impl: ResolvedImpl, bundle: NodeInputBundle, ctx: RunContext):
-    Promise<NodeOutput>
+  run(impl: ResolvedImpl, bundle: NodeInputBundle, ctx: RunContext): Promise<NodeOutput>
 }
 ```
 
@@ -38,9 +36,9 @@ What the dispatcher sees in `run()`:
 
 ```ts
 interface NodeInputBundle {
-  state_view: Record<string, unknown>     // values of fields in node.reads
-  edge_inputs: Record<string, unknown>     // upstream nodes' edge_outputs by their id
-  args: Record<string, unknown>            // node.spec.args (literal values, $resolved)
+  state_view: Record<string, unknown> // values of fields in node.reads
+  edge_inputs: Record<string, unknown> // upstream nodes' edge_outputs by their id
+  args: Record<string, unknown> // node.spec.args (literal values, $resolved)
 }
 ```
 
@@ -102,14 +100,14 @@ V2 (not yet committed) will likely expose `NodeKind` as `string` and let dispatc
 
 ## Per-kind behavior summary
 
-| Dispatcher              | Key behavior                                                                                                                 |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `ToolDispatcher`        | Dynamic-imports the .mjs file via `pathToFileURL`. Calls its default export with `{ ...args, _edge_inputs, _state }`.        |
-| `AgentDispatcher`       | Compiles the inline AJV schema once. Calls `LLMClient.complete()` with the `structured_output` tool forced. Validates result.|
-| `SkillDispatcher`       | Reads SKILL.md (with frontmatter via gray-matter), invokes the LLM with the body as system prompt. Returns text or struct.   |
-| `DatasetDispatcher`     | Branches on `source.type` (file / sqlite / http / mcp-resource) and loads rows.                                              |
-| `ExperienceDispatcher`  | Calls `runExperience()` recursively on the nested YAML. State is isolated by default.                                        |
-| `CliAgentDispatcher`    | Spawns a subprocess via injectable `SubprocessRunner`. Parses stdout (text or JSON with optional AJV).                       |
+| Dispatcher             | Key behavior                                                                                                                  |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `ToolDispatcher`       | Dynamic-imports the .mjs file via `pathToFileURL`. Calls its default export with `{ ...args, _edge_inputs, _state }`.         |
+| `AgentDispatcher`      | Compiles the inline AJV schema once. Calls `LLMClient.complete()` with the `structured_output` tool forced. Validates result. |
+| `SkillDispatcher`      | Reads SKILL.md (with frontmatter via gray-matter), invokes the LLM with the body as system prompt. Returns text or struct.    |
+| `DatasetDispatcher`    | Branches on `source.type` (file / sqlite / http / mcp-resource) and loads rows.                                               |
+| `ExperienceDispatcher` | Calls `runExperience()` recursively on the nested YAML. State is isolated by default.                                         |
+| `CliAgentDispatcher`   | Spawns a subprocess via injectable `SubprocessRunner`. Parses stdout (text or JSON with optional AJV).                        |
 
 For the full per-kind YAML and dispatcher details, see the [6 node kinds](/concepts/node-kinds) index page.
 

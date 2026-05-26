@@ -65,6 +65,8 @@ importers:
 
   examples/agent-echo: {}
 
+  examples/brainstorming: {}
+
   examples/cli-orchestration: {}
 
   examples/dataset-aggregate: {}

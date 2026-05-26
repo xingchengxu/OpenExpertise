@@ -1,0 +1,7 @@
+# VitePress build artifacts
+.vitepress/dist/
+.vitepress/cache/
+
+# Local config
+.env
+.env.local

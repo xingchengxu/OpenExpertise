@@ -38,21 +38,22 @@ The `ToolDispatcher` (`packages/node-kinds-tool/src/index.ts`) loads your module
 
 **Input bundle fields available in `args`:**
 
-| Field | Type | Source |
-|---|---|---|
-| `_state` | `Record<string, unknown>` | Frozen snapshot of declared `reads:` fields |
-| `_edge_inputs` | `Record<string, unknown>` | Values forwarded from predecessor nodes via `edge_output` |
-| `$item` | `unknown` | Current item when inside `for_each` |
-| `$index` | `number` | Current index when inside `for_each` |
-| Any declared `args:` key | `unknown` | Static args from the YAML node spec |
+| Field                    | Type                      | Source                                                    |
+| ------------------------ | ------------------------- | --------------------------------------------------------- |
+| `_state`                 | `Record<string, unknown>` | Frozen snapshot of declared `reads:` fields               |
+| `_edge_inputs`           | `Record<string, unknown>` | Values forwarded from predecessor nodes via `edge_output` |
+| `$item`                  | `unknown`                 | Current item when inside `for_each`                       |
+| `$index`                 | `number`                  | Current index when inside `for_each`                      |
+| Any declared `args:` key | `unknown`                 | Static args from the YAML node spec                       |
 
 **Return shape:**
 
 ```js
 return {
-  state_delta: { field_name: value },   // required (may be empty {})
-  edge_output: anything,                 // optional — forwarded to successor nodes
-  metrics: {                             // optional — shown in TUI and events
+  state_delta: { field_name: value }, // required (may be empty {})
+  edge_output: anything, // optional — forwarded to successor nodes
+  metrics: {
+    // optional — shown in TUI and events
     tokens_in: 0,
     tokens_out: 0,
     duration_ms: 42,
@@ -69,7 +70,7 @@ The runtime writes every key in `state_delta` to the SQLite store and emits a `s
 ```js
 export default async function score(args) {
   const findings = args._state.findings ?? []
-  const highCount = findings.filter(f => f.severity === 'high').length
+  const highCount = findings.filter((f) => f.severity === 'high').length
   return { state_delta: { risk_score: highCount * 10 } }
 }
 ```
@@ -77,7 +78,7 @@ export default async function score(args) {
 **Fetch from an API:**
 
 ```js
-import { fetch } from 'node:http'   // or use undici / node-fetch
+import { fetch } from 'node:http' // or use undici / node-fetch
 
 export default async function fetchPR(args) {
   // TODO: replace with real GitHub API call
@@ -92,8 +93,8 @@ export default async function fetchPR(args) {
 export default async function parse(args) {
   const rows = JSON.parse(args._state.raw_json)
   return {
-    state_delta: {},        // nothing to persist
-    edge_output: rows,      // forwarded to downstream nodes
+    state_delta: {}, // nothing to persist
+    edge_output: rows, // forwarded to downstream nodes
   }
 }
 ```
@@ -108,8 +109,8 @@ export default async function seedDimensions(_args) {
         { key: 'security', focus: 'injection and auth vulnerabilities' },
         { key: 'performance', focus: 'N+1 queries and missing indexes' },
         { key: 'style', focus: 'naming and formatting' },
-      ]
-    }
+      ],
+    },
   }
 }
 ```

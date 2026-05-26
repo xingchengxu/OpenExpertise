@@ -20,17 +20,17 @@ Both Inngest and Temporal are general-purpose engines. An LLM call is just anoth
 
 ## Where OpenExpertise differs
 
-| Dimension | OpenExpertise | Inngest / Temporal |
-|---|---|---|
-| LLM-aware primitives | `agent` node kind with structured output, prompt files, schema validation | LLM calls are plain activities/steps; no structured output or prompt abstractions |
-| Deployment footprint | Runs as a CLI against a local SQLite store; zero separate services | Requires Inngest Dev Server / Temporal server or cloud service |
-| Graph definition | Declarative YAML — the graph is a data artifact | TypeScript / Go / Java code — the workflow is a code artifact |
-| Schema validation | `state.schema` validated with AJV before execution | Workflow inputs typed via language type system; no pre-run validation of the graph |
-| Self-evolution | `oe evolve` proposes graph changes from runtime traces | Not present |
-| Multi-CLI integration | `cli-agent` delegates to Claude Code / Codex / Gemini subprocesses | Not present |
-| Authoring | `oe ultra` auto-generates YAML from natural language | Code-first |
-| Scope | LLM + expert-process orchestration | General-purpose distributed systems: payments, ETL, ML, logistics |
-| 429-aware retry | Built in; exponential backoff on HTTP 429 | Inngest has `step.ai.infer()`; Temporal requires custom activity retry policy |
+| Dimension             | OpenExpertise                                                             | Inngest / Temporal                                                                 |
+| --------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| LLM-aware primitives  | `agent` node kind with structured output, prompt files, schema validation | LLM calls are plain activities/steps; no structured output or prompt abstractions  |
+| Deployment footprint  | Runs as a CLI against a local SQLite store; zero separate services        | Requires Inngest Dev Server / Temporal server or cloud service                     |
+| Graph definition      | Declarative YAML — the graph is a data artifact                           | TypeScript / Go / Java code — the workflow is a code artifact                      |
+| Schema validation     | `state.schema` validated with AJV before execution                        | Workflow inputs typed via language type system; no pre-run validation of the graph |
+| Self-evolution        | `oe evolve` proposes graph changes from runtime traces                    | Not present                                                                        |
+| Multi-CLI integration | `cli-agent` delegates to Claude Code / Codex / Gemini subprocesses        | Not present                                                                        |
+| Authoring             | `oe ultra` auto-generates YAML from natural language                      | Code-first                                                                         |
+| Scope                 | LLM + expert-process orchestration                                        | General-purpose distributed systems: payments, ETL, ML, logistics                  |
+| 429-aware retry       | Built in; exponential backoff on HTTP 429                                 | Inngest has `step.ai.infer()`; Temporal requires custom activity retry policy      |
 
 ## When to pick Inngest / Temporal over OpenExpertise
 
