@@ -63,6 +63,10 @@ export function buildProgram(): Command {
           logger.error('--args must be valid JSON')
           process.exit(2)
         }
+        if (cmdOpts.concurrency !== undefined && !Number.isInteger(cmdOpts.concurrency)) {
+          logger.error('--concurrency must be a positive integer')
+          process.exit(2)
+        }
         process.exit(
           await runCommand({
             path,
