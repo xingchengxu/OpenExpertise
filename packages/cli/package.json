@@ -39,6 +39,7 @@
     "@openexpertise/node-kinds-experience": "workspace:*",
     "@openexpertise/tui": "workspace:*",
     "@openexpertise/evolution": "workspace:*",
+    "@openexpertise/authoring": "workspace:*",
     "@openexpertise/llm-openai": "workspace:*",
     "commander": "^12.0.0",
     "pino": "^9.0.0",

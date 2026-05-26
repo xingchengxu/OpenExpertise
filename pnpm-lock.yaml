@@ -84,6 +84,9 @@ importers:
 
   packages/cli:
     dependencies:
+      '@openexpertise/authoring':
+        specifier: workspace:*
+        version: link:../authoring
       '@openexpertise/core':
         specifier: workspace:*
         version: link:../core

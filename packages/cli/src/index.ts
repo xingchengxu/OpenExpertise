@@ -7,6 +7,7 @@ import { initCommand } from './commands/init.js'
 import { stateCommand, resetStateCommand } from './commands/state.js'
 import { diffCommand } from './commands/diff.js'
 import { evolveCommand } from './commands/evolve.js'
+import { ultraCommand } from './commands/ultra.js'
 import { makeLogger } from './logger.js'
 
 export function buildProgram(): Command {
@@ -154,6 +155,31 @@ export function buildProgram(): Command {
         }),
       )
     })
+
+  program
+    .command('ultra')
+    .description('LLM-author a new experience from a natural-language task description')
+    .argument('<task>', 'the task description (natural language)')
+    .option('--draft-root <dir>', 'directory for the draft', '.openexpertise/drafts')
+    .option('--llm <provider>', 'LLM provider: anthropic | openai (auto-detected from env)')
+    .action(
+      async (
+        task: string,
+        cmdOpts: { draftRoot: string; llm?: string },
+        cmd: Command,
+      ) => {
+        const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+        const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+        process.exit(
+          await ultraCommand({
+            taskDescription: task,
+            draftRoot: cmdOpts.draftRoot,
+            logger,
+            ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
+          }),
+        )
+      },
+    )
 
   return program
 }
