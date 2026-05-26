@@ -245,9 +245,11 @@ export default defineConfig({
           text: 'Operations',
           collapsed: false,
           items: [
-            { text: 'Architecture overview', link: '/operations/architecture' },
+            { text: 'Overview', link: '/operations/' },
+            { text: 'Architecture', link: '/operations/architecture' },
             { text: 'Observability', link: '/operations/observability' },
             { text: 'Deployment', link: '/operations/deployment' },
+            { text: 'Performance & cost', link: '/operations/performance' },
           ],
         },
       ],

@@ -21,6 +21,12 @@ The three observability surfaces:
 
 Integration recipes for the common backends.
 
+## [Performance & cost](/operations/performance)
+
+Hard numbers per example (wall time, tokens, USD cost on Claude 3.5 Sonnet and gpt-4o), plus the 6 levers you have when you need to bring them down: concurrency, tight schemas, cache + resume, cheaper models, conditional skip, cli-agent for long sessions.
+
+Includes the runtime's overhead profile (framework adds <100ms total, LLM dominates) and memory footprint (<50MB resident for typical runs).
+
 ## [Deployment](/operations/deployment)
 
 How to run OE in production:
