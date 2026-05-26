@@ -25,27 +25,27 @@ If the generated YAML passes validation, `oe ultra` exits `0` and logs the next 
 
 ## Arguments
 
-| Argument | Required | Description |
-|---|---|---|
-| `<task>` | ✓ | Natural-language description of the workflow you want to create. Quote the whole string. |
+| Argument | Required | Description                                                                              |
+| -------- | -------- | ---------------------------------------------------------------------------------------- |
+| `<task>` | ✓        | Natural-language description of the workflow you want to create. Quote the whole string. |
 
 ## Options
 
-| Flag | Description | Default |
-|---|---|---|
-| `--draft-root <dir>` | Directory under which the draft experience folder is created. | `.openexpertise/drafts` |
-| `--llm <provider>` | LLM provider: `anthropic` \| `openai`. Auto-detected from environment when omitted. | auto |
-| `--log-format <fmt>` | Log format: `json` \| `pretty` | `pretty` |
-| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error` | `info` |
-| `-h, --help` | Display help and exit | — |
+| Flag                  | Description                                                                         | Default                 |
+| --------------------- | ----------------------------------------------------------------------------------- | ----------------------- |
+| `--draft-root <dir>`  | Directory under which the draft experience folder is created.                       | `.openexpertise/drafts` |
+| `--llm <provider>`    | LLM provider: `anthropic` \| `openai`. Auto-detected from environment when omitted. | auto                    |
+| `--log-format <fmt>`  | Log format: `json` \| `pretty`                                                      | `pretty`                |
+| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error`                               | `info`                  |
+| `-h, --help`          | Display help and exit                                                               | —                       |
 
 ## Exit codes
 
-| Code | Meaning |
-|---|---|
-| `0` | Draft written and passes `oe validate` |
-| `1` | LLM provider not configured, or LLM call failed |
-| `2` | Draft written but fails `oe validate` — inspect and fix before running |
+| Code | Meaning                                                                |
+| ---- | ---------------------------------------------------------------------- |
+| `0`  | Draft written and passes `oe validate`                                 |
+| `1`  | LLM provider not configured, or LLM call failed                        |
+| `2`  | Draft written but fails `oe validate` — inspect and fix before running |
 
 ## Examples
 

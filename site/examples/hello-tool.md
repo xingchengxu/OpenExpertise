@@ -5,7 +5,7 @@ description: The smallest possible OpenExpertise experience — one tool node, n
 
 # hello-tool
 
-*The smallest possible OpenExpertise experience: one [tool](/concepts/node-tool) node writes a greeting to [state](/concepts/state).*
+_The smallest possible OpenExpertise experience: one [tool](/concepts/node-tool) node writes a greeting to [state](/concepts/state)._
 
 ## What it demonstrates
 
@@ -32,10 +32,10 @@ No edges — a single node is a valid DAG.
 
 ## State schema
 
-| Field | Type | Direction | Description |
-|---|---|---|---|
-| `name` | `string` | in (via `--args`) | Subject of the greeting |
-| `greeting` | `string` | out | Produced by `greet.mjs` |
+| Field      | Type     | Direction         | Description             |
+| ---------- | -------- | ----------------- | ----------------------- |
+| `name`     | `string` | in (via `--args`) | Subject of the greeting |
+| `greeting` | `string` | out               | Produced by `greet.mjs` |
 
 ## How it runs
 

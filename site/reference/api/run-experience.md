@@ -47,26 +47,26 @@ export interface RunResult {
 
 ## Parameters
 
-| Name | Type | Required | Description |
-|---|---|---|---|
-| `spec` | `ExperienceSpec` | ✓ | Parsed and validated experience specification. Use `parseExperienceYaml` from `@openexpertise/schema` to obtain it. |
-| `experienceDir` | `string` | ✓ | Absolute path to the directory containing `experience.yaml`. Used to resolve relative `impl` paths, tool modules, and sub-experience YAML files. |
-| `dispatchers` | `DispatcherRegistry` | ✓ | Registry containing one `NodeDispatcher` per node kind used in the spec. The runner throws at dispatch time if a required kind is missing. |
-| `events` | `EventBus` | — | An existing `EventBus` to attach to. If omitted, a fresh bus is created internally. Subscribers attached before calling `runExperience` will receive all events. |
-| `args` | `Record<string, unknown>` | — | Runtime arguments passed into every node's `NodeInputBundle.args`. Defaults to `{}`. |
-| `dbPath` | `string` | — | Path for the SQLite state database. Defaults to `<experienceDir>/.openexpertise/state.sqlite`. |
-| `runId` | `string` | — | Stable identifier for this run. Defaults to a random UUID. Supply a deterministic value for idempotent resume semantics. |
-| `eventLogPath` | `string` | — | Path for the `.jsonl` event log. Defaults to `<experienceDir>/.openexpertise/runs/<runId>.jsonl`. |
-| `cache` | `boolean` | — | Enable node-output memoization. Defaults to `true`. Pass `false` to disable. |
-| `concurrency` | `number` | — | Maximum number of nodes that may execute in parallel. Overrides `runtime.concurrency` in the YAML. Defaults to `1` (sequential). |
+| Name            | Type                      | Required | Description                                                                                                                                                      |
+| --------------- | ------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `spec`          | `ExperienceSpec`          | ✓        | Parsed and validated experience specification. Use `parseExperienceYaml` from `@openexpertise/schema` to obtain it.                                              |
+| `experienceDir` | `string`                  | ✓        | Absolute path to the directory containing `experience.yaml`. Used to resolve relative `impl` paths, tool modules, and sub-experience YAML files.                 |
+| `dispatchers`   | `DispatcherRegistry`      | ✓        | Registry containing one `NodeDispatcher` per node kind used in the spec. The runner throws at dispatch time if a required kind is missing.                       |
+| `events`        | `EventBus`                | —        | An existing `EventBus` to attach to. If omitted, a fresh bus is created internally. Subscribers attached before calling `runExperience` will receive all events. |
+| `args`          | `Record<string, unknown>` | —        | Runtime arguments passed into every node's `NodeInputBundle.args`. Defaults to `{}`.                                                                             |
+| `dbPath`        | `string`                  | —        | Path for the SQLite state database. Defaults to `<experienceDir>/.openexpertise/state.sqlite`.                                                                   |
+| `runId`         | `string`                  | —        | Stable identifier for this run. Defaults to a random UUID. Supply a deterministic value for idempotent resume semantics.                                         |
+| `eventLogPath`  | `string`                  | —        | Path for the `.jsonl` event log. Defaults to `<experienceDir>/.openexpertise/runs/<runId>.jsonl`.                                                                |
+| `cache`         | `boolean`                 | —        | Enable node-output memoization. Defaults to `true`. Pass `false` to disable.                                                                                     |
+| `concurrency`   | `number`                  | —        | Maximum number of nodes that may execute in parallel. Overrides `runtime.concurrency` in the YAML. Defaults to `1` (sequential).                                 |
 
 ## Returns
 
-| Field | Type | Description |
-|---|---|---|
-| `runId` | `string` | The UUID for this run (may have been generated internally). |
-| `status` | `'success' \| 'failed' \| 'partial'` | `success` — all nodes finished; `failed` — at least one node triggered `fail_run` policy; `partial` — at least one node was skipped due to a `skip` error policy but no fatal failure. |
-| `finalState` | `Record<string, unknown>` | Snapshot of the entire state blackboard at run completion. Keys are the field names declared in `state.schema`. |
+| Field        | Type                                 | Description                                                                                                                                                                            |
+| ------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runId`      | `string`                             | The UUID for this run (may have been generated internally).                                                                                                                            |
+| `status`     | `'success' \| 'failed' \| 'partial'` | `success` — all nodes finished; `failed` — at least one node triggered `fail_run` policy; `partial` — at least one node was skipped due to a `skip` error policy but no fatal failure. |
+| `finalState` | `Record<string, unknown>`            | Snapshot of the entire state blackboard at run completion. Keys are the field names declared in `state.schema`.                                                                        |
 
 ## Example
 
@@ -96,8 +96,8 @@ const result = await runExperience({
   concurrency: 4,
 })
 
-console.log(result.status)      // 'success'
-console.log(result.finalState)  // { field1: ..., field2: ... }
+console.log(result.status) // 'success'
+console.log(result.finalState) // { field1: ..., field2: ... }
 ```
 
 ## Behavior notes

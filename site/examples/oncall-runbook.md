@@ -5,7 +5,7 @@ description: Structured incident triage — fan-out investigation across dimensi
 
 # oncall-runbook
 
-*When an incident fires, run a structured triage: fetch the incident, investigate across three independent angles in parallel (`for_each` fan-out), rank the findings, and produce a one-page summary for the oncall engineer.*
+_When an incident fires, run a structured triage: fetch the incident, investigate across three independent angles in parallel (`for_each` fan-out), rank the findings, and produce a one-page summary for the oncall engineer._
 
 ## What it demonstrates
 
@@ -43,13 +43,13 @@ Phases: `triage` → `synthesis`.
 
 ## State schema
 
-| Field | Type | Merge | Description |
-|---|---|---|---|
-| `incident` | `object` | — | Raw incident payload |
-| `dimensions` | `array<object>` | — | Investigation angles seeded by `list_dimensions.mjs` |
-| `findings` | `array<object>` | `array_append` | Accumulated from each `investigate` iteration |
-| `prioritized_findings` | `array<object>` | — | Ranked by the `prioritize` agent |
-| `summary` | `string` | — | Oncall-facing one-pager |
+| Field                  | Type            | Merge          | Description                                          |
+| ---------------------- | --------------- | -------------- | ---------------------------------------------------- |
+| `incident`             | `object`        | —              | Raw incident payload                                 |
+| `dimensions`           | `array<object>` | —              | Investigation angles seeded by `list_dimensions.mjs` |
+| `findings`             | `array<object>` | `array_append` | Accumulated from each `investigate` iteration        |
+| `prioritized_findings` | `array<object>` | —              | Ranked by the `prioritize` agent                     |
+| `summary`              | `string`        | —              | Oncall-facing one-pager                              |
 
 ## How it runs
 

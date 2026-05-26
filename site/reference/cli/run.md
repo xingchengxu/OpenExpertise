@@ -24,30 +24,30 @@ Pass `--tui` to replace streaming log lines with a full-screen interactive dashb
 
 ## Arguments
 
-| Argument | Required | Description |
-|---|---|---|
-| `[path]` | — | Path to an `experience.yaml` file or to a directory containing one. Defaults to `.` (current directory). |
+| Argument | Required | Description                                                                                              |
+| -------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `[path]` | —        | Path to an `experience.yaml` file or to a directory containing one. Defaults to `.` (current directory). |
 
 ## Options
 
-| Flag | Description | Default |
-|---|---|---|
-| `--args <json>` | JSON object passed as the `args` map to the experience | `{}` |
-| `--tui` | Show interactive TUI dashboard instead of log output | `false` |
-| `--evolve` | After a successful run, automatically generate evolution proposals | `false` |
-| `--llm <provider>` | LLM provider: `anthropic` \| `openai`. Auto-detected from environment when omitted. | auto |
-| `--concurrency <n>` | Node-level concurrency limit. Overrides `runtime.concurrency` in YAML. Must be a positive integer. | YAML default |
-| `--log-format <fmt>` | Log format: `json` \| `pretty` | `pretty` |
-| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error` | `info` |
-| `-h, --help` | Display help and exit | — |
+| Flag                  | Description                                                                                        | Default      |
+| --------------------- | -------------------------------------------------------------------------------------------------- | ------------ |
+| `--args <json>`       | JSON object passed as the `args` map to the experience                                             | `{}`         |
+| `--tui`               | Show interactive TUI dashboard instead of log output                                               | `false`      |
+| `--evolve`            | After a successful run, automatically generate evolution proposals                                 | `false`      |
+| `--llm <provider>`    | LLM provider: `anthropic` \| `openai`. Auto-detected from environment when omitted.                | auto         |
+| `--concurrency <n>`   | Node-level concurrency limit. Overrides `runtime.concurrency` in YAML. Must be a positive integer. | YAML default |
+| `--log-format <fmt>`  | Log format: `json` \| `pretty`                                                                     | `pretty`     |
+| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error`                                              | `info`       |
+| `-h, --help`          | Display help and exit                                                                              | —            |
 
 ## Exit codes
 
-| Code | Meaning |
-|---|---|
-| `0` | Run completed with `status: success` |
-| `1` | Run completed with `status: failure` or an unhandled runtime error |
-| `2` | Invalid invocation: `--args` is not valid JSON, or `--concurrency` is not a positive integer |
+| Code | Meaning                                                                                      |
+| ---- | -------------------------------------------------------------------------------------------- |
+| `0`  | Run completed with `status: success`                                                         |
+| `1`  | Run completed with `status: failure` or an unhandled runtime error                           |
+| `2`  | Invalid invocation: `--args` is not valid JSON, or `--concurrency` is not a positive integer |
 
 ## Examples
 

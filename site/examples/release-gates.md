@@ -5,7 +5,7 @@ description: Four parallel pre-release checks — license, changelog, coverage, 
 
 # release-gates
 
-*Four independent pre-release checks run in the `scan` phase — license compliance, changelog breaking-change scan, test-coverage delta, and a Claude Code security review — then a single `score` agent fans them in and returns a release/no-release recommendation.*
+_Four independent pre-release checks run in the `scan` phase — license compliance, changelog breaking-change scan, test-coverage delta, and a Claude Code security review — then a single `score` agent fans them in and returns a release/no-release recommendation._
 
 ## What it demonstrates
 
@@ -36,13 +36,13 @@ Phases: `scan` → `gate`.
 
 ## State schema
 
-| Field | Type | Merge | Description |
-|---|---|---|---|
-| `license_issues` | `array<object>` | `array_append` | Non-allowlisted dependencies |
-| `breaking_changes` | `array<object>` | `array_append` | Changelog lines flagged `[BREAKING]` |
-| `coverage_delta` | `object` | — | `{before, after, delta}` coverage numbers |
-| `security_findings` | `array<object>` | `array_append` | From Claude Code's security review |
-| `decision` | `object` | — | `{ready_to_release, score, blocking_issues, recommendation}` |
+| Field               | Type            | Merge          | Description                                                  |
+| ------------------- | --------------- | -------------- | ------------------------------------------------------------ |
+| `license_issues`    | `array<object>` | `array_append` | Non-allowlisted dependencies                                 |
+| `breaking_changes`  | `array<object>` | `array_append` | Changelog lines flagged `[BREAKING]`                         |
+| `coverage_delta`    | `object`        | —              | `{before, after, delta}` coverage numbers                    |
+| `security_findings` | `array<object>` | `array_append` | From Claude Code's security review                           |
+| `decision`          | `object`        | —              | `{ready_to_release, score, blocking_issues, recommendation}` |
 
 ## How it runs
 

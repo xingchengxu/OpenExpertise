@@ -5,7 +5,7 @@ description: Two cli-agent nodes in sequence — Claude Code summarizes a topic,
 
 # cli-orchestration
 
-*The minimal two-CLI demo: Claude Code writes a three-sentence summary; Codex reads it from state and critiques it — both in a single graph, state flowing between them via `{{interpolation}}`.*
+_The minimal two-CLI demo: Claude Code writes a three-sentence summary; Codex reads it from state and critiques it — both in a single graph, state flowing between them via `{{interpolation}}`._
 
 ## What it demonstrates
 
@@ -46,11 +46,11 @@ graph:
 
 ## State schema
 
-| Field | Type | Description |
-|---|---|---|
-| `topic` | `string` | Subject; set in `summarize`'s static `args` |
-| `summary` | `string` | Claude Code's 3-sentence summary |
-| `critique` | `string` | Codex's 2-sentence critique |
+| Field      | Type     | Description                                 |
+| ---------- | -------- | ------------------------------------------- |
+| `topic`    | `string` | Subject; set in `summarize`'s static `args` |
+| `summary`  | `string` | Claude Code's 3-sentence summary            |
+| `critique` | `string` | Codex's 2-sentence critique                 |
 
 ## How it runs
 

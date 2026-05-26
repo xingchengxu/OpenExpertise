@@ -5,7 +5,7 @@ description: Classify, de-duplicate, label, and route an incoming GitHub issue t
 
 # issue-triage
 
-*Triage an incoming GitHub issue: classify it, optionally check for duplicates, assign labels, and suggest an owner — with a [`when:`](/concepts/control-flow) conditional edge that skips the dedup step when no similar issues exist.*
+_Triage an incoming GitHub issue: classify it, optionally check for duplicates, assign labels, and suggest an owner — with a [`when:`](/concepts/control-flow) conditional edge that skips the dedup step when no similar issues exist._
 
 ## What it demonstrates
 
@@ -32,15 +32,15 @@ Phases: `classify` → `dedup` → `route`.
 
 ## State schema
 
-| Field | Type | Description |
-|---|---|---|
-| `issue` | `object` | Raw issue payload from `fixtures/issue.json` |
-| `classification` | `object` | `{type, severity, area}` from the `classify` agent |
-| `similar_issues` | `array<object>` | Candidates from the similarity search tool |
-| `is_duplicate` | `boolean` | Set by `dedup` agent (if it runs) |
-| `duplicate_of` | `string` | Issue ID if duplicate (optional) |
-| `labels` | `array<string>` | Proposed labels (`merge: array_append`) |
-| `suggested_owner` | `string` | GitHub handle for routing |
+| Field             | Type            | Description                                        |
+| ----------------- | --------------- | -------------------------------------------------- |
+| `issue`           | `object`        | Raw issue payload from `fixtures/issue.json`       |
+| `classification`  | `object`        | `{type, severity, area}` from the `classify` agent |
+| `similar_issues`  | `array<object>` | Candidates from the similarity search tool         |
+| `is_duplicate`    | `boolean`       | Set by `dedup` agent (if it runs)                  |
+| `duplicate_of`    | `string`        | Issue ID if duplicate (optional)                   |
+| `labels`          | `array<string>` | Proposed labels (`merge: array_append`)            |
+| `suggested_owner` | `string`        | GitHub handle for routing                          |
 
 ## How it runs
 

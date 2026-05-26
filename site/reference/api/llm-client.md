@@ -58,22 +58,22 @@ export interface LLMClient {
 
 ## `complete` parameters
 
-| Name | Type | Required | Description |
-|---|---|---|---|
-| `model` | `string` | ✓ | Model identifier string, passed verbatim to the provider (e.g. `"claude-sonnet-4-6"`, `"gpt-4o"`). |
-| `messages` | `LLMMessage[]` | ✓ | Conversation turns. Each turn has a `role` (`'user'` or `'assistant'`) and a `content` string. |
-| `system` | `string` | — | System prompt sent before the message list. |
-| `tools` | `LLMTool[]` | — | Tool definitions to expose. Each tool has a `name`, `description`, and a JSON Schema `input_schema`. |
-| `max_tokens` | `number` | — | Maximum tokens in the completion. Defaults to `4096` in most implementations. |
+| Name         | Type           | Required | Description                                                                                          |
+| ------------ | -------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `model`      | `string`       | ✓        | Model identifier string, passed verbatim to the provider (e.g. `"claude-sonnet-4-6"`, `"gpt-4o"`).   |
+| `messages`   | `LLMMessage[]` | ✓        | Conversation turns. Each turn has a `role` (`'user'` or `'assistant'`) and a `content` string.       |
+| `system`     | `string`       | —        | System prompt sent before the message list.                                                          |
+| `tools`      | `LLMTool[]`    | —        | Tool definitions to expose. Each tool has a `name`, `description`, and a JSON Schema `input_schema`. |
+| `max_tokens` | `number`       | —        | Maximum tokens in the completion. Defaults to `4096` in most implementations.                        |
 
 ## `complete` return type
 
-| Field | Type | Description |
-|---|---|---|
-| `text` | `string` | Concatenated text content of all `text`-type blocks in the response. May be empty when the model only returns tool calls. |
-| `tool_calls` | `LLMToolCall[]` | Tool invocations requested by the model. Present only when the model returned at least one tool call. |
-| `usage` | `LLMUsage` | Token counts for the request. Present when the provider reports usage. |
-| `stop_reason` | `string` | Provider-specific stop reason string (e.g. `"end_turn"`, `"tool_use"`, `"stop"`). |
+| Field         | Type            | Description                                                                                                               |
+| ------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `text`        | `string`        | Concatenated text content of all `text`-type blocks in the response. May be empty when the model only returns tool calls. |
+| `tool_calls`  | `LLMToolCall[]` | Tool invocations requested by the model. Present only when the model returned at least one tool call.                     |
+| `usage`       | `LLMUsage`      | Token counts for the request. Present when the provider reports usage.                                                    |
+| `stop_reason` | `string`        | Provider-specific stop reason string (e.g. `"end_turn"`, `"tool_use"`, `"stop"`).                                         |
 
 ## Provided implementations
 

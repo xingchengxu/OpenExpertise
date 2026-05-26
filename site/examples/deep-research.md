@@ -5,7 +5,7 @@ description: Multi-vendor deep research pipeline — Claude Code for technical/a
 
 # deep-research
 
-*A real deep-research pipeline: an agent clarifies the question and plans the work, then Claude Code and Gemini search their respective strengths in parallel (`for_each` fan-out on both), and a synthesis agent cross-references all findings into a cited summary.*
+_A real deep-research pipeline: an agent clarifies the question and plans the work, then Claude Code and Gemini search their respective strengths in parallel (`for_each` fan-out on both), and a synthesis agent cross-references all findings into a cited summary._
 
 ## What it demonstrates
 
@@ -34,17 +34,17 @@ Phases: `scoping` → `search` → `synthesis`.
 
 ## State schema
 
-| Field | Type | Merge | Description |
-|---|---|---|---|
-| `question` | `string` | — | Raw question from `fixtures/question.json` |
-| `clarified_question` | `string` | — | Narrowed question from the `clarify` agent |
-| `assumptions` | `array<string>` | — | Assumptions the clarifier surfaced |
-| `research_plan` | `object` | — | Rationale + parallelism strategy from `decompose` |
-| `claude_subqs` | `array<object>` | — | Sub-questions assigned to Claude |
-| `gemini_subqs` | `array<object>` | — | Sub-questions assigned to Gemini |
-| `raw_findings` | `array<object>` | `array_append` | All claims + evidence + URLs from both CLIs |
-| `citations` | `array<string>` | — | Deduplicated URLs extracted by `extract_citations.mjs` |
-| `cross_referenced` | `object` | — | `{executive_summary, key_findings[], open_questions[]}` |
+| Field                | Type            | Merge          | Description                                             |
+| -------------------- | --------------- | -------------- | ------------------------------------------------------- |
+| `question`           | `string`        | —              | Raw question from `fixtures/question.json`              |
+| `clarified_question` | `string`        | —              | Narrowed question from the `clarify` agent              |
+| `assumptions`        | `array<string>` | —              | Assumptions the clarifier surfaced                      |
+| `research_plan`      | `object`        | —              | Rationale + parallelism strategy from `decompose`       |
+| `claude_subqs`       | `array<object>` | —              | Sub-questions assigned to Claude                        |
+| `gemini_subqs`       | `array<object>` | —              | Sub-questions assigned to Gemini                        |
+| `raw_findings`       | `array<object>` | `array_append` | All claims + evidence + URLs from both CLIs             |
+| `citations`          | `array<string>` | —              | Deduplicated URLs extracted by `extract_citations.mjs`  |
+| `cross_referenced`   | `object`        | —              | `{executive_summary, key_findings[], open_questions[]}` |
 
 ## How it runs
 
@@ -80,7 +80,7 @@ for_each: { source: $.claude_subqs, concurrency: 2 }
 Each iteration receives `$item` (the sub-question) and asks Claude to use WebSearch for at least 3 sources, returning structured JSON:
 
 ```json
-{"raw_findings": [{"sub_question_id": "c1", "claim": "...", "evidence": "...", "url": "..."}]}
+{ "raw_findings": [{ "sub_question_id": "c1", "claim": "...", "evidence": "...", "url": "..." }] }
 ```
 
 `search_gemini` does the same over `gemini_subqs` using Gemini's Google Search grounding. Both nodes write to `raw_findings` with `array_append` — all findings from both CLIs accumulate into one flat list.
@@ -127,10 +127,11 @@ Increase `for_each.concurrency: 4` and `--concurrency 8` if you have many sub-qu
 
 ::: tip Evolution after runs
 After 3+ runs, `oe evolve` typically proposes:
+
 - An academic-paper specialist (cli-agent with Semantic Scholar MCP)
 - A source-credibility scorer between search and synthesis
 - Routing code-heavy sub-questions to Codex instead of Claude
-:::
+  :::
 
 ## Source
 

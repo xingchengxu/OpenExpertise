@@ -18,24 +18,24 @@ On success the command logs `experience valid` and exits `0`. On failure it logs
 
 ## Arguments
 
-| Argument | Required | Description |
-|---|---|---|
-| `[path]` | — | Path to an `experience.yaml` file or to a directory that contains one. Defaults to `.` (current directory). |
+| Argument | Required | Description                                                                                                 |
+| -------- | -------- | ----------------------------------------------------------------------------------------------------------- |
+| `[path]` | —        | Path to an `experience.yaml` file or to a directory that contains one. Defaults to `.` (current directory). |
 
 ## Options
 
-| Flag | Description | Default |
-|---|---|---|
-| `--log-format <fmt>` | Log format: `json` \| `pretty` | `pretty` |
-| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error` | `info` |
-| `-h, --help` | Display help and exit | — |
+| Flag                  | Description                                           | Default  |
+| --------------------- | ----------------------------------------------------- | -------- |
+| `--log-format <fmt>`  | Log format: `json` \| `pretty`                        | `pretty` |
+| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error` | `info`   |
+| `-h, --help`          | Display help and exit                                 | —        |
 
 ## Exit codes
 
-| Code | Meaning |
-|---|---|
-| `0` | YAML is valid |
-| `1` | Validation failed (parse error, schema violation, or file not found) |
+| Code | Meaning                                                              |
+| ---- | -------------------------------------------------------------------- |
+| `0`  | YAML is valid                                                        |
+| `1`  | Validation failed (parse error, schema violation, or file not found) |
 
 ## Examples
 

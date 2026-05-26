@@ -26,20 +26,20 @@ None.
 
 ## Options
 
-| Flag | Description | Default |
-|---|---|---|
-| `--experience <path>` | Path to the experience directory (or `experience.yaml`). | `.` |
-| `--yes` | Confirm the destructive action. Required for the deletion to proceed. | `false` |
-| `--log-format <fmt>` | Log format: `json` \| `pretty` | `pretty` |
-| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error` | `info` |
-| `-h, --help` | Display help and exit | — |
+| Flag                  | Description                                                           | Default  |
+| --------------------- | --------------------------------------------------------------------- | -------- |
+| `--experience <path>` | Path to the experience directory (or `experience.yaml`).              | `.`      |
+| `--yes`               | Confirm the destructive action. Required for the deletion to proceed. | `false`  |
+| `--log-format <fmt>`  | Log format: `json` \| `pretty`                                        | `pretty` |
+| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error`                 | `info`   |
+| `-h, --help`          | Display help and exit                                                 | —        |
 
 ## Exit codes
 
-| Code | Meaning |
-|---|---|
-| `0` | State deleted (or state file did not exist) |
-| `1` | `--yes` not provided, or `experience.yaml` not found |
+| Code | Meaning                                              |
+| ---- | ---------------------------------------------------- |
+| `0`  | State deleted (or state file did not exist)          |
+| `1`  | `--yes` not provided, or `experience.yaml` not found |
 
 ## Examples
 

@@ -47,10 +47,10 @@ export class StateStore {
 
 ## Constructor options
 
-| Name | Type | Required | Description |
-|---|---|---|---|
-| `dbPath` | `string` | ✓ | Absolute path to the SQLite file. Created if it does not exist. |
-| `spec` | `ExperienceSpec` | ✓ | Experience spec used to validate field names and types on every write. |
+| Name     | Type             | Required | Description                                                            |
+| -------- | ---------------- | -------- | ---------------------------------------------------------------------- |
+| `dbPath` | `string`         | ✓        | Absolute path to the SQLite file. Created if it does not exist.        |
+| `spec`   | `ExperienceSpec` | ✓        | Experience spec used to validate field names and types on every write. |
 
 On construction, `StateStore` opens the database with WAL journal mode and ensures the `state_snapshot` and `state_history` tables exist (idempotent `CREATE TABLE IF NOT EXISTS`).
 
@@ -94,11 +94,11 @@ Persists all fields in `delta` in a single SQLite transaction:
 4. Upserts `state_snapshot`.
 5. Appends a row to `state_history`.
 
-| Parameter | Type | Description |
-|---|---|---|
-| `delta` | `Record<string, unknown>` | Fields and their new (or incoming) values. |
-| `meta.runId` | `string` | Run identifier written to `state_history` for provenance. |
-| `meta.nodeId` | `string` | Node identifier written to `state_history` for provenance. |
+| Parameter     | Type                      | Description                                                |
+| ------------- | ------------------------- | ---------------------------------------------------------- |
+| `delta`       | `Record<string, unknown>` | Fields and their new (or incoming) values.                 |
+| `meta.runId`  | `string`                  | Run identifier written to `state_history` for provenance.  |
+| `meta.nodeId` | `string`                  | Node identifier written to `state_history` for provenance. |
 
 ### `close()`
 
@@ -112,11 +112,11 @@ Closes the underlying `better-sqlite3` database handle. Called automatically by 
 
 The merge strategy is declared per-field in YAML (`state.schema.<field>.merge`):
 
-| Strategy | Behavior |
-|---|---|
-| `last_wins` (default) | The incoming value completely replaces the existing value. |
-| `set_once` | The field is written only if it currently has no value (`undefined`). Subsequent writes are silently ignored. |
-| `array_append` | The existing array and the incoming array (or single value wrapped in an array) are concatenated. Requires the field `type` to be `array`. |
+| Strategy              | Behavior                                                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `last_wins` (default) | The incoming value completely replaces the existing value.                                                                                 |
+| `set_once`            | The field is written only if it currently has no value (`undefined`). Subsequent writes are silently ignored.                              |
+| `array_append`        | The existing array and the incoming array (or single value wrapped in an array) are concatenated. Requires the field `type` to be `array`. |
 
 ## Example
 
@@ -129,20 +129,17 @@ const spec = parseExperienceYaml(readFileSync('experience.yaml', 'utf8'))
 const store = new StateStore({ dbPath: '/tmp/my-run.sqlite', spec })
 
 // Write a value
-store.write(
-  { results: ['item-a', 'item-b'] },
-  { runId: 'run-1', nodeId: 'gather' }
-)
+store.write({ results: ['item-a', 'item-b'] }, { runId: 'run-1', nodeId: 'gather' })
 
 // Read it back
-console.log(store.get('results'))  // ['item-a', 'item-b']
+console.log(store.get('results')) // ['item-a', 'item-b']
 
 // Snapshot all fields
-console.log(store.snapshot())  // { results: [...], status: undefined, ... }
+console.log(store.snapshot()) // { results: [...], status: undefined, ... }
 
 // Audit trail
 const rows = store.history('results')
-console.log(rows[0]?.node_id)  // 'gather'
+console.log(rows[0]?.node_id) // 'gather'
 
 store.close()
 ```

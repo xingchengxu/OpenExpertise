@@ -40,12 +40,12 @@ The skeleton is **hard-coded**. The LLM only fills the **leaves**. This is what 
 
 This rigidity has costs.
 
-| What you gain                                                                                  | What you give up                                                                                            |
-| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Reproducibility.** Same DAG every run; replayable trace.                                     | **Spontaneity.** The LLM can't decide to skip a step or invent a new one based on what it's seeing.         |
-| **Observability.** Per-node tokens, per-node activity, per-field write history.                | **Surprise wins.** The agent won't go off-script to fix a side issue it noticed.                            |
-| **Evolution.** You change the graph deliberately, with the advisor's help, and you keep the old version in git. | **Speed of iteration.** Modifying the graph requires a `git apply` step (or a manual YAML edit).            |
-| **Safety.** The graph can't write outside its declared `state.schema` fields.                  | **Generality.** OpenExpertise is for codified SOPs — not for exploratory tasks where you don't know the shape yet. |
+| What you gain                                                                                                   | What you give up                                                                                                   |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Reproducibility.** Same DAG every run; replayable trace.                                                      | **Spontaneity.** The LLM can't decide to skip a step or invent a new one based on what it's seeing.                |
+| **Observability.** Per-node tokens, per-node activity, per-field write history.                                 | **Surprise wins.** The agent won't go off-script to fix a side issue it noticed.                                   |
+| **Evolution.** You change the graph deliberately, with the advisor's help, and you keep the old version in git. | **Speed of iteration.** Modifying the graph requires a `git apply` step (or a manual YAML edit).                   |
+| **Safety.** The graph can't write outside its declared `state.schema` fields.                                   | **Generality.** OpenExpertise is for codified SOPs — not for exploratory tasks where you don't know the shape yet. |
 
 If you want exploratory or open-ended work, **use Claude Code, Codex, or Gemini directly.** OpenExpertise sits one layer above them. It is the conductor; they are the workers.
 
@@ -57,14 +57,14 @@ An `agent` node's contract:
 - id: classify_issue
   kind: agent
   prompt: ./prompts/classify.md
-  reads: [issue]                        # the LLM sees these state fields
-  schema:                               # the LLM MUST return data matching this shape
+  reads: [issue] # the LLM sees these state fields
+  schema: # the LLM MUST return data matching this shape
     type: object
     required: [type, severity]
     properties:
       type: { type: string, enum: [bug, feature, question] }
       severity: { type: string, enum: [low, medium, high] }
-  writes: [classification]              # the result goes to this state field
+  writes: [classification] # the result goes to this state field
 ```
 
 The LLM is called with the prompt + the `issue` state field. It must respond by invoking a `structured_output` tool whose arguments match the inline schema. AJV validates. The result is written to the `classification` state field. **That's the entire contract.**

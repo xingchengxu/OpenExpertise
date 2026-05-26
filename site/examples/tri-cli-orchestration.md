@@ -5,7 +5,7 @@ description: Three rival agentic CLIs — Claude Code, OpenAI Codex, Google Gemi
 
 # tri-cli-orchestration
 
-*Three rival agentic CLIs from three competing vendors — Claude Code, OpenAI Codex, and Google Gemini — orchestrated in a single graph: Claude summarizes, Codex critiques, Gemini delivers the verdict. All sharing state through OpenExpertise's SQLite blackboard.*
+_Three rival agentic CLIs from three competing vendors — Claude Code, OpenAI Codex, and Google Gemini — orchestrated in a single graph: Claude summarizes, Codex critiques, Gemini delivers the verdict. All sharing state through OpenExpertise's SQLite blackboard._
 
 ## What it demonstrates
 
@@ -34,12 +34,12 @@ edges:
 
 ## State schema
 
-| Field | Type | Description |
-|---|---|---|
-| `topic` | `string` | Subject; set in `summarize`'s static `args` |
-| `summary` | `string` | Claude Code's one-sentence summary |
-| `critique` | `string` | Codex's one-sentence critique |
-| `verdict` | `string` | Gemini's one-sentence go/no-go verdict |
+| Field      | Type     | Description                                 |
+| ---------- | -------- | ------------------------------------------- |
+| `topic`    | `string` | Subject; set in `summarize`'s static `args` |
+| `summary`  | `string` | Claude Code's one-sentence summary          |
+| `critique` | `string` | Codex's one-sentence critique               |
+| `verdict`  | `string` | Gemini's one-sentence go/no-go verdict      |
 
 ## How it runs
 
@@ -66,6 +66,7 @@ Each CLI talks to its own vendor's API using its own stored credentials. OpenExp
 Each node has a tightly scoped, one-sentence-output prompt. This keeps the state values small and makes the state flow easy to trace.
 
 **summarize (Claude Code):**
+
 ```
 Write a single-sentence summary of the topic.
 No preamble, no markdown.
@@ -74,6 +75,7 @@ Topic: {{topic}}
 ```
 
 **critique (Codex):**
+
 ```
 In one sentence, point out the single biggest thing this summary misses.
 Be specific. No preamble.
@@ -82,6 +84,7 @@ Summary: {{summary}}
 ```
 
 **verdict (Gemini):**
+
 ```
 Given the summary and the critique, deliver a one-sentence verdict
 on whether the summary is production-ready (yes/no + the single
@@ -98,15 +101,19 @@ Gemini's prompt includes both `{{summary}}` and `{{critique}}` — both are reso
 Here is the actual output captured from one execution, topic: _"In-memory caching strategies for HTTP APIs"_:
 
 **summary** — Claude Code:
+
 > In-memory caching strategies for HTTP APIs store frequently requested response data directly in application memory to reduce latency, lower backend load, and improve throughput, using techniques like time-based expiration, LRU eviction, and cache invalidation on writes.
 
 **critique** — Codex:
+
 > It misses that in-memory caches are per-process, so horizontally scaled APIs can serve inconsistent or stale data across instances unless you add coordination or use a distributed cache.
 
 **verdict** — Gemini:
+
 > No; specify that in-memory caches are per-process, which can lead to data inconsistency across horizontally scaled API instances.
 
 The E2E test in `e2e/tri-cli-orchestration.e2e.test.ts` uses scripted subprocess runners that return exactly this text. The assertions confirm:
+
 - The `claude` binary was invoked first
 - Codex's prompt contained Claude's summary (`frequently requested response data`)
 - Gemini's prompt contained both the summary and the critique (`per-process`)
@@ -128,6 +135,7 @@ No other workflow framework supports this today because none treat CLI-spawned a
 ## How the state flow works technically
 
 When `critique` is dispatched, the `CliAgentDispatcher`:
+
 1. Reads `summary` from the SQLite blackboard
 2. Resolves `{{summary}}` in the prompt template
 3. Spawns `codex` with the resolved prompt as a command-line argument

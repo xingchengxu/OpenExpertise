@@ -5,7 +5,7 @@ description: The smallest LLM-backed OpenExpertise experience — one agent node
 
 # agent-echo
 
-*The smallest LLM-backed experience: one [`agent`](/concepts/node-agent) node reads a name from args and writes a one-sentence greeting.*
+_The smallest LLM-backed experience: one [`agent`](/concepts/node-agent) node reads a name from args and writes a one-sentence greeting._
 
 ## What it demonstrates
 
@@ -30,10 +30,10 @@ graph:
 
 ## State schema
 
-| Field | Type | Direction | Description |
-|---|---|---|---|
-| `name` | `string` | in (via node args) | Who to greet |
-| `greeting` | `string` | out | Model's one-sentence reply |
+| Field      | Type     | Direction          | Description                |
+| ---------- | -------- | ------------------ | -------------------------- |
+| `name`     | `string` | in (via node args) | Who to greet               |
+| `greeting` | `string` | out                | Model's one-sentence reply |
 
 ## How it runs
 

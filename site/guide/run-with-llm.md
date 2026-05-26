@@ -142,10 +142,10 @@ Three reasons free text is a footgun for SOPs:
 
 ## What models are wired in?
 
-| Provider                                                          | Default model        | Override                              |
-| ----------------------------------------------------------------- | -------------------- | ------------------------------------- |
-| Anthropic                                                         | `claude-sonnet-4-6`  | per-node `model:` field, or `--model` |
-| OpenAI (and any OpenAI-compatible endpoint via `OPENAI_BASE_URL`) | `gpt-4o-2024-11-20`  | same                                  |
+| Provider                                                          | Default model       | Override                              |
+| ----------------------------------------------------------------- | ------------------- | ------------------------------------- |
+| Anthropic                                                         | `claude-sonnet-4-6` | per-node `model:` field, or `--model` |
+| OpenAI (and any OpenAI-compatible endpoint via `OPENAI_BASE_URL`) | `gpt-4o-2024-11-20` | same                                  |
 
 The retry policy is automatic — both clients catch HTTP 429 and back off exponentially up to 4 attempts. Tune via constructor opts when calling the API directly, or rely on the defaults from the CLI.
 

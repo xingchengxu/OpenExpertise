@@ -5,7 +5,7 @@ description: Fan-out code review across dimensions, verify each finding adversar
 
 # review-branch
 
-*The canonical OpenExpertise demo: review a code diff across three independent dimensions (bugs, performance, tests), verify every finding adversarially, then score the branch — all in one structured graph.*
+_The canonical OpenExpertise demo: review a code diff across three independent dimensions (bugs, performance, tests), verify every finding adversarially, then score the branch — all in one structured graph._
 
 ## What it demonstrates
 
@@ -36,14 +36,14 @@ Phases: `collect` → `review` → `verify` → `score`.
 
 ## State schema
 
-| Field | Type | Merge | Description |
-|---|---|---|---|
-| `pr_id` | `string` | — | PR identifier passed via `--args` |
-| `diff` | `string` | — | Raw unified diff loaded by `fetch_diff.mjs` |
-| `dimensions` | `array<object>` | — | `[{key:"bugs"}, {key:"perf"}, {key:"tests"}]` |
-| `findings` | `array<object>` | `array_append` | Accumulated from all three review iterations |
-| `verified_findings` | `array<object>` | `array_append` | Accumulated from all verify iterations |
-| `risk_score` | `number` | — | `[0,1]` risk score from the score agent |
+| Field               | Type            | Merge          | Description                                   |
+| ------------------- | --------------- | -------------- | --------------------------------------------- |
+| `pr_id`             | `string`        | —              | PR identifier passed via `--args`             |
+| `diff`              | `string`        | —              | Raw unified diff loaded by `fetch_diff.mjs`   |
+| `dimensions`        | `array<object>` | —              | `[{key:"bugs"}, {key:"perf"}, {key:"tests"}]` |
+| `findings`          | `array<object>` | `array_append` | Accumulated from all three review iterations  |
+| `verified_findings` | `array<object>` | `array_append` | Accumulated from all verify iterations        |
+| `risk_score`        | `number`        | —              | `[0,1]` risk score from the score agent       |
 
 ## How it runs
 
@@ -68,6 +68,7 @@ def get_user(user_id):
 ```
 
 Two problems visible to a careful reviewer:
+
 1. **SQL injection** — `user_id` is string-interpolated directly into the query.
 2. **Missing tests** — the `# TODO: add tests` comment is right there in the diff.
 
@@ -80,11 +81,12 @@ The `perf` dimension may also flag a missing index, depending on the model.
 `fetch_diff` reads `fixtures/add-user-lookup.diff` and writes it to the `diff` state field.
 
 `seed_dimensions` returns three dimensions:
+
 ```json
 [
-  {"key": "bugs",  "focus": "logic errors"},
-  {"key": "perf",  "focus": "regressions"},
-  {"key": "tests", "focus": "missing coverage"}
+  { "key": "bugs", "focus": "logic errors" },
+  { "key": "perf", "focus": "regressions" },
+  { "key": "tests", "focus": "missing coverage" }
 ]
 ```
 
@@ -100,11 +102,11 @@ other reviewers handle other dimensions, and out-of-scope findings will be disca
 
 Typical output from three iterations:
 
-| Dimension | Finding |
-|---|---|
-| `bugs` | "SQL injection via f-string interpolation" (high) |
-| `perf` | "No DB index on users.id; full-table scan on every request" (medium) |
-| `tests` | "No test for `/users/<id>` endpoint" (medium) |
+| Dimension | Finding                                                              |
+| --------- | -------------------------------------------------------------------- |
+| `bugs`    | "SQL injection via f-string interpolation" (high)                    |
+| `perf`    | "No DB index on users.id; full-table scan on every request" (medium) |
+| `tests`   | "No test for `/users/<id>` endpoint" (medium)                        |
 
 All three arrays are merged via `array_append` into `findings` (length 3).
 

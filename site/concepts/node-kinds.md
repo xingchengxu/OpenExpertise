@@ -4,14 +4,14 @@ OpenExpertise ships six node kinds. Picking the right one for each step is most 
 
 ## At a glance
 
-| Kind                                       | Use it when…                                                              | Backed by                          |
-| ------------------------------------------ | ------------------------------------------------------------------------- | ---------------------------------- |
-| [`tool`](/concepts/node-tool)              | The step is deterministic code — fetch, parse, transform, score          | Your `.mjs` file                   |
-| [`agent`](/concepts/node-agent)            | The step needs LLM judgment with a structured output                      | Anthropic / OpenAI client          |
-| [`skill`](/concepts/node-skill)            | You have a reusable, version-tagged SKILL.md package                      | SkillDispatcher + LLM client       |
-| [`dataset`](/concepts/node-dataset)        | The step loads tabular or document data into state                        | file / SQLite / HTTP / MCP-resource |
-| [`experience`](/concepts/node-experience)  | The step is itself a whole sub-experience (graph of graphs)               | Nested `runExperience()`           |
-| [`cli-agent`](/concepts/node-cli-agent)    | The step needs the full power of Claude Code / Codex / Gemini             | Subprocess + JSON-mode parser      |
+| Kind                                      | Use it when…                                                    | Backed by                           |
+| ----------------------------------------- | --------------------------------------------------------------- | ----------------------------------- |
+| [`tool`](/concepts/node-tool)             | The step is deterministic code — fetch, parse, transform, score | Your `.mjs` file                    |
+| [`agent`](/concepts/node-agent)           | The step needs LLM judgment with a structured output            | Anthropic / OpenAI client           |
+| [`skill`](/concepts/node-skill)           | You have a reusable, version-tagged SKILL.md package            | SkillDispatcher + LLM client        |
+| [`dataset`](/concepts/node-dataset)       | The step loads tabular or document data into state              | file / SQLite / HTTP / MCP-resource |
+| [`experience`](/concepts/node-experience) | The step is itself a whole sub-experience (graph of graphs)     | Nested `runExperience()`            |
+| [`cli-agent`](/concepts/node-cli-agent)   | The step needs the full power of Claude Code / Codex / Gemini   | Subprocess + JSON-mode parser       |
 
 ## The decision tree
 
@@ -51,17 +51,17 @@ Is it a whole sub-flow I want to invoke atomically?
 Regardless of kind, every node spec has:
 
 ```yaml
-- id: my_node           # unique within the graph
-  kind: tool            # one of the 6
-  phase: collect        # optional, for UI grouping
-  reads: [foo, bar]     # state fields injected into the node's input
-  writes: [baz]         # state fields the node is allowed to write to
-  on_error:             # optional retry/skip/fail policy
+- id: my_node # unique within the graph
+  kind: tool # one of the 6
+  phase: collect # optional, for UI grouping
+  reads: [foo, bar] # state fields injected into the node's input
+  writes: [baz] # state fields the node is allowed to write to
+  on_error: # optional retry/skip/fail policy
     policy: retry
     attempts: 3
     backoff: exponential
     base_ms: 1000
-  for_each:             # optional fan-out
+  for_each: # optional fan-out
     source: $.dimensions
     concurrency: 4
   # ... plus kind-specific fields ...
@@ -92,18 +92,18 @@ Each kind has its own deep-dive page with required fields, examples, and gotchas
 
 Looking at the [examples library](/examples/), here's the mix-and-match:
 
-| Example                   | Tools used                                                          |
-| ------------------------- | ------------------------------------------------------------------- |
-| `hello-tool`              | `tool`                                                              |
-| `agent-echo`              | `agent`                                                             |
-| `dataset-aggregate`       | `dataset` + `tool`                                                  |
-| `review-branch`           | `tool` + `agent` ×3                                                 |
-| `oncall-runbook`          | `tool` + `agent` (with `for_each`)                                  |
-| `issue-triage`            | `tool` + `agent` ×4 (with `when:` edges)                            |
-| `release-gates`           | `tool` ×3 + `cli-agent` + `agent`                                   |
-| `cli-orchestration`       | `cli-agent` ×2                                                      |
-| `tri-cli-orchestration`   | `cli-agent` ×3 (3 vendors, one graph)                               |
-| `deep-research`           | `tool` + `agent` ×4                                                 |
-| `systematic-debugging`    | `tool` + `agent` ×3                                                 |
+| Example                 | Tools used                               |
+| ----------------------- | ---------------------------------------- |
+| `hello-tool`            | `tool`                                   |
+| `agent-echo`            | `agent`                                  |
+| `dataset-aggregate`     | `dataset` + `tool`                       |
+| `review-branch`         | `tool` + `agent` ×3                      |
+| `oncall-runbook`        | `tool` + `agent` (with `for_each`)       |
+| `issue-triage`          | `tool` + `agent` ×4 (with `when:` edges) |
+| `release-gates`         | `tool` ×3 + `cli-agent` + `agent`        |
+| `cli-orchestration`     | `cli-agent` ×2                           |
+| `tri-cli-orchestration` | `cli-agent` ×3 (3 vendors, one graph)    |
+| `deep-research`         | `tool` + `agent` ×4                      |
+| `systematic-debugging`  | `tool` + `agent` ×3                      |
 
 → Start with the [`tool` page](/concepts/node-tool) — it's the simplest.

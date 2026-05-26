@@ -16,25 +16,25 @@ The command is read-only and does not modify any state. It is useful for post-mo
 
 ## Arguments
 
-| Argument | Required | Description |
-|---|---|---|
-| `<run-id>` | ✓ | The run-id to inspect. Must match a `.jsonl` file at `.openexpertise/runs/<run-id>.jsonl`. |
+| Argument   | Required | Description                                                                                |
+| ---------- | -------- | ------------------------------------------------------------------------------------------ |
+| `<run-id>` | ✓        | The run-id to inspect. Must match a `.jsonl` file at `.openexpertise/runs/<run-id>.jsonl`. |
 
 ## Options
 
-| Flag | Description | Default |
-|---|---|---|
-| `--experience <path>` | Path to the experience directory (or `experience.yaml`). Used to locate `.openexpertise/runs/`. | `.` |
-| `--log-format <fmt>` | Log format: `json` \| `pretty` | `pretty` |
-| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error` | `info` |
-| `-h, --help` | Display help and exit | — |
+| Flag                  | Description                                                                                     | Default  |
+| --------------------- | ----------------------------------------------------------------------------------------------- | -------- |
+| `--experience <path>` | Path to the experience directory (or `experience.yaml`). Used to locate `.openexpertise/runs/`. | `.`      |
+| `--log-format <fmt>`  | Log format: `json` \| `pretty`                                                                  | `pretty` |
+| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error`                                           | `info`   |
+| `-h, --help`          | Display help and exit                                                                           | —        |
 
 ## Exit codes
 
-| Code | Meaning |
-|---|---|
-| `0` | Log read and emitted successfully |
-| `1` | Run log not found at the expected path |
+| Code | Meaning                                |
+| ---- | -------------------------------------- |
+| `0`  | Log read and emitted successfully      |
+| `1`  | Run log not found at the expected path |
 
 ## Examples
 

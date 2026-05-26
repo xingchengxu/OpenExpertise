@@ -46,9 +46,9 @@ Synchronously calls every registered listener with `event`. Listener errors are 
 
 ```ts
 export type RunEvent =
-  | { type: 'run.started';  run_id: string; ts: string; args?: unknown }
+  | { type: 'run.started'; run_id: string; ts: string; args?: unknown }
   | { type: 'run.finished'; run_id: string; ts: string; status: 'success' | 'failed' | 'partial' }
-  | { type: 'node.ready';   run_id: string; node_id: string; ts: string; phase?: string }
+  | { type: 'node.ready'; run_id: string; node_id: string; ts: string; phase?: string }
   | { type: 'node.started'; run_id: string; node_id: string; ts: string; phase?: string }
   | {
       type: 'node.finished'
@@ -58,9 +58,23 @@ export type RunEvent =
       phase?: string
       metrics?: { tokens_in?: number; tokens_out?: number; cost_usd?: number }
     }
-  | { type: 'node.failed';   run_id: string; node_id: string; ts: string; phase?: string; error: string }
-  | { type: 'node.skipped';  run_id: string; node_id: string; ts: string; phase?: string; reason: string }
-  | { type: 'state.write';   run_id: string; node_id: string; field: string; ts: string }
+  | {
+      type: 'node.failed'
+      run_id: string
+      node_id: string
+      ts: string
+      phase?: string
+      error: string
+    }
+  | {
+      type: 'node.skipped'
+      run_id: string
+      node_id: string
+      ts: string
+      phase?: string
+      reason: string
+    }
+  | { type: 'state.write'; run_id: string; node_id: string; field: string; ts: string }
   | {
       type: 'node.tokens'
       run_id: string
@@ -75,28 +89,28 @@ export type RunEvent =
 
 ### Event reference
 
-| `type` | Emitted by | Key fields | Description |
-|---|---|---|---|
-| `run.started` | `runExperience` | `args` | Emitted at the very start of a run, before any node executes. |
-| `run.finished` | `runExperience` | `status` | Emitted after all nodes have settled (success, failure, or partial). |
-| `node.ready` | Scheduler | `node_id`, `phase` | Emitted when a node's upstream dependencies are satisfied and it is queued for execution. |
-| `node.started` | Scheduler | `node_id`, `phase` | Emitted immediately before the dispatcher's `run` method is called. |
-| `node.finished` | Scheduler | `node_id`, `phase`, `metrics` | Emitted after the dispatcher's `run` returns successfully. |
-| `node.failed` | Scheduler | `node_id`, `error` | Emitted when the dispatcher throws an unhandled error. |
-| `node.skipped` | Scheduler | `node_id`, `reason` | Emitted when a node is skipped due to a `skip` error policy or an unsatisfied `when:` edge condition. |
-| `state.write` | `StateStore` | `node_id`, `field` | Emitted once per field on every call to `StateStore.write`. |
-| `node.tokens` | Dispatchers | `input_tokens`, `output_tokens`, `model` | Emitted by LLM-backed dispatchers (`agent`, `skill`, `cli-agent`) after a completion call. |
-| `node.activity` | Dispatchers | `activity` | Free-form status string emitted by dispatchers at key internal steps (e.g. `"spawning claude-code (timeout 600000ms)"`). Used by the TUI for live progress display. |
+| `type`          | Emitted by      | Key fields                               | Description                                                                                                                                                         |
+| --------------- | --------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `run.started`   | `runExperience` | `args`                                   | Emitted at the very start of a run, before any node executes.                                                                                                       |
+| `run.finished`  | `runExperience` | `status`                                 | Emitted after all nodes have settled (success, failure, or partial).                                                                                                |
+| `node.ready`    | Scheduler       | `node_id`, `phase`                       | Emitted when a node's upstream dependencies are satisfied and it is queued for execution.                                                                           |
+| `node.started`  | Scheduler       | `node_id`, `phase`                       | Emitted immediately before the dispatcher's `run` method is called.                                                                                                 |
+| `node.finished` | Scheduler       | `node_id`, `phase`, `metrics`            | Emitted after the dispatcher's `run` returns successfully.                                                                                                          |
+| `node.failed`   | Scheduler       | `node_id`, `error`                       | Emitted when the dispatcher throws an unhandled error.                                                                                                              |
+| `node.skipped`  | Scheduler       | `node_id`, `reason`                      | Emitted when a node is skipped due to a `skip` error policy or an unsatisfied `when:` edge condition.                                                               |
+| `state.write`   | `StateStore`    | `node_id`, `field`                       | Emitted once per field on every call to `StateStore.write`.                                                                                                         |
+| `node.tokens`   | Dispatchers     | `input_tokens`, `output_tokens`, `model` | Emitted by LLM-backed dispatchers (`agent`, `skill`, `cli-agent`) after a completion call.                                                                          |
+| `node.activity` | Dispatchers     | `activity`                               | Free-form status string emitted by dispatchers at key internal steps (e.g. `"spawning claude-code (timeout 600000ms)"`). Used by the TUI for live progress display. |
 
 ## Common fields
 
 All `RunEvent` variants include:
 
-| Field | Type | Description |
-|---|---|---|
-| `type` | `string` | Discriminant. Use it to narrow the union. |
-| `run_id` | `string` | UUID of the run that emitted the event. |
-| `ts` | `string` | ISO-8601 timestamp at the moment of emission. |
+| Field    | Type     | Description                                   |
+| -------- | -------- | --------------------------------------------- |
+| `type`   | `string` | Discriminant. Use it to narrow the union.     |
+| `run_id` | `string` | UUID of the run that emitted the event.       |
+| `ts`     | `string` | ISO-8601 timestamp at the moment of emission. |
 
 ## Example
 
@@ -112,7 +126,7 @@ let totalTokensOut = 0
 
 const unsub = bus.subscribe((e: RunEvent) => {
   if (e.type === 'node.tokens') {
-    totalTokensIn  += e.input_tokens
+    totalTokensIn += e.input_tokens
     totalTokensOut += e.output_tokens
   }
   if (e.type === 'node.failed') {
@@ -121,7 +135,7 @@ const unsub = bus.subscribe((e: RunEvent) => {
   if (e.type === 'run.finished') {
     console.log(`Run ${e.run_id} ${e.status}`)
     console.log(`Total tokens: ${totalTokensIn} in / ${totalTokensOut} out`)
-    unsub()  // clean up
+    unsub() // clean up
   }
 })
 

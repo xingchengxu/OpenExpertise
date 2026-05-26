@@ -18,25 +18,25 @@ If the SQLite file does not exist yet (i.e. no run has completed), `oe state` ex
 
 ## Arguments
 
-| Argument | Required | Description |
-|---|---|---|
-| `[field]` | — | A specific state field name to read. When omitted, the full snapshot is returned. |
+| Argument  | Required | Description                                                                       |
+| --------- | -------- | --------------------------------------------------------------------------------- |
+| `[field]` | —        | A specific state field name to read. When omitted, the full snapshot is returned. |
 
 ## Options
 
-| Flag | Description | Default |
-|---|---|---|
-| `--experience <path>` | Path to the experience directory (or `experience.yaml`). | `.` |
-| `--log-format <fmt>` | Log format: `json` \| `pretty` | `pretty` |
-| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error` | `info` |
-| `-h, --help` | Display help and exit | — |
+| Flag                  | Description                                              | Default  |
+| --------------------- | -------------------------------------------------------- | -------- |
+| `--experience <path>` | Path to the experience directory (or `experience.yaml`). | `.`      |
+| `--log-format <fmt>`  | Log format: `json` \| `pretty`                           | `pretty` |
+| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error`    | `info`   |
+| `-h, --help`          | Display help and exit                                    | —        |
 
 ## Exit codes
 
-| Code | Meaning |
-|---|---|
-| `0` | State read successfully (or state file does not exist yet) |
-| `1` | `experience.yaml` not found |
+| Code | Meaning                                                    |
+| ---- | ---------------------------------------------------------- |
+| `0`  | State read successfully (or state file does not exist yet) |
+| `1`  | `experience.yaml` not found                                |
 
 ## Examples
 

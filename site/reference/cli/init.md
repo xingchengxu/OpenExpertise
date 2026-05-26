@@ -22,24 +22,24 @@ If the target directory already exists, `init` exits with code `1` and logs an e
 
 ## Arguments
 
-| Argument | Required | Description |
-|---|---|---|
-| `<name>` | ✓ | Name of the directory to create (also used as the experience `name` field in YAML) |
+| Argument | Required | Description                                                                        |
+| -------- | -------- | ---------------------------------------------------------------------------------- |
+| `<name>` | ✓        | Name of the directory to create (also used as the experience `name` field in YAML) |
 
 ## Options
 
-| Flag | Description | Default |
-|---|---|---|
-| `--log-format <fmt>` | Log format: `json` \| `pretty` | `pretty` |
-| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error` | `info` |
-| `-h, --help` | Display help and exit | — |
+| Flag                  | Description                                           | Default  |
+| --------------------- | ----------------------------------------------------- | -------- |
+| `--log-format <fmt>`  | Log format: `json` \| `pretty`                        | `pretty` |
+| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error` | `info`   |
+| `-h, --help`          | Display help and exit                                 | —        |
 
 ## Exit codes
 
-| Code | Meaning |
-|---|---|
-| `0` | Directory scaffolded successfully |
-| `1` | Target directory already exists or write error |
+| Code | Meaning                                        |
+| ---- | ---------------------------------------------- |
+| `0`  | Directory scaffolded successfully              |
+| `1`  | Target directory already exists or write error |
 
 ## Examples
 

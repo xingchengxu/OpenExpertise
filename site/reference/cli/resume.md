@@ -22,25 +22,25 @@ The original args are recovered automatically from the first event (`run.started
 
 ## Arguments
 
-| Argument | Required | Description |
-|---|---|---|
-| `<run-id>` | ✓ | The run-id of the prior run to resume from. Must match a file at `.openexpertise/runs/<run-id>.jsonl`. |
+| Argument   | Required | Description                                                                                            |
+| ---------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `<run-id>` | ✓        | The run-id of the prior run to resume from. Must match a file at `.openexpertise/runs/<run-id>.jsonl`. |
 
 ## Options
 
-| Flag | Description | Default |
-|---|---|---|
-| `--experience <path>` | Path to the experience directory (or `experience.yaml`). | `.` |
-| `--log-format <fmt>` | Log format: `json` \| `pretty` | `pretty` |
-| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error` | `info` |
-| `-h, --help` | Display help and exit | — |
+| Flag                  | Description                                              | Default  |
+| --------------------- | -------------------------------------------------------- | -------- |
+| `--experience <path>` | Path to the experience directory (or `experience.yaml`). | `.`      |
+| `--log-format <fmt>`  | Log format: `json` \| `pretty`                           | `pretty` |
+| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error`    | `info`   |
+| `-h, --help`          | Display help and exit                                    | —        |
 
 ## Exit codes
 
-| Code | Meaning |
-|---|---|
-| `0` | Resumed run completed with `status: success` |
-| `1` | `experience.yaml` not found, prior run log not found, or run completed with `status: failure` |
+| Code | Meaning                                                                                       |
+| ---- | --------------------------------------------------------------------------------------------- |
+| `0`  | Resumed run completed with `status: success`                                                  |
+| `1`  | `experience.yaml` not found, prior run log not found, or run completed with `status: failure` |
 
 ## Examples
 

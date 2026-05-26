@@ -5,7 +5,7 @@ description: Load a CSV with a dataset node, then aggregate it with a tool node 
 
 # dataset-aggregate
 
-*A two-node pipeline: a [`dataset`](/concepts/node-dataset) node loads a CSV into [state](/concepts/state), a [`tool`](/concepts/node-tool) node aggregates it — no LLM involved.*
+_A two-node pipeline: a [`dataset`](/concepts/node-dataset) node loads a CSV into [state](/concepts/state), a [`tool`](/concepts/node-tool) node aggregates it — no LLM involved._
 
 ## What it demonstrates
 
@@ -37,10 +37,10 @@ graph:
 
 ## State schema
 
-| Field | Type | Direction | Description |
-|---|---|---|---|
-| `rows` | `array<object>` | intermediate | CSV rows loaded by `load_rows` |
-| `total` | `number` | out | Sum of the `amount` column |
+| Field   | Type            | Direction    | Description                    |
+| ------- | --------------- | ------------ | ------------------------------ |
+| `rows`  | `array<object>` | intermediate | CSV rows loaded by `load_rows` |
+| `total` | `number`        | out          | Sum of the `amount` column     |
 
 ## How it runs
 

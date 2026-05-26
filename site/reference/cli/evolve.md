@@ -26,26 +26,26 @@ Passing `--evolve` to `oe run` calls `oe evolve` automatically after a successfu
 
 ## Arguments
 
-| Argument | Required | Description |
-|---|---|---|
-| `<run-id>` | ✓ | Run-id of the completed run to analyse. Must match a `.jsonl` file at `.openexpertise/runs/<run-id>.jsonl`. |
+| Argument   | Required | Description                                                                                                 |
+| ---------- | -------- | ----------------------------------------------------------------------------------------------------------- |
+| `<run-id>` | ✓        | Run-id of the completed run to analyse. Must match a `.jsonl` file at `.openexpertise/runs/<run-id>.jsonl`. |
 
 ## Options
 
-| Flag | Description | Default |
-|---|---|---|
-| `--experience <path>` | Path to the experience directory (or `experience.yaml`). | `.` |
-| `--llm <provider>` | LLM provider: `anthropic` \| `openai`. Auto-detected from environment when omitted. | auto |
-| `--log-format <fmt>` | Log format: `json` \| `pretty` | `pretty` |
-| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error` | `info` |
-| `-h, --help` | Display help and exit | — |
+| Flag                  | Description                                                                         | Default  |
+| --------------------- | ----------------------------------------------------------------------------------- | -------- |
+| `--experience <path>` | Path to the experience directory (or `experience.yaml`).                            | `.`      |
+| `--llm <provider>`    | LLM provider: `anthropic` \| `openai`. Auto-detected from environment when omitted. | auto     |
+| `--log-format <fmt>`  | Log format: `json` \| `pretty`                                                      | `pretty` |
+| `--log-level <level>` | Log verbosity: `info` \| `debug` \| `warn` \| `error`                               | `info`   |
+| `-h, --help`          | Display help and exit                                                               | —        |
 
 ## Exit codes
 
-| Code | Meaning |
-|---|---|
-| `0` | Proposals written successfully |
-| `1` | `experience.yaml` not found, run log not found, or LLM call failed |
+| Code | Meaning                                                            |
+| ---- | ------------------------------------------------------------------ |
+| `0`  | Proposals written successfully                                     |
+| `1`  | `experience.yaml` not found, run log not found, or LLM call failed |
 
 ## Examples
 

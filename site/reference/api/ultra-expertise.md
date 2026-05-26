@@ -33,7 +33,9 @@ export class UltraExpertise {
     taskDescription: string
     rootDir: string
     draftSlug?: string
-  }): Promise<UltraResult & WriteDraftResult & { validation: { valid: boolean; errors?: string[] } }>
+  }): Promise<
+    UltraResult & WriteDraftResult & { validation: { valid: boolean; errors?: string[] } }
+  >
 }
 ```
 
@@ -74,10 +76,10 @@ export interface SynthesisOutput {
 
 ## Constructor options
 
-| Name | Type | Required | Description |
-|---|---|---|---|
-| `client` | `LLMClient` | ✓ | Any `LLMClient` implementation. `AnthropicLLMClient` is the standard choice. |
-| `model` | `string` | — | Model used for both `analyze` and `synthesize` calls. Defaults to `'claude-sonnet-4-6'`. |
+| Name     | Type        | Required | Description                                                                              |
+| -------- | ----------- | -------- | ---------------------------------------------------------------------------------------- |
+| `client` | `LLMClient` | ✓        | Any `LLMClient` implementation. `AnthropicLLMClient` is the standard choice.             |
+| `model`  | `string`    | —        | Model used for both `analyze` and `synthesize` calls. Defaults to `'claude-sonnet-4-6'`. |
 
 ## `analyze`
 
@@ -87,8 +89,8 @@ async analyze(taskDescription: string): Promise<AnalysisOutput>
 
 Sends `taskDescription` to the LLM with a system prompt loaded from `prompts/analyzer.md`. The model returns a structured analysis via tool call. AJV validates the response against `ANALYSIS_SCHEMA` before returning.
 
-| Parameter | Type | Description |
-|---|---|---|
+| Parameter         | Type     | Description                                                                                       |
+| ----------------- | -------- | ------------------------------------------------------------------------------------------------- |
 | `taskDescription` | `string` | Plain-text description of the workflow to automate. Can be a few sentences or several paragraphs. |
 
 Throws if the LLM does not return a `structured_output` tool call, or if the tool call fails AJV validation (message lists all constraint violations).
@@ -115,22 +117,22 @@ async author(opts: {
 
 Runs `analyze` then `synthesize` then writes all files to disk under `<rootDir>/<slug>/`, and validates the generated YAML with `parseExperienceYaml` + `validateExperienceSpec`.
 
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `taskDescription` | `string` | ✓ | Task description forwarded to both phases. |
-| `rootDir` | `string` | ✓ | Directory under which the draft folder is created. |
-| `draftSlug` | `string` | — | Subdirectory name for the draft. Defaults to a slugified form of `analysis.name`. |
+| Parameter         | Type     | Required | Description                                                                       |
+| ----------------- | -------- | -------- | --------------------------------------------------------------------------------- |
+| `taskDescription` | `string` | ✓        | Task description forwarded to both phases.                                        |
+| `rootDir`         | `string` | ✓        | Directory under which the draft folder is created.                                |
+| `draftSlug`       | `string` | —        | Subdirectory name for the draft. Defaults to a slugified form of `analysis.name`. |
 
 Returns:
 
-| Field | Type | Description |
-|---|---|---|
-| `analysis` | `AnalysisOutput` | Phase-1 analysis result. |
-| `synthesis` | `SynthesisOutput` | Phase-2 synthesis result. |
-| `draftDir` | `string` | Absolute path to the written draft directory. |
-| `filesWritten` | `string[]` | List of file paths written relative to `draftDir`. |
-| `validation.valid` | `boolean` | Whether the generated YAML passed `validateExperienceSpec`. |
-| `validation.errors` | `string[]` | AJV error messages if validation failed. |
+| Field               | Type              | Description                                                 |
+| ------------------- | ----------------- | ----------------------------------------------------------- |
+| `analysis`          | `AnalysisOutput`  | Phase-1 analysis result.                                    |
+| `synthesis`         | `SynthesisOutput` | Phase-2 synthesis result.                                   |
+| `draftDir`          | `string`          | Absolute path to the written draft directory.               |
+| `filesWritten`      | `string[]`        | List of file paths written relative to `draftDir`.          |
+| `validation.valid`  | `boolean`         | Whether the generated YAML passed `validateExperienceSpec`. |
+| `validation.errors` | `string[]`        | AJV error messages if validation failed.                    |
 
 ::: warning Validation failures are non-fatal
 `author` always writes files to disk even when `validation.valid` is `false`. This is intentional — a partially valid draft is still useful as a starting point. Check `validation.errors` and edit before running.

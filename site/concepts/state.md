@@ -14,7 +14,7 @@ state:
     findings: { type: array, items: { type: object }, merge: array_append }
     verified_findings: { type: array, items: { type: object }, merge: array_append }
     risk_score: { type: number }
-  store: ./custom-path.sqlite    # optional; defaults to .openexpertise/state.sqlite
+  store: ./custom-path.sqlite # optional; defaults to .openexpertise/state.sqlite
 ```
 
 Each field has:
@@ -29,11 +29,11 @@ The runtime enforces this schema. A node that tries to write a field not in `sta
 
 When multiple nodes (or multiple `for_each` iterations of one node) write to the same field, the merge strategy decides:
 
-| Strategy       | Behavior                                                                                  | Use case                                                              |
-| -------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `set_once`     | First write wins; subsequent writes throw.                                                | Constants like `pr_id` that should only ever be set once.             |
-| `last_wins` (default) | The latest write replaces the prior value.                                         | Scalars that get refined: `risk_score`, `summary`.                    |
-| `array_append` | Each write appends to an array. Order is write-arrival order.                             | Fan-out collections: `findings`, `events`, `prioritized_findings`.    |
+| Strategy              | Behavior                                                      | Use case                                                           |
+| --------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `set_once`            | First write wins; subsequent writes throw.                    | Constants like `pr_id` that should only ever be set once.          |
+| `last_wins` (default) | The latest write replaces the prior value.                    | Scalars that get refined: `risk_score`, `summary`.                 |
+| `array_append`        | Each write appends to an array. Order is write-arrival order. | Fan-out collections: `findings`, `events`, `prioritized_findings`. |
 
 For a fan-out node:
 
@@ -64,7 +64,7 @@ import { StateStore } from '@openexpertise/core'
 const store = new StateStore({ dbPath, spec })
 const findings = store.get('findings')
 const snapshot = store.snapshot()
-const history = store.history('findings')   // every write, oldest-first
+const history = store.history('findings') // every write, oldest-first
 store.close()
 ```
 
