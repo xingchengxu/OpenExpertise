@@ -37,6 +37,7 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started', activeMatch: '^/guide/' },
       { text: 'Concepts', link: '/concepts/experiences', activeMatch: '^/concepts/' },
       { text: 'Examples', link: '/examples/', activeMatch: '^/examples/' },
+      { text: 'Use cases', link: '/use-cases/', activeMatch: '^/use-cases/' },
       { text: 'Cookbook', link: '/cookbook/', activeMatch: '^/cookbook/' },
       {
         text: 'Reference',
@@ -57,6 +58,7 @@ export default defineConfig({
       {
         text: 'v0.1.0',
         items: [
+          { text: 'Roadmap', link: '/roadmap' },
           {
             text: 'Changelog',
             link: 'https://github.com/xingchengxu/OpenExpertise/blob/main/CHANGELOG.md',
@@ -254,6 +256,24 @@ export default defineConfig({
           text: 'Cookbook',
           collapsed: false,
           items: [{ text: 'Recipes index', link: '/cookbook/' }],
+        },
+      ],
+      '/use-cases/': [
+        {
+          text: 'Use cases',
+          collapsed: false,
+          items: [{ text: 'By role / scenario', link: '/use-cases/' }],
+        },
+      ],
+      '/roadmap': [
+        {
+          text: 'Project',
+          collapsed: false,
+          items: [
+            { text: 'Roadmap', link: '/roadmap' },
+            { text: 'FAQ', link: '/faq' },
+            { text: 'Glossary', link: '/glossary' },
+          ],
         },
       ],
       '/faq': [
