@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@openexpertise/schema": "workspace:*",
-    "better-sqlite3": "^11.0.0",
+    "better-sqlite3": "^12.10.0",
     "object-hash": "^3.0.0"
   },
   "devDependencies": {

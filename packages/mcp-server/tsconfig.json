@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "composite": true
+  },
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../cli" },
+    { "path": "../core" },
+    { "path": "../evolution" },
+    { "path": "../node-kinds-agent" },
+    { "path": "../node-kinds-cli-agent" },
+    { "path": "../node-kinds-dataset" },
+    { "path": "../node-kinds-experience" },
+    { "path": "../node-kinds-skill" },
+    { "path": "../node-kinds-tool" },
+    { "path": "../schema" }
+  ]
+}

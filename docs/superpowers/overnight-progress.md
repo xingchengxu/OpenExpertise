@@ -255,3 +255,28 @@ Logging for v1.1 consideration.
 1. **Merge `feat/cli-agent-node-kind` into `main`** when satisfied.
 2. **Manual smoke** with at least one real CLI installed: `node packages/cli/dist/bin.js run examples/cli-orchestration` (requires `claude` + `codex` on PATH).
 3. **Start Plan B** — `@openexpertise/mcp-server` exposing 5 tools (oe_run/validate/state/inspect/evolve) over stdio MCP. Spec section already written in the integration spec doc.
+
+---
+
+## Plan B — MCP Server (2026-05-26)
+
+Branch: `feat/mcp-server` (off `main`)
+Spec: `docs/superpowers/specs/2026-05-26-agentic-cli-integration-design.md` (Plan B section)
+Plan: `docs/superpowers/plans/2026-05-26-mcp-server.md`
+
+### What shipped
+
+| Area | Result |
+|---|---|
+| New package | `@openexpertise/mcp-server` with `oe-mcp` bin |
+| Tools | `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `oe_evolve` |
+| CLI integration | Reuses `@openexpertise/cli/llm-factory` via new subpath export |
+| Tests | In-process MCP round-trip via SDK's InMemoryTransport |
+| Docs | `docs/mcp-server.md` with per-CLI registration instructions |
+| Side: bumped better-sqlite3 11 → 12.10.0 | Node 26 compatibility (no prebuild for v11 on NODE_MODULE_VERSION 147) |
+
+### Next concrete actions
+
+1. Merge `feat/mcp-server` into `main`.
+2. Register the server in Claude Code: `claude mcp add openexpertise -- node $PWD/packages/mcp-server/dist/bin.js`. Validate by asking Claude to "use oe_validate on examples/hello-tool".
+3. Launch prep: npm publish (all packages have publishConfig), GitHub remote, docs site.
