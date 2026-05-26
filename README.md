@@ -26,12 +26,16 @@ node packages/cli/dist/bin.js run examples/review-branch --tui
 
 **Evolve** — ask the advisor what's missing:
 
-```bash
+````bash
 node packages/cli/dist/bin.js evolve run-2026-05-26-a1b2c3
-# → wrote .openexpertise/proposals/run-2026-05-26-a1b2c3.md
+# → wrote .openexpertise/evolution/run-2026-05-26-a1b2c3.md
 #   proposal: "Add `security` dimension"
-git apply .openexpertise/proposals/run-2026-05-26-a1b2c3.diff
-```
+
+# The proposal markdown embeds a unified diff inside a ```diff fenced block.
+# Extract it and pipe to git apply:
+awk '/^```diff$/{f=1;next} /^```$/{f=0} f' \
+  .openexpertise/evolution/run-2026-05-26-a1b2c3.md | git apply
+````
 
 **Run 2** — same command. Now four reviewers. SQL injection caught:
 

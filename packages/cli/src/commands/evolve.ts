@@ -4,7 +4,7 @@ import { parseExperienceYaml } from '@openexpertise/schema'
 import { StateStore } from '@openexpertise/core'
 import type { LLMClient } from '@openexpertise/core'
 import { EvolutionAdvisor } from '@openexpertise/evolution'
-import { makeLLMClient, resolveLLMProvider } from '../llm-factory.js'
+import { makeLLMClient, resolveLLMProvider, defaultModelFor } from '../llm-factory.js'
 import type { Logger } from 'pino'
 
 export interface EvolveOpts {
@@ -55,19 +55,20 @@ export async function evolveCommand(opts: EvolveOpts): Promise<number> {
     }
   }
 
-  // Lazy: resolves provider + constructs client only on first complete() call.
-  // Consistent with run.ts closure pattern for multi-provider support.
+  // Resolve provider eagerly so the advisor sends a provider-appropriate model
+  // name (Claude vs GPT). evolve always needs an LLM, so any resolution error
+  // here surfaces immediately rather than being deferred.
+  const provider = resolveLLMProvider(opts.llm !== undefined ? { flag: opts.llm } : {})
+  const model = defaultModelFor(provider)
+
   let cached: LLMClient | null = null
   const llm: LLMClient = {
     async complete(llmOpts) {
-      if (!cached) {
-        const provider = resolveLLMProvider(opts.llm !== undefined ? { flag: opts.llm } : {})
-        cached = await makeLLMClient(provider)
-      }
+      if (!cached) cached = await makeLLMClient(provider)
       return cached.complete(llmOpts)
     },
   }
-  const advisor = new EvolutionAdvisor({ client: llm })
+  const advisor = new EvolutionAdvisor({ client: llm, model })
   const proposals = await advisor.analyze({
     experienceSpec: spec,
     experienceYamlSource: yamlSource,

@@ -48,10 +48,10 @@ Keystrokes (substitute the captured runId):
 
 ```bash
 node packages/cli/dist/bin.js evolve <runId>
-cat .openexpertise/proposals/<runId>.md
+cat .openexpertise/evolution/<runId>.md
 ```
 
-The proposal should include "Add `security` dimension" with a diff block editing `tools/list_dimensions.mjs`.
+The proposal should include "Add `security` dimension" with an embedded `diff` fenced block editing `tools/list_dimensions.mjs`. (There is no separate `.diff` file — the diff lives inside the markdown.)
 
 Narration ("the advisor reads the run trace and the diff, notices no reviewer was looking for injection-class bugs, proposes adding a security dimension.").
 
@@ -64,7 +64,9 @@ Replace the proposal markdown manually with a pre-recorded version (kept in this
 Keystrokes:
 
 ```bash
-git apply .openexpertise/proposals/<runId>.diff
+# Extract the embedded diff and apply it
+awk '/^```diff$/{f=1;next} /^```$/{f=0} f' \
+  .openexpertise/evolution/<runId>.md | git apply
 git diff examples/review-branch/tools/list_dimensions.mjs
 ```
 
@@ -72,7 +74,7 @@ The one-line addition is visible: `+ { key: 'security', focus: 'injection / auth
 
 ### Fallback if `git apply` fails
 
-The advisor's diff format isn't always perfect. Fallback: edit `examples/review-branch/tools/list_dimensions.mjs` by hand to add the line shown above.
+The advisor's diff format isn't always perfect (path resolution, context lines, hash mismatches can all break `git apply`). Fallback: open the proposal markdown, copy the diff block, and edit `examples/review-branch/tools/list_dimensions.mjs` by hand to add the line shown above.
 
 ## Scene 5 — Run 2 (25s)
 

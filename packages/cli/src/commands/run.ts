@@ -10,7 +10,7 @@ import { DatasetDispatcher } from '@openexpertise/node-kinds-dataset'
 import { ExperienceDispatcher } from '@openexpertise/node-kinds-experience'
 import { startTui } from '@openexpertise/tui'
 import { resolveExperienceYaml } from './validate.js'
-import { makeLLMClient, resolveLLMProvider } from '../llm-factory.js'
+import { makeLLMClient, resolveLLMProvider, defaultModelFor } from '../llm-factory.js'
 import type { Logger } from 'pino'
 
 export interface RunOpts {
@@ -31,21 +31,33 @@ export async function runCommand(opts: RunOpts): Promise<number> {
   const dispatchers = new DispatcherRegistry()
   dispatchers.register(new ToolDispatcher())
 
-  // LLM-backed dispatchers share one client. Construction is deferred until the
-  // first complete() call so that experiences without agent/skill nodes (e.g.
-  // hello-tool) run fine without any LLM env var set.
+  // Resolve provider eagerly so dispatchers know which default model to send
+  // (Anthropic vs OpenAI model names). When no env var or flag is configured,
+  // we keep going with a fallback default — agent/skill dispatchers won't fire
+  // for experiences like hello-tool, so the bogus default is never used.
+  // SDK construction itself stays lazy via the proxy below.
+  let eagerProvider: ReturnType<typeof resolveLLMProvider> | null = null
+  try {
+    eagerProvider = resolveLLMProvider(opts.llm !== undefined ? { flag: opts.llm } : {})
+  } catch (err) {
+    if (opts.llm !== undefined) throw err // explicit --llm with missing/unknown value → surface
+    // otherwise: no LLM configured; tolerable if no agent/skill nodes fire
+  }
+  const defaultModel = eagerProvider ? defaultModelFor(eagerProvider) : 'claude-sonnet-4-5'
+
   let cached: LLMClient | null = null
   const llm: LLMClient = {
     async complete(llmOpts) {
       if (!cached) {
-        const provider = resolveLLMProvider(opts.llm !== undefined ? { flag: opts.llm } : {})
+        const provider =
+          eagerProvider ?? resolveLLMProvider(opts.llm !== undefined ? { flag: opts.llm } : {})
         cached = await makeLLMClient(provider)
       }
       return cached.complete(llmOpts)
     },
   }
-  dispatchers.register(new AgentDispatcher({ client: llm }))
-  dispatchers.register(new SkillDispatcher({ client: llm }))
+  dispatchers.register(new AgentDispatcher({ client: llm, defaultModel }))
+  dispatchers.register(new SkillDispatcher({ client: llm, defaultModel }))
 
   dispatchers.register(new DatasetDispatcher())
   dispatchers.register(new ExperienceDispatcher({ runExperience }))
