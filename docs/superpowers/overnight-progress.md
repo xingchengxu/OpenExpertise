@@ -333,3 +333,35 @@ Plan: `docs/superpowers/plans/2026-05-26-tui-upgrade.md`
 1. Merge `feat/tui-upgrade` into `main`.
 2. Manual smoke with a real API key on `oe run examples/review-branch --tui` — confirm tokens tick up live and activity strings are readable.
 3. Move to Plan C (examples library expansion).
+
+---
+
+## Plan C (V2) — Examples Library (2026-05-26)
+
+Branch: `feat/examples-library` (off `main`)
+Spec: `docs/superpowers/specs/2026-05-26-ultraexpertise-and-v2-polish-design.md` (Plan C section)
+Plan: `docs/superpowers/plans/2026-05-26-examples-library.md`
+
+### What shipped
+
+| Example | Highlights |
+|---|---|
+| `oncall-runbook` | Tool seeds 3 investigation dimensions; agent fans out via `for_each`; sequential prioritize + summary agents. Demonstrates structured for_each. |
+| `issue-triage` | Conditional edge `when: 'length($.similar_issues) > 0'` skips dedup if no similar issues exist. Demonstrates conditional control flow. |
+| `release-gates` | Three tools + one `cli-agent` (claude-code) → one scoring agent. Demonstrates heterogeneous node kinds in one graph. |
+
+### Tests
+
+| File | Coverage |
+|---|---|
+| `e2e/oncall-runbook.e2e.test.ts` | Mocked Anthropic LLM — runs all 5 nodes, asserts 3 findings + summary string. |
+| `e2e/issue-triage.e2e.test.ts` | Mocked LLM — classify + dedup + labels + owner end-to-end. |
+| `e2e/release-gates.e2e.test.ts` | Mocked LLM + scripted subprocess runner — 4 sibling checks + scoring agent + no-release decision. |
+
+Test count: 198 baseline + 3 new e2e = **201 passing**.
+
+### Next concrete actions
+
+1. Merge `feat/examples-library` into `main`.
+2. Optionally smoke each example end-to-end with a real API key.
+3. Move to Plan D (parallel scheduler + 429 handling) — the most invasive of the V2 plans.
