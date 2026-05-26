@@ -38,7 +38,7 @@ It's NOT an autonomous agent. It's the **orchestration layer** that lets you wir
 ## 60-second demo
 
 ```bash
-git clone <repo-url> && cd OpenExpertise
+git clone https://github.com/xingchengxu/OpenExpertise && cd OpenExpertise
 pnpm install && pnpm -r build
 
 export ANTHROPIC_API_KEY=sk-...        # or OPENAI_API_KEY=...
@@ -186,7 +186,7 @@ That same flow handles reasoning-style models that prefix tool-call arguments wi
 ## Install & first run (under 60 seconds)
 
 ```bash
-git clone <repo-url> && cd OpenExpertise
+git clone https://github.com/xingchengxu/OpenExpertise && cd OpenExpertise
 pnpm install && pnpm -r build
 
 # Hello world — pure tool, no API key needed:
