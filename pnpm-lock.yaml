@@ -70,6 +70,18 @@ importers:
 
   examples/review-branch: {}
 
+  packages/authoring:
+    dependencies:
+      '@openexpertise/core':
+        specifier: workspace:*
+        version: link:../core
+      '@openexpertise/schema':
+        specifier: workspace:*
+        version: link:../schema
+      ajv:
+        specifier: ^8.17.0
+        version: 8.20.0
+
   packages/cli:
     dependencies:
       '@openexpertise/core':
