@@ -21,21 +21,18 @@ class ScriptedLLM implements LLMClient {
   async complete(opts: LLMCompleteOpts) {
     this.calls.push(opts)
     const prompt = opts.messages[0]?.content ?? ''
-    // Pattern-match by prompt content to return appropriate tool_calls.
-    if (prompt.includes('reviewing dimension')) {
+    if (prompt.includes('You are the') && prompt.includes('reviewer')) {
       return {
         text: '',
         tool_calls: [
           {
             name: 'structured_output',
-            input: {
-              findings: [{ title: 'sample bug', severity: 'high' }],
-            },
+            input: { findings: [{ title: 'sample bug', severity: 'high' }] },
           },
         ],
       }
     }
-    if (prompt.includes('Adversarially verify')) {
+    if (prompt.includes('adversarial verifier')) {
       return {
         text: '',
         tool_calls: [
@@ -43,7 +40,7 @@ class ScriptedLLM implements LLMClient {
         ],
       }
     }
-    if (prompt.includes('compute a risk_score')) {
+    if (prompt.includes('risk_score')) {
       return {
         text: '',
         tool_calls: [{ name: 'structured_output', input: { risk_score: 0.75 } }],
