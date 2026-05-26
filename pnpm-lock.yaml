@@ -32,6 +32,9 @@ importers:
 
   e2e:
     dependencies:
+      '@openexpertise/authoring':
+        specifier: workspace:*
+        version: link:../packages/authoring
       '@openexpertise/cli':
         specifier: workspace:*
         version: link:../packages/cli
