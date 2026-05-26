@@ -10,7 +10,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error(`oe-mcp failed to start: ${(err as Error).message}`)
   process.exit(1)
 })
