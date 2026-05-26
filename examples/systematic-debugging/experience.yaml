@@ -1,0 +1,141 @@
+name: systematic-debugging
+description: Translation of the superpowers systematic-debugging skill into an OpenExpertise flow. Observe symptoms → hypothesize root causes → verify each hypothesis (fan-out) → localize the buggy code → propose a fix via Claude Code → verify the fix passes tests.
+version: 0.1.0
+
+state:
+  schema:
+    repo_path: { type: string }
+    failing_test_cmd: { type: string }
+    symptoms: { type: object }
+    hypotheses: { type: array, items: { type: object } }
+    check_results: { type: array, items: { type: object }, merge: array_append }
+    diagnosis: { type: object }
+    fix_proposal: { type: string }
+    verification_status: { type: string }
+    verification_output: { type: string }
+
+phases:
+  - { id: observe }
+  - { id: hypothesize }
+  - { id: verify }
+  - { id: localize }
+  - { id: fix }
+  - { id: verify_fix }
+
+graph:
+  nodes:
+    - id: capture_symptoms
+      kind: tool
+      phase: observe
+      impl: ./tools/capture_symptoms.mjs
+      args:
+        repo_path: './fixtures/buggy_repo'
+        failing_test_cmd: 'node --test test.mjs'
+      writes: [symptoms, repo_path, failing_test_cmd]
+
+    - id: hypothesize
+      kind: agent
+      phase: hypothesize
+      prompt: ./prompts/hypothesize.md
+      reads: [symptoms]
+      schema:
+        type: object
+        required: [hypotheses]
+        properties:
+          hypotheses:
+            type: array
+            items:
+              type: object
+              required: [id, text, confidence, predicted_check]
+              properties:
+                id: { type: string }
+                text: { type: string }
+                confidence: { type: string, enum: [high, medium, low] }
+                predicted_check: { type: string }
+      writes: [hypotheses]
+
+    - id: verify_hypothesis
+      kind: cli-agent
+      provider: claude-code
+      phase: verify
+      prompt: |
+        You are verifying a hypothesis about a failing test.
+
+        Repo path: {{symptoms.repo_path}}
+        Hypothesis ({{$item.id}}): {{$item.text}}
+        Predicted check: {{$item.predicted_check}}
+
+        Read the relevant files in the repo, examine the failing output, and judge whether the hypothesis is supported by the evidence. Return JSON:
+
+        {"check_results": [{"hypothesis_id": "{{$item.id}}", "evidence": "<what you found>", "verdict": "supported" | "refuted" | "inconclusive"}]}
+
+        Output exactly one element in `check_results`. The hypothesis_id MUST match the input.
+      for_each: { source: $.hypotheses, concurrency: 2 }
+      reads: [symptoms, hypotheses]
+      output_format: json
+      schema:
+        type: object
+        required: [check_results]
+        properties:
+          check_results:
+            type: array
+            items:
+              type: object
+              required: [hypothesis_id, evidence, verdict]
+              properties:
+                hypothesis_id: { type: string }
+                evidence: { type: string }
+                verdict: { type: string, enum: [supported, refuted, inconclusive] }
+      writes: [check_results]
+      timeout_ms: 240000
+
+    - id: localize
+      kind: agent
+      phase: localize
+      prompt: ./prompts/localize.md
+      reads: [symptoms, hypotheses, check_results]
+      schema:
+        type: object
+        required: [diagnosis]
+        properties:
+          diagnosis:
+            type: object
+            required: [root_cause, location]
+            properties:
+              root_cause: { type: string }
+              location: { type: string }
+              supported_hypothesis_id: { type: string }
+      writes: [diagnosis]
+
+    - id: propose_fix
+      kind: cli-agent
+      provider: claude-code
+      phase: fix
+      prompt: |
+        A failing test has been diagnosed:
+
+        Root cause: {{diagnosis.root_cause}}
+        Location: {{diagnosis.location}}
+        Repo: {{symptoms.repo_path}}
+
+        Read the file at the location, make the minimum edit that fixes the bug, and SAVE THE FILE. Then return a short markdown summary of the changes you made.
+
+        Do not run tests yourself — a downstream node will verify.
+      reads: [symptoms, diagnosis]
+      output_format: text
+      writes: [fix_proposal]
+      timeout_ms: 300000
+
+    - id: verify_fix
+      kind: tool
+      phase: verify_fix
+      impl: ./tools/run_tests.mjs
+      reads: [repo_path, failing_test_cmd]
+      writes: [verification_status, verification_output]
+
+  edges:
+    - { from: capture_symptoms, to: hypothesize }
+    - { from: hypothesize, to: verify_hypothesis }
+    - { from: verify_hypothesis, to: localize }
+    - { from: localize, to: propose_fix }
+    - { from: propose_fix, to: verify_fix }
