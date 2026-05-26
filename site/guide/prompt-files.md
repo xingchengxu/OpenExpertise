@@ -1,3 +1,5 @@
+<div v-pre>
+
 # Prompt files
 
 Write focused, reusable prompt templates for `agent` and `skill` nodes using `{{placeholder}}` interpolation.
@@ -131,3 +133,5 @@ The placeholder name `args` is not special — it is just a key in the bundle. I
 - [Hand-writing experience.yaml](/guide/authoring-yaml)
 - [agent node concept](/concepts/node-agent)
 - [review-branch example](/examples/review-branch)
+
+</div>
