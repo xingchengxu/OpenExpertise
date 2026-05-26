@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest'
-import { mkdtempSync, rmSync, cpSync, readFileSync } from 'node:fs'
+import { mkdtempSync, rmSync, cpSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -91,6 +91,39 @@ describe('issue-triage end-to-end (mocked Anthropic)', () => {
     expect(result.finalState.classification).toMatchObject({ type: 'bug', area: 'auth' })
     expect(result.finalState.is_duplicate).toBe(true)
     expect(result.finalState.duplicate_of).toBe('901')
+    expect((result.finalState.labels as unknown[]).length).toBeGreaterThan(0)
+    expect(result.finalState.suggested_owner).toBe('@security-team')
+  })
+
+  it('still labels + routes when no similar issues exist (dedup skipped)', async () => {
+    dir = mkdtempSync(join(tmpdir(), 'oe-e2e-triage-skip-'))
+    const src = join(HERE, '..', 'examples', 'issue-triage')
+    cpSync(src, dir, { recursive: true })
+
+    // Overwrite the historical fixture so search_similar returns []
+    // — this triggers the when: clause and skips the dedup node.
+    writeFileSync(join(dir, 'fixtures/historical_issues.json'), '[]')
+
+    const spec = parseExperienceYaml(readFileSync(join(dir, 'experience.yaml'), 'utf8'))
+    const llm = new ScriptedLLM()
+    const dispatchers = new DispatcherRegistry()
+    dispatchers.register(new ToolDispatcher())
+    dispatchers.register(new AgentDispatcher({ client: llm }))
+
+    const result = await runExperience({
+      spec,
+      experienceDir: dir,
+      dispatchers,
+      events: new EventBus(),
+      args: {},
+    })
+
+    expect(result.status).toBe('success')
+    // dedup was skipped → is_duplicate / duplicate_of stay undefined
+    expect(result.finalState.is_duplicate).toBeUndefined()
+    expect(result.finalState.duplicate_of).toBeUndefined()
+    // But labeling + routing still run because assign_labels only depends on classify
+    expect(result.finalState.classification).toMatchObject({ type: 'bug', area: 'auth' })
     expect((result.finalState.labels as unknown[]).length).toBeGreaterThan(0)
     expect(result.finalState.suggested_owner).toBe('@security-team')
   })

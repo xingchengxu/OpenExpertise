@@ -85,6 +85,10 @@ graph:
     - { from: load_issue, to: classify }
     - { from: classify, to: search_similar }
     - { from: search_similar, to: dedup, when: 'length($.similar_issues) > 0' }
-    - { from: dedup, to: assign_labels }
+    # NOTE: assign_labels intentionally does NOT depend on dedup. The dedup
+    # node may be skipped via the `when:` clause above, and the scheduler
+    # cascades 'skipped' status through predecessor edges — depending on
+    # dedup would silently drop label assignment whenever similar_issues
+    # is empty. assign_labels only needs `classification`.
     - { from: classify, to: assign_labels }
     - { from: assign_labels, to: suggest_owner }
