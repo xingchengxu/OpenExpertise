@@ -13,6 +13,9 @@ hero:
       text: 60-second demo
       link: /guide/getting-started
     - theme: alt
+      text: Cookbook
+      link: /cookbook/
+    - theme: alt
       text: View on GitHub
       link: https://github.com/xingchengxu/OpenExpertise
     - theme: alt
@@ -224,5 +227,9 @@ If you want a chat-based assistant or one-off task automation, **use the underly
   <p style="color: var(--vp-c-text-2); font-size: 0.95em;">Build expert workflows once. Run them forever. Watch them get better at it.</p>
   <p>
     <a href="/OpenExpertise/guide/getting-started" style="font-weight: 600;">Start building →</a>
+    &nbsp;·&nbsp;
+    <a href="/OpenExpertise/cookbook/" style="font-weight: 600;">Copy a recipe →</a>
+    &nbsp;·&nbsp;
+    <a href="/OpenExpertise/faq" style="font-weight: 600;">Got a question?</a>
   </p>
 </div>

@@ -37,6 +37,7 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started', activeMatch: '^/guide/' },
       { text: 'Concepts', link: '/concepts/experiences', activeMatch: '^/concepts/' },
       { text: 'Examples', link: '/examples/', activeMatch: '^/examples/' },
+      { text: 'Cookbook', link: '/cookbook/', activeMatch: '^/cookbook/' },
       {
         text: 'Reference',
         items: [
@@ -46,6 +47,13 @@ export default defineConfig({
         ],
       },
       { text: 'Compare', link: '/compare/', activeMatch: '^/compare/' },
+      {
+        text: 'Help',
+        items: [
+          { text: 'FAQ + troubleshooting', link: '/faq' },
+          { text: 'Glossary', link: '/glossary' },
+        ],
+      },
       {
         text: 'v0.1.0',
         items: [
@@ -238,6 +246,33 @@ export default defineConfig({
             { text: 'Architecture overview', link: '/operations/architecture' },
             { text: 'Observability', link: '/operations/observability' },
             { text: 'Deployment', link: '/operations/deployment' },
+          ],
+        },
+      ],
+      '/cookbook/': [
+        {
+          text: 'Cookbook',
+          collapsed: false,
+          items: [{ text: 'Recipes index', link: '/cookbook/' }],
+        },
+      ],
+      '/faq': [
+        {
+          text: 'Help',
+          collapsed: false,
+          items: [
+            { text: 'FAQ + troubleshooting', link: '/faq' },
+            { text: 'Glossary', link: '/glossary' },
+          ],
+        },
+      ],
+      '/glossary': [
+        {
+          text: 'Help',
+          collapsed: false,
+          items: [
+            { text: 'FAQ + troubleshooting', link: '/faq' },
+            { text: 'Glossary', link: '/glossary' },
           ],
         },
       ],
