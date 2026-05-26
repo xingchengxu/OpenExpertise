@@ -3,7 +3,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import {
   InMemoryTransport,
 } from '@modelcontextprotocol/sdk/inMemory.js'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createServer } from '../src/server.js'
@@ -25,7 +25,7 @@ describe('mcp-server', () => {
     // Will grow to the full 5 as Tasks 4-8 register tools. Skeleton task asserts
     // the framework is wired and listTools round-trips.
     expect(Array.isArray(names)).toBe(true)
-    expect(names).toEqual(expect.arrayContaining(['oe_validate', 'oe_state']))
+    expect(names).toEqual(expect.arrayContaining(['oe_validate', 'oe_state', 'oe_inspect']))
   })
 
   it('oe_validate accepts a well-formed experience and reports valid', async () => {
@@ -89,6 +89,34 @@ graph: { nodes: [{ id: a, kind: tool, impl: ./x.mjs, writes: [x] }], edges: [] }
       const content = result.content as Array<{ type: string; text: string }>
       const payload = JSON.parse(content[0]!.text) as { snapshot?: unknown; note?: string }
       expect(payload.note).toMatch(/no runs/i)
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it('oe_inspect reads the event log for a run', async () => {
+    const { client } = await connectClient()
+    const dir = mkdtempSync(join(tmpdir(), 'oe-mcp-inspect-'))
+    try {
+      const runsDir = join(dir, '.openexpertise', 'runs')
+      mkdirSync(runsDir, { recursive: true })
+      const events = [
+        { type: 'run.started', run_id: 'r1', ts: '2026-05-26T00:00:00Z' },
+        { type: 'node.completed', run_id: 'r1', node_id: 'a', ts: '2026-05-26T00:00:01Z' },
+        { type: 'run.finished', run_id: 'r1', ts: '2026-05-26T00:00:02Z', status: 'success' },
+      ]
+      writeFileSync(
+        join(runsDir, 'r1.jsonl'),
+        events.map((e) => JSON.stringify(e)).join('\n'),
+      )
+      const result = await client.callTool({
+        name: 'oe_inspect',
+        arguments: { experience_path: dir, run_id: 'r1' },
+      })
+      const content = result.content as Array<{ type: string; text: string }>
+      const payload = JSON.parse(content[0]!.text) as { events: unknown[] }
+      expect(payload.events.length).toBe(3)
+      expect((payload.events[0] as { type: string }).type).toBe('run.started')
     } finally {
       rmSync(dir, { recursive: true, force: true })
     }
