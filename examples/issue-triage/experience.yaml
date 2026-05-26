@@ -1,0 +1,90 @@
+name: issue-triage
+description: Triage a GitHub issue — classify, dedup, label, route.
+version: 0.1.0
+
+state:
+  schema:
+    issue: { type: object }
+    classification: { type: object }
+    similar_issues: { type: array, items: { type: object } }
+    is_duplicate: { type: boolean }
+    duplicate_of: { type: string }
+    labels: { type: array, items: { type: string }, merge: array_append }
+    suggested_owner: { type: string }
+
+phases:
+  - { id: classify }
+  - { id: dedup }
+  - { id: route }
+
+graph:
+  nodes:
+    - id: load_issue
+      kind: tool
+      phase: classify
+      impl: ./tools/load_issue.mjs
+      writes: [issue]
+    - id: classify
+      kind: agent
+      phase: classify
+      prompt: ./prompts/classify.md
+      reads: [issue]
+      schema:
+        type: object
+        required: [classification]
+        properties:
+          classification:
+            type: object
+            required: [type, severity, area]
+            properties:
+              type: { type: string, enum: [bug, feature, question, docs, chore] }
+              severity: { type: string, enum: [low, medium, high] }
+              area: { type: string }
+      writes: [classification]
+    - id: search_similar
+      kind: tool
+      phase: dedup
+      impl: ./tools/search_similar.mjs
+      reads: [issue]
+      writes: [similar_issues]
+    - id: dedup
+      kind: agent
+      phase: dedup
+      prompt: ./prompts/dedup.md
+      reads: [issue, similar_issues]
+      schema:
+        type: object
+        required: [is_duplicate]
+        properties:
+          is_duplicate: { type: boolean }
+          duplicate_of: { type: string }
+      writes: [is_duplicate, duplicate_of]
+    - id: assign_labels
+      kind: agent
+      phase: route
+      prompt: ./prompts/assign_labels.md
+      reads: [issue, classification]
+      schema:
+        type: object
+        required: [labels]
+        properties:
+          labels: { type: array, items: { type: string } }
+      writes: [labels]
+    - id: suggest_owner
+      kind: agent
+      phase: route
+      prompt: ./prompts/suggest_owner.md
+      reads: [classification]
+      schema:
+        type: object
+        required: [suggested_owner]
+        properties:
+          suggested_owner: { type: string }
+      writes: [suggested_owner]
+  edges:
+    - { from: load_issue, to: classify }
+    - { from: classify, to: search_similar }
+    - { from: search_similar, to: dedup, when: 'length($.similar_issues) > 0' }
+    - { from: dedup, to: assign_labels }
+    - { from: classify, to: assign_labels }
+    - { from: assign_labels, to: suggest_owner }
