@@ -5,6 +5,7 @@ import { DispatcherRegistry, EventBus, runExperience } from '@openexpertise/core
 import type { LLMClient } from '@openexpertise/core'
 import { ToolDispatcher } from '@openexpertise/node-kinds-tool'
 import { AgentDispatcher } from '@openexpertise/node-kinds-agent'
+import { CliAgentDispatcher } from '@openexpertise/node-kinds-cli-agent'
 import { SkillDispatcher } from '@openexpertise/node-kinds-skill'
 import { DatasetDispatcher } from '@openexpertise/node-kinds-dataset'
 import { ExperienceDispatcher } from '@openexpertise/node-kinds-experience'
@@ -61,6 +62,7 @@ export async function runCommand(opts: RunOpts): Promise<number> {
 
   dispatchers.register(new DatasetDispatcher())
   dispatchers.register(new ExperienceDispatcher({ runExperience }))
+  dispatchers.register(new CliAgentDispatcher())
 
   const events = new EventBus()
 

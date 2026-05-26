@@ -14,6 +14,7 @@
     "@openexpertise/node-kinds-agent": "workspace:*",
     "@openexpertise/node-kinds-dataset": "workspace:*",
     "@openexpertise/node-kinds-experience": "workspace:*",
-    "@openexpertise/evolution": "workspace:*"
+    "@openexpertise/evolution": "workspace:*",
+    "@openexpertise/node-kinds-cli-agent": "workspace:*"
   }
 }

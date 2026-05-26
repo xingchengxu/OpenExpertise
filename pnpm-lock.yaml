@@ -44,6 +44,9 @@ importers:
       '@openexpertise/node-kinds-agent':
         specifier: workspace:*
         version: link:../packages/node-kinds-agent
+      '@openexpertise/node-kinds-cli-agent':
+        specifier: workspace:*
+        version: link:../packages/node-kinds-cli-agent
       '@openexpertise/node-kinds-dataset':
         specifier: workspace:*
         version: link:../packages/node-kinds-dataset
@@ -58,6 +61,8 @@ importers:
         version: link:../packages/schema
 
   examples/agent-echo: {}
+
+  examples/cli-orchestration: {}
 
   examples/dataset-aggregate: {}
 
@@ -79,6 +84,9 @@ importers:
       '@openexpertise/node-kinds-agent':
         specifier: workspace:*
         version: link:../node-kinds-agent
+      '@openexpertise/node-kinds-cli-agent':
+        specifier: workspace:*
+        version: link:../node-kinds-cli-agent
       '@openexpertise/node-kinds-dataset':
         specifier: workspace:*
         version: link:../node-kinds-dataset
@@ -149,6 +157,18 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.30.0
         version: 0.30.1
+      '@openexpertise/core':
+        specifier: workspace:*
+        version: link:../core
+      '@openexpertise/schema':
+        specifier: workspace:*
+        version: link:../schema
+      ajv:
+        specifier: ^8.17.0
+        version: 8.20.0
+
+  packages/node-kinds-cli-agent:
+    dependencies:
       '@openexpertise/core':
         specifier: workspace:*
         version: link:../core
