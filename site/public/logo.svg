@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <!-- DAG: 3 sibling nodes converging into 1 -->
+  <circle cx="14" cy="14" r="6" fill="url(#g)"/>
+  <circle cx="32" cy="14" r="6" fill="url(#g)"/>
+  <circle cx="50" cy="14" r="6" fill="url(#g)"/>
+  <circle cx="32" cy="50" r="8" fill="url(#g)"/>
+  <line x1="14" y1="20" x2="30" y2="44" stroke="url(#g)" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="32" y1="20" x2="32" y2="42" stroke="url(#g)" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="50" y1="20" x2="34" y2="44" stroke="url(#g)" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
