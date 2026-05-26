@@ -162,24 +162,18 @@ export function buildProgram(): Command {
     .argument('<task>', 'the task description (natural language)')
     .option('--draft-root <dir>', 'directory for the draft', '.openexpertise/drafts')
     .option('--llm <provider>', 'LLM provider: anthropic | openai (auto-detected from env)')
-    .action(
-      async (
-        task: string,
-        cmdOpts: { draftRoot: string; llm?: string },
-        cmd: Command,
-      ) => {
-        const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
-        const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
-        process.exit(
-          await ultraCommand({
-            taskDescription: task,
-            draftRoot: cmdOpts.draftRoot,
-            logger,
-            ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
-          }),
-        )
-      },
-    )
+    .action(async (task: string, cmdOpts: { draftRoot: string; llm?: string }, cmd: Command) => {
+      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+      process.exit(
+        await ultraCommand({
+          taskDescription: task,
+          draftRoot: cmdOpts.draftRoot,
+          logger,
+          ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
+        }),
+      )
+    })
 
   return program
 }

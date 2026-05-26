@@ -2,11 +2,7 @@ import { resolve } from 'node:path'
 import type { Logger } from 'pino'
 import type { LLMClient } from '@openexpertise/core'
 import { UltraExpertise } from '@openexpertise/authoring'
-import {
-  makeLLMClient,
-  resolveLLMProvider,
-  defaultModelFor,
-} from '../llm-factory.js'
+import { makeLLMClient, resolveLLMProvider, defaultModelFor } from '../llm-factory.js'
 
 export interface UltraOpts {
   taskDescription: string

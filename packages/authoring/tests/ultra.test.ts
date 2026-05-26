@@ -85,7 +85,11 @@ describe('UltraExpertise', () => {
   })
 
   it('throws when LLM response lacks the structured_output tool call', async () => {
-    const llm: LLMClient = { async complete() { return { text: 'no tool call here' } } }
+    const llm: LLMClient = {
+      async complete() {
+        return { text: 'no tool call here' }
+      },
+    }
     const ultra = new UltraExpertise({ client: llm })
     await expect(ultra.analyze('x')).rejects.toThrow(/structured_output/i)
   })
@@ -96,7 +100,16 @@ describe('UltraExpertise', () => {
         return {
           text: '',
           tool_calls: [
-            { name: 'structured_output', input: { name: 'BAD UPPER', description: 'x', phases: [], state_fields: [], node_sketches: [] } },
+            {
+              name: 'structured_output',
+              input: {
+                name: 'BAD UPPER',
+                description: 'x',
+                phases: [],
+                state_fields: [],
+                node_sketches: [],
+              },
+            },
           ],
         }
       },

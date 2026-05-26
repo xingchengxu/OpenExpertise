@@ -23,7 +23,14 @@ describe('mcp-server', () => {
     // Will grow to the full 5 as Tasks 4-8 register tools. Skeleton task asserts
     // the framework is wired and listTools round-trips.
     expect(Array.isArray(names)).toBe(true)
-    expect(names).toEqual(['oe_evolve', 'oe_inspect', 'oe_run', 'oe_state', 'oe_ultra', 'oe_validate'])
+    expect(names).toEqual([
+      'oe_evolve',
+      'oe_inspect',
+      'oe_run',
+      'oe_state',
+      'oe_ultra',
+      'oe_validate',
+    ])
   })
 
   it('oe_validate accepts a well-formed experience and reports valid', async () => {

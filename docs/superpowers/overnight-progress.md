@@ -280,3 +280,32 @@ Plan: `docs/superpowers/plans/2026-05-26-mcp-server.md`
 1. Merge `feat/mcp-server` into `main`.
 2. Register the server in Claude Code: `claude mcp add openexpertise -- node $PWD/packages/mcp-server/dist/bin.js`. Validate by asking Claude to "use oe_validate on examples/hello-tool".
 3. Launch prep: npm publish (all packages have publishConfig), GitHub remote, docs site.
+
+---
+
+## Plan A (V2) — Ultraexpertise (2026-05-26)
+
+Branch: `feat/ultraexpertise` (off `main`)
+Spec: `docs/superpowers/specs/2026-05-26-ultraexpertise-and-v2-polish-design.md` (Plan A section)
+Plan: `docs/superpowers/plans/2026-05-26-ultraexpertise.md`
+
+### What shipped
+
+| Area | Result |
+|---|---|
+| New package | `@openexpertise/authoring` — `UltraExpertise` (analyze + synthesize + write + validate) |
+| CLI | `oe ultra "<task>" [--draft-root <dir>] [--llm <provider>]` |
+| MCP | `oe_ultra` tool — same engine, exposed to Claude Code / Codex / Gemini |
+| Slash command | `/ultraexpertise <task>` shipped with `skill-experience-creator/commands/` |
+| Tests | 7 slug + 4 ultra phase + 5 writer + 2 author + 1 mcp + 1 e2e = 20 new (184 total) |
+| Docs | `docs/ultraexpertise.md` reference |
+
+### Architectural note
+
+The same `llm-factory` underlies all three of: `oe run` (when agent/skill/cli-agent nodes fire), `oe evolve` (advisor), and now `oe ultra` (author). Author → run → evolve is one closed loop.
+
+### Next concrete actions
+
+1. Merge `feat/ultraexpertise` into `main`.
+2. Manually smoke with a real API key: `export ANTHROPIC_API_KEY=...; node packages/cli/dist/bin.js ultra "summarize the docs in this repo"` — verify the draft validates and the YAML is sensible.
+3. Move to Plan B (TUI upgrade — live tokens + activity).

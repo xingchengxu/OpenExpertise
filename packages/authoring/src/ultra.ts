@@ -3,11 +3,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import Ajv from 'ajv'
 import type { LLMClient, LLMTool } from '@openexpertise/core'
-import {
-  parseExperienceYaml,
-  validateExperienceSpec,
-  ValidationError,
-} from '@openexpertise/schema'
+import { parseExperienceYaml, validateExperienceSpec, ValidationError } from '@openexpertise/schema'
 import {
   ANALYSIS_SCHEMA,
   SYNTHESIS_SCHEMA,
@@ -53,9 +49,7 @@ export class UltraExpertise {
     })
     const call = result.tool_calls?.find((c) => c.name === 'structured_output')
     if (!call) {
-      throw new Error(
-        'UltraExpertise.analyze: LLM did not return a structured_output tool call',
-      )
+      throw new Error('UltraExpertise.analyze: LLM did not return a structured_output tool call')
     }
     const data = call.input
     if (!this.validateAnalysis(data)) {
@@ -67,10 +61,7 @@ export class UltraExpertise {
     return data as AnalysisOutput
   }
 
-  async synthesize(
-    taskDescription: string,
-    analysis: AnalysisOutput,
-  ): Promise<SynthesisOutput> {
+  async synthesize(taskDescription: string, analysis: AnalysisOutput): Promise<SynthesisOutput> {
     const systemPath = resolve(HERE, 'prompts/synthesizer.md')
     const system = readFileSync(systemPath, 'utf8')
     const tool: LLMTool = {
@@ -91,9 +82,7 @@ export class UltraExpertise {
     })
     const call = result.tool_calls?.find((c) => c.name === 'structured_output')
     if (!call) {
-      throw new Error(
-        'UltraExpertise.synthesize: LLM did not return a structured_output tool call',
-      )
+      throw new Error('UltraExpertise.synthesize: LLM did not return a structured_output tool call')
     }
     const data = call.input
     if (!this.validateSynthesis(data)) {
@@ -109,7 +98,9 @@ export class UltraExpertise {
     taskDescription: string
     rootDir: string
     draftSlug?: string
-  }): Promise<UltraResult & WriteDraftResult & { validation: { valid: boolean; errors?: string[] } }> {
+  }): Promise<
+    UltraResult & WriteDraftResult & { validation: { valid: boolean; errors?: string[] } }
+  > {
     const analysis = await this.analyze(opts.taskDescription)
     const synthesis = await this.synthesize(opts.taskDescription, analysis)
     const slug = opts.draftSlug ?? slugify(analysis.name)

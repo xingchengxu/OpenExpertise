@@ -1,11 +1,7 @@
 import { resolve } from 'node:path'
 import type { LLMClient } from '@openexpertise/core'
 import { UltraExpertise } from '@openexpertise/authoring'
-import {
-  makeLLMClient,
-  resolveLLMProvider,
-  defaultModelFor,
-} from '@openexpertise/cli/llm-factory'
+import { makeLLMClient, resolveLLMProvider, defaultModelFor } from '@openexpertise/cli/llm-factory'
 import type { ToolHandler } from './types.js'
 
 export const ultraTool: ToolHandler = {
@@ -29,9 +25,8 @@ export const ultraTool: ToolHandler = {
   async call(args) {
     const task = args['task']
     if (typeof task !== 'string') throw new Error('task is required')
-    const draftRoot = typeof args['draft_root'] === 'string'
-      ? args['draft_root']
-      : resolve('.openexpertise/drafts')
+    const draftRoot =
+      typeof args['draft_root'] === 'string' ? args['draft_root'] : resolve('.openexpertise/drafts')
 
     const llmFlag = typeof args['llm'] === 'string' ? (args['llm'] as string) : undefined
     const provider = resolveLLMProvider(llmFlag !== undefined ? { flag: llmFlag } : {})

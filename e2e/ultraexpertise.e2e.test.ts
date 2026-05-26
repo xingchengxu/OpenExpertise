@@ -75,9 +75,7 @@ graph:
     expect(result.files_written).toContain('tools/greet.mjs')
 
     // The generated draft must actually be runnable end-to-end.
-    const spec = parseExperienceYaml(
-      readFileSync(join(result.draftDir, 'experience.yaml'), 'utf8'),
-    )
+    const spec = parseExperienceYaml(readFileSync(join(result.draftDir, 'experience.yaml'), 'utf8'))
     const dispatchers = new DispatcherRegistry()
     dispatchers.register(new ToolDispatcher())
     const runResult = await runExperience({

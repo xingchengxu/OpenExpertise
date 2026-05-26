@@ -7,7 +7,7 @@ describe('slugify', () => {
   })
 
   it('strips non-alphanumeric characters', () => {
-    expect(slugify("Audit GitHub PRs! (compliance/SOC2)")).toBe('audit-github-prs-compliance-soc2')
+    expect(slugify('Audit GitHub PRs! (compliance/SOC2)')).toBe('audit-github-prs-compliance-soc2')
   })
 
   it('collapses consecutive separators', () => {
