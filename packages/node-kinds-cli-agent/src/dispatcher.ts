@@ -51,9 +51,7 @@ export class CliAgentDispatcher implements NodeDispatcher {
       strict: false,
     })
 
-    const workdir = spec.workdir
-      ? resolvePath(ctx.experienceDir, spec.workdir)
-      : ctx.experienceDir
+    const workdir = spec.workdir ? resolvePath(ctx.experienceDir, spec.workdir) : ctx.experienceDir
 
     const buildOpts: Parameters<typeof provider.buildCommand>[0] = {
       prompt,

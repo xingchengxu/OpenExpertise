@@ -48,7 +48,10 @@ describe('DefaultSubprocessRunner', () => {
     const res = await runner.run(
       {
         cmd: process.execPath,
-        args: ['-e', 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>process.stdout.write(d))'],
+        args: [
+          '-e',
+          'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>process.stdout.write(d))',
+        ],
         stdin: 'piped-input',
       },
       { timeoutMs: 5000, cwd: process.cwd() },

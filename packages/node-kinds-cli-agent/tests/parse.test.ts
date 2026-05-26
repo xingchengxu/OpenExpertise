@@ -17,9 +17,9 @@ describe('parseOutput', () => {
   })
 
   it('text mode with multiple writes throws (ambiguous mapping)', () => {
-    expect(() =>
-      parseOutput({ stdout: 'x', outputFormat: 'text', writes: ['a', 'b'] }),
-    ).toThrow(/text mode requires/i)
+    expect(() => parseOutput({ stdout: 'x', outputFormat: 'text', writes: ['a', 'b'] })).toThrow(
+      /text mode requires/i,
+    )
   })
 
   it('json mode parses stdout and returns the parsed object', () => {
@@ -32,9 +32,9 @@ describe('parseOutput', () => {
   })
 
   it('json mode throws on invalid JSON', () => {
-    expect(() =>
-      parseOutput({ stdout: 'not json', outputFormat: 'json', writes: [] }),
-    ).toThrow(/JSON/i)
+    expect(() => parseOutput({ stdout: 'not json', outputFormat: 'json', writes: [] })).toThrow(
+      /JSON/i,
+    )
   })
 
   it('json mode validates against schema when provided', () => {

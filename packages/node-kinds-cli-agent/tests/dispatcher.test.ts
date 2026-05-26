@@ -29,7 +29,12 @@ describe('CliAgentDispatcher', () => {
   })
 
   it('text mode: stdout maps to single writes field', async () => {
-    const runner = new FakeRunner({ stdout: 'the answer', stderr: '', exitCode: 0, timedOut: false })
+    const runner = new FakeRunner({
+      stdout: 'the answer',
+      stderr: '',
+      exitCode: 0,
+      timedOut: false,
+    })
     const d = new CliAgentDispatcher({ runner })
     const node: CliAgentNodeSpec = {
       id: 'n1',
@@ -39,11 +44,7 @@ describe('CliAgentDispatcher', () => {
       writes: ['answer'],
     }
     const impl = await d.resolve(node, ctx)
-    const out = await d.run(
-      impl,
-      { state_view: {}, edge_inputs: {}, args: {} },
-      ctx,
-    )
+    const out = await d.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, ctx)
     expect(out.state_delta).toEqual({ answer: 'the answer' })
     expect(runner.lastSpec?.cmd).toBe('claude')
     expect(runner.lastSpec?.args).toContain('--output-format')
@@ -86,11 +87,7 @@ describe('CliAgentDispatcher', () => {
       writes: ['report'],
     }
     const impl = await d.resolve(node, ctx)
-    await d.run(
-      impl,
-      { state_view: { diff: 'PR-123' }, edge_inputs: {}, args: {} },
-      ctx,
-    )
+    await d.run(impl, { state_view: { diff: 'PR-123' }, edge_inputs: {}, args: {} }, ctx)
     expect(runner.lastSpec?.args.some((a) => a.includes('PR-123'))).toBe(true)
   })
 
@@ -110,9 +107,9 @@ describe('CliAgentDispatcher', () => {
       writes: ['out'],
     }
     const impl = await d.resolve(node, ctx)
-    await expect(
-      d.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, ctx),
-    ).rejects.toThrow(/exit code 1.*boom/s)
+    await expect(d.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, ctx)).rejects.toThrow(
+      /exit code 1.*boom/s,
+    )
   })
 
   it('timeout throws a specific error', async () => {
@@ -132,9 +129,9 @@ describe('CliAgentDispatcher', () => {
       timeout_ms: 5000,
     }
     const impl = await d.resolve(node, ctx)
-    await expect(
-      d.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, ctx),
-    ).rejects.toThrow(/timed out/i)
+    await expect(d.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, ctx)).rejects.toThrow(
+      /timed out/i,
+    )
   })
 
   it('respects workdir relative to experienceDir', async () => {

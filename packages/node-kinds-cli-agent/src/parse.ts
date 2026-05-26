@@ -39,9 +39,7 @@ export function parseOutput(opts: ParseOpts): Record<string, unknown> {
       const msgs = (validate.errors ?? []).map(
         (e) => `${e.instancePath || '(root)'}: ${e.message ?? 'invalid'}`,
       )
-      throw new Error(
-        `cli-agent${tag}: parsed output failed schema validation: ${msgs.join(', ')}`,
-      )
+      throw new Error(`cli-agent${tag}: parsed output failed schema validation: ${msgs.join(', ')}`)
     }
   }
 
