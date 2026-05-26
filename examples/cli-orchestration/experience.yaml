@@ -1,0 +1,34 @@
+name: cli-orchestration
+description: Two cli-agent nodes — Claude Code summarizes a topic, Codex critiques the summary.
+version: 0.1.0
+
+state:
+  schema:
+    topic: { type: string }
+    summary: { type: string }
+    critique: { type: string }
+
+graph:
+  nodes:
+    - id: summarize
+      kind: cli-agent
+      provider: claude-code
+      prompt: |
+        Write a 3-sentence summary of the following topic. Just the summary,
+        no preamble.
+
+        Topic: {{topic}}
+      writes: [summary]
+      timeout_ms: 120000
+    - id: critique
+      kind: cli-agent
+      provider: codex
+      prompt: |
+        Critique this summary in 2 sentences. Be specific about what's missing
+        or wrong. Just the critique, no preamble.
+
+        Summary: {{summary}}
+      writes: [critique]
+      timeout_ms: 120000
+  edges:
+    - { from: summarize, to: critique }
