@@ -4,7 +4,7 @@
 
 ### **AI-era Makefile.** Codify expert workflows as runnable, evolving graphs.
 
-[![tests](https://img.shields.io/badge/tests-225%20passing-brightgreen)](#) [![typecheck](https://img.shields.io/badge/typecheck-strict-blue)](#) [![packages](https://img.shields.io/badge/packages-14-blueviolet)](#) [![license](https://img.shields.io/badge/license-TBD-lightgrey)](#)
+[![tests](https://img.shields.io/badge/tests-225%20passing-brightgreen)](#) [![typecheck](https://img.shields.io/badge/typecheck-strict-blue)](#) [![packages](https://img.shields.io/badge/packages-14-blueviolet)](#) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 [**60-second demo**](#60-second-demo) · [**Why**](#why-openexpertise) · [**Examples**](#built-in-examples) · [**Compare**](#vs-the-alternatives) · [**Docs**](#docs)
 
@@ -400,7 +400,7 @@ This project is built largely via [Claude Code](https://claude.com/claude-code)-
 
 ## License
 
-TBD by the maintainer.
+[MIT](LICENSE) © 2026 OpenClaw Foundation.
 
 ---
 
