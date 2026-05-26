@@ -1,7 +1,27 @@
 {
   "name": "@openexpertise/cli",
   "version": "0.1.0",
+  "description": "The `oe` command-line interface — run, resume, inspect, evolve, validate experiences.",
+  "keywords": [
+    "openexpertise",
+    "workflow",
+    "dag",
+    "llm",
+    "yaml",
+    "cli",
+    "oe"
+  ],
+  "author": "OpenExpertise contributors",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xingchengxu/OpenExpertise.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/xingchengxu/OpenExpertise/issues"
+  },
+  "homepage": "https://github.com/xingchengxu/OpenExpertise#readme",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,7 +39,8 @@
     "oe": "./dist/bin.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"

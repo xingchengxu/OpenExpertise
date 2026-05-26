@@ -1,12 +1,40 @@
 {
   "name": "@openexpertise/node-kinds-agent",
   "version": "0.1.0",
+  "description": "Dispatcher for `agent` nodes — calls an LLM with structured-output schema, writes validated keys to state.",
+  "keywords": [
+    "openexpertise",
+    "workflow",
+    "dag",
+    "llm",
+    "yaml",
+    "agent",
+    "dispatcher",
+    "structured-output"
+  ],
+  "author": "OpenExpertise contributors",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xingchengxu/OpenExpertise.git",
+    "directory": "packages/node-kinds-agent"
+  },
+  "bugs": {
+    "url": "https://github.com/xingchengxu/OpenExpertise/issues"
+  },
+  "homepage": "https://github.com/xingchengxu/OpenExpertise#readme",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"

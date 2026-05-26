@@ -1,12 +1,40 @@
 {
   "name": "@openexpertise/llm-openai",
   "version": "0.1.0",
+  "description": "OpenAI-compatible LLMClient implementation for OpenExpertise — wraps any OpenAI-API endpoint (OpenAI, Azure, self-hosted).",
+  "keywords": [
+    "openexpertise",
+    "workflow",
+    "dag",
+    "llm",
+    "yaml",
+    "openai",
+    "azure",
+    "llm-client"
+  ],
+  "author": "OpenExpertise contributors",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xingchengxu/OpenExpertise.git",
+    "directory": "packages/llm-openai"
+  },
+  "bugs": {
+    "url": "https://github.com/xingchengxu/OpenExpertise/issues"
+  },
+  "homepage": "https://github.com/xingchengxu/OpenExpertise#readme",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"
