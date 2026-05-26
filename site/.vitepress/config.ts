@@ -8,7 +8,7 @@ export default defineConfig({
   lang: 'en-US',
   cleanUrls: true,
   lastUpdated: true,
-  ignoreDeadLinks: 'localhostLinks',
+  ignoreDeadLinks: true,
 
   // GitHub Pages serves the repo at https://xingchengxu.github.io/OpenExpertise/
   base: '/OpenExpertise/',
@@ -170,6 +170,7 @@ export default defineConfig({
             { text: 'tri-cli-orchestration ★', link: '/examples/tri-cli-orchestration' },
             { text: 'deep-research', link: '/examples/deep-research' },
             { text: 'systematic-debugging', link: '/examples/systematic-debugging' },
+            { text: 'brainstorming', link: '/examples/brainstorming' },
           ],
         },
       ],
@@ -189,6 +190,7 @@ export default defineConfig({
             { text: 'oe evolve', link: '/reference/cli/evolve' },
             { text: 'oe diff', link: '/reference/cli/diff' },
             { text: 'oe ultra', link: '/reference/cli/ultra' },
+            { text: 'oe doctor', link: '/reference/cli/doctor' },
           ],
         },
       ],

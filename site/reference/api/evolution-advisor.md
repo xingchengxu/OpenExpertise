@@ -22,7 +22,7 @@ export interface EvolutionProposal {
   operation: EvolutionOperation
   confidence: EvolutionConfidence
   rationale: string
-  diff: string  // unified diff snippet (for add-node / tune-param) OR JSON array (for add-dataset-case)
+  diff: string // unified diff snippet (for add-node / tune-param) OR JSON array (for add-dataset-case)
   title: string
 }
 
@@ -34,7 +34,7 @@ export interface EvolutionAdvisorOpts {
 export interface EvolutionInput {
   experienceSpec: ExperienceSpec
   experienceYamlSource: string
-  runEvents: unknown[]        // jsonl lines parsed
+  runEvents: unknown[] // jsonl lines parsed
   stateDiff: Array<{ field: string; before: unknown; after: unknown }>
 }
 
@@ -47,31 +47,31 @@ export class EvolutionAdvisor {
 
 ## Constructor options
 
-| Name | Type | Required | Description |
-|---|---|---|---|
-| `client` | `LLMClient` | ✓ | Any object implementing `LLMClient`. `AnthropicLLMClient` is the standard choice. |
-| `model` | `string` | — | Model identifier to use for the analysis call. Defaults to `'claude-sonnet-4-5'`. |
+| Name     | Type        | Required | Description                                                                       |
+| -------- | ----------- | -------- | --------------------------------------------------------------------------------- |
+| `client` | `LLMClient` | ✓        | Any object implementing `LLMClient`. `AnthropicLLMClient` is the standard choice. |
+| `model`  | `string`    | —        | Model identifier to use for the analysis call. Defaults to `'claude-sonnet-4-5'`. |
 
 ## `analyze` parameters
 
-| Name | Type | Required | Description |
-|---|---|---|---|
-| `experienceSpec` | `ExperienceSpec` | ✓ | Parsed spec from the run being analyzed. |
-| `experienceYamlSource` | `string` | ✓ | Raw YAML source string. Included verbatim in the LLM prompt so the model can reference line numbers and formatting. |
-| `runEvents` | `unknown[]` | ✓ | All events parsed from the run's `.jsonl` log file. The advisor samples the first 30 to stay within token budget. |
-| `stateDiff` | `Array<{ field, before, after }>` | ✓ | Field-level diff between the state before and after the run. Computed by the CLI (`oe evolve`) but can be constructed manually. |
+| Name                   | Type                              | Required | Description                                                                                                                     |
+| ---------------------- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `experienceSpec`       | `ExperienceSpec`                  | ✓        | Parsed spec from the run being analyzed.                                                                                        |
+| `experienceYamlSource` | `string`                          | ✓        | Raw YAML source string. Included verbatim in the LLM prompt so the model can reference line numbers and formatting.             |
+| `runEvents`            | `unknown[]`                       | ✓        | All events parsed from the run's `.jsonl` log file. The advisor samples the first 30 to stay within token budget.               |
+| `stateDiff`            | `Array<{ field, before, after }>` | ✓        | Field-level diff between the state before and after the run. Computed by the CLI (`oe evolve`) but can be constructed manually. |
 
 ## `analyze` return type
 
 Returns `Promise<EvolutionProposal[]>` — an array of up to 5 proposals, each with:
 
-| Field | Type | Description |
-|---|---|---|
-| `operation` | `'add-node' \| 'tune-param' \| 'add-dataset-case'` | Kind of change proposed. |
-| `confidence` | `'high' \| 'medium' \| 'low'` | Advisor's self-assessed confidence in the proposal. |
-| `title` | `string` | Short human-readable title. |
-| `rationale` | `string` | Explanation of why this change would improve the experience. |
-| `diff` | `string` | Unified diff snippet to `git apply`, or a JSON array of new dataset cases. |
+| Field        | Type                                               | Description                                                                |
+| ------------ | -------------------------------------------------- | -------------------------------------------------------------------------- |
+| `operation`  | `'add-node' \| 'tune-param' \| 'add-dataset-case'` | Kind of change proposed.                                                   |
+| `confidence` | `'high' \| 'medium' \| 'low'`                      | Advisor's self-assessed confidence in the proposal.                        |
+| `title`      | `string`                                           | Short human-readable title.                                                |
+| `rationale`  | `string`                                           | Explanation of why this change would improve the experience.               |
+| `diff`       | `string`                                           | Unified diff snippet to `git apply`, or a JSON array of new dataset cases. |
 
 ## `renderMarkdown`
 
@@ -81,7 +81,7 @@ Formats a proposal list as a Markdown document for human review:
 renderMarkdown(proposals: EvolutionProposal[], runId: string): string
 ```
 
-The output starts with a heading `# Evolution Proposals for run \`<runId>\`` followed by one section per proposal including the rationale and a fenced `diff` block. Returns a single `_No proposals generated for this run._` line when the array is empty.
+The output starts with a heading `# Evolution Proposals for run <runId>` followed by one section per proposal including the rationale and a fenced `diff` block. Returns a single `_No proposals generated for this run._` line when the array is empty.
 
 ## Example
 
@@ -108,9 +108,7 @@ const proposals = await advisor.analyze({
   experienceSpec: spec,
   experienceYamlSource: readFileSync('experience.yaml', 'utf8'),
   runEvents: events,
-  stateDiff: [
-    { field: 'results', before: [], after: ['item-1', 'item-2'] },
-  ],
+  stateDiff: [{ field: 'results', before: [], after: ['item-1', 'item-2'] }],
 })
 
 console.log(advisor.renderMarkdown(proposals, 'my-run-id'))
