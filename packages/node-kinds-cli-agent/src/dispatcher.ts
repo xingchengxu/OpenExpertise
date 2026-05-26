@@ -32,7 +32,7 @@ export class CliAgentDispatcher implements NodeDispatcher {
     this.defaultTimeoutMs = opts.defaultTimeoutMs ?? 600_000
   }
 
-  async resolve(node: NodeSpec, ctx: RunContext): Promise<CliAgentImpl> {
+  async resolve(node: NodeSpec, _ctx: RunContext): Promise<CliAgentImpl> {
     if (node.kind !== 'cli-agent') {
       throw new Error(`CliAgentDispatcher cannot resolve kind=${node.kind}`)
     }

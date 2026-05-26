@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import {
-  initialDashboardState,
-  reduceDashboardState,
-  type DashboardState,
-} from '../src/reducer.js'
+import { initialDashboardState, reduceDashboardState } from '../src/reducer.js'
 import type { RunEvent } from '@openexpertise/core'
 
 const NODES = [{ id: 'a' }, { id: 'b', phase: 'review' }]
@@ -110,10 +106,7 @@ describe('reduceDashboardState', () => {
 
   it('run.finished → captures final status', () => {
     const s0 = initialDashboardState(NODES)
-    const s1 = reduceDashboardState(
-      s0,
-      evt('run.finished', { run_id: 'r1', status: 'success' }),
-    )
+    const s1 = reduceDashboardState(s0, evt('run.finished', { run_id: 'r1', status: 'success' }))
     expect(s1.runStatus).toBe('finished: success')
   })
 

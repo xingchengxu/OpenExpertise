@@ -1,11 +1,7 @@
 import React, { useEffect, useReducer } from 'react'
 import { Box, Text } from 'ink'
 import type { EventBus, RunEvent } from '@openexpertise/core'
-import {
-  initialDashboardState,
-  reduceDashboardState,
-  type NodeState,
-} from './reducer.js'
+import { initialDashboardState, reduceDashboardState, type NodeState } from './reducer.js'
 
 interface Props {
   events: EventBus
@@ -13,11 +9,7 @@ interface Props {
 }
 
 export function Dashboard({ events, nodes }: Props): React.ReactElement {
-  const [state, dispatch] = useReducer(
-    reduceDashboardState,
-    nodes,
-    initialDashboardState,
-  )
+  const [state, dispatch] = useReducer(reduceDashboardState, nodes, initialDashboardState)
 
   useEffect(() => {
     const unsub = events.subscribe((event: RunEvent) => dispatch(event))

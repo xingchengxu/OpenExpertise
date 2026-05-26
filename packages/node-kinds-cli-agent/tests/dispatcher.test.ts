@@ -19,7 +19,11 @@ class FakeRunner implements SubprocessRunner {
 // The CliAgentDispatcher reads ctx.experienceDir, ctx.runId, and ctx.events.
 // Everything else is safely cast away. If the implementer finds RunContext requires more fields
 // at compile time, add only what's strictly needed.
-const ctx = { experienceDir: '/tmp/exp', runId: 'r1', events: new EventBus() } as unknown as RunContext
+const ctx = {
+  experienceDir: '/tmp/exp',
+  runId: 'r1',
+  events: new EventBus(),
+} as unknown as RunContext
 
 describe('CliAgentDispatcher', () => {
   it('kind is "cli-agent"', () => {

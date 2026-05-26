@@ -4,7 +4,13 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { AgentDispatcher } from '../src/agent-dispatcher.js'
 import type { LLMClient, LLMCompleteOpts, LLMCompleteResult } from '@openexpertise/core'
-import { RunContext, StateStore, EventBus, DispatcherRegistry, type RunEvent } from '@openexpertise/core'
+import {
+  RunContext,
+  StateStore,
+  EventBus,
+  DispatcherRegistry,
+  type RunEvent,
+} from '@openexpertise/core'
 import type { AgentNodeSpec, ExperienceSpec } from '@openexpertise/schema'
 
 class FakeLLM implements LLMClient {
