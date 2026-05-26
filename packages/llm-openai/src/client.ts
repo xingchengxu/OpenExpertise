@@ -1,10 +1,5 @@
 import OpenAI from 'openai'
-import type {
-  LLMClient,
-  LLMCompleteOpts,
-  LLMCompleteResult,
-  LLMMessage,
-} from '@openexpertise/core'
+import type { LLMClient, LLMCompleteOpts, LLMCompleteResult, LLMMessage } from '@openexpertise/core'
 
 export interface OpenAILLMClientOpts {
   apiKey?: string

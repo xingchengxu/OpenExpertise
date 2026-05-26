@@ -142,20 +142,18 @@ export function buildProgram(): Command {
     .argument('<run-id>', 'prior run id')
     .option('--experience <path>', 'experience path', '.')
     .option('--llm <provider>', 'LLM provider: anthropic | openai (auto-detected from env)')
-    .action(
-      async (runId: string, cmdOpts: { experience: string; llm?: string }, cmd: Command) => {
-        const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
-        const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
-        process.exit(
-          await evolveCommand({
-            experiencePath: cmdOpts.experience,
-            runId,
-            logger,
-            ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
-          }),
-        )
-      },
-    )
+    .action(async (runId: string, cmdOpts: { experience: string; llm?: string }, cmd: Command) => {
+      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+      process.exit(
+        await evolveCommand({
+          experiencePath: cmdOpts.experience,
+          runId,
+          logger,
+          ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
+        }),
+      )
+    })
 
   return program
 }
