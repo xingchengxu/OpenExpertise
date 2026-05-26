@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import type { LLMClient, LLMCompleteOpts } from '@openexpertise/core'
 import { UltraExpertise } from '../src/ultra.js'
 import type { AnalysisOutput, SynthesisOutput } from '../src/schemas.js'
@@ -103,5 +103,52 @@ describe('UltraExpertise', () => {
     }
     const ultra = new UltraExpertise({ client: llm })
     await expect(ultra.analyze('x')).rejects.toThrow(/validation/i)
+  })
+})
+
+import { mkdtempSync, rmSync, readFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+
+describe('UltraExpertise.author end-to-end', () => {
+  let tmp: string
+  afterEach(() => {
+    if (tmp) rmSync(tmp, { recursive: true, force: true })
+  })
+
+  it('runs analyze + synthesize + writeDraft and returns a draft path', async () => {
+    tmp = mkdtempSync(join(tmpdir(), 'oe-author-'))
+    const llm = new ScriptedLLM(ANALYSIS, SYNTHESIS)
+    const ultra = new UltraExpertise({ client: llm })
+    const result = await ultra.author({
+      taskDescription: 'say hi',
+      rootDir: tmp,
+    })
+    expect(result.analysis.name).toBe('hello-author')
+    expect(result.synthesis.files).toHaveLength(2)
+    expect(result.draftDir).toMatch(/hello-author$/)
+    expect(result.files_written).toContain('experience.yaml')
+    expect(result.validation.valid).toBe(true)
+    // experience.yaml landed
+    const yaml = readFileSync(join(result.draftDir, 'experience.yaml'), 'utf8')
+    expect(yaml).toContain('hello-author')
+  })
+
+  it('reports validation errors but still writes the draft', async () => {
+    tmp = mkdtempSync(join(tmpdir(), 'oe-author-bad-'))
+    const badSynth = {
+      ...SYNTHESIS,
+      experience_yaml: `name: bad\n`, // missing version/state/graph → invalid
+    }
+    const llm = new ScriptedLLM(ANALYSIS, badSynth)
+    const ultra = new UltraExpertise({ client: llm })
+    const result = await ultra.author({
+      taskDescription: 'say hi',
+      rootDir: tmp,
+    })
+    expect(result.validation.valid).toBe(false)
+    expect(result.validation.errors?.length ?? 0).toBeGreaterThan(0)
+    // Files still written so user can inspect
+    expect(result.files_written).toContain('experience.yaml')
   })
 })

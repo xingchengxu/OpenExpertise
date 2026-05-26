@@ -1,14 +1,21 @@
 import { readFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import Ajv from 'ajv'
 import type { LLMClient, LLMTool } from '@openexpertise/core'
+import {
+  parseExperienceYaml,
+  validateExperienceSpec,
+  ValidationError,
+} from '@openexpertise/schema'
 import {
   ANALYSIS_SCHEMA,
   SYNTHESIS_SCHEMA,
   type AnalysisOutput,
   type SynthesisOutput,
 } from './schemas.js'
+import { writeDraft, type WriteDraftResult } from './writer.js'
+import { slugify } from './slug.js'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 
@@ -96,5 +103,36 @@ export class UltraExpertise {
       throw new Error(`UltraExpertise.synthesize: AJV validation failed: ${msgs.join(', ')}`)
     }
     return data as SynthesisOutput
+  }
+
+  async author(opts: {
+    taskDescription: string
+    rootDir: string
+    draftSlug?: string
+  }): Promise<UltraResult & WriteDraftResult & { validation: { valid: boolean; errors?: string[] } }> {
+    const analysis = await this.analyze(opts.taskDescription)
+    const synthesis = await this.synthesize(opts.taskDescription, analysis)
+    const slug = opts.draftSlug ?? slugify(analysis.name)
+    const draftDir = join(opts.rootDir, slug)
+    const writeResult = await writeDraft({
+      draftDir,
+      experienceYaml: synthesis.experience_yaml,
+      files: synthesis.files,
+    })
+    const validation = this.validateGeneratedYaml(synthesis.experience_yaml)
+    return { analysis, synthesis, ...writeResult, validation }
+  }
+
+  private validateGeneratedYaml(source: string): { valid: boolean; errors?: string[] } {
+    try {
+      const spec = parseExperienceYaml(source)
+      validateExperienceSpec(spec)
+      return { valid: true }
+    } catch (err) {
+      if (err instanceof ValidationError) {
+        return { valid: false, errors: err.errors.length > 0 ? err.errors : [err.message] }
+      }
+      return { valid: false, errors: [(err as Error).message] }
+    }
   }
 }
