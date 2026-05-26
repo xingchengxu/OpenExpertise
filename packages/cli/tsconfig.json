@@ -10,7 +10,8 @@
     { "path": "../node-kinds-dataset" },
     { "path": "../node-kinds-experience" },
     { "path": "../tui" },
-    { "path": "../evolution" }
+    { "path": "../evolution" },
+    { "path": "../llm-openai" }
   ],
   "include": ["src/**/*"]
 }

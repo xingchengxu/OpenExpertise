@@ -73,6 +73,9 @@ importers:
       '@openexpertise/evolution':
         specifier: workspace:*
         version: link:../evolution
+      '@openexpertise/llm-openai':
+        specifier: workspace:*
+        version: link:../llm-openai
       '@openexpertise/node-kinds-agent':
         specifier: workspace:*
         version: link:../node-kinds-agent
