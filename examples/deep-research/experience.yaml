@@ -85,7 +85,7 @@ graph:
 
         For each finding, capture the exact source URL. Return JSON matching this schema:
 
-        {"findings": [{"sub_question_id": "{{$item.id}}", "claim": "...", "evidence": "...", "url": "..."}]}
+        {"raw_findings": [{"sub_question_id": "{{$item.id}}", "claim": "...", "evidence": "...", "url": "..."}]}
 
         Do not include findings without a URL.
       for_each: { source: $.claude_subqs, concurrency: 2 }
@@ -93,9 +93,9 @@ graph:
       output_format: json
       schema:
         type: object
-        required: [findings]
+        required: [raw_findings]
         properties:
-          findings:
+          raw_findings:
             type: array
             items:
               type: object
@@ -118,7 +118,7 @@ graph:
         Sub-question: {{$item.text}}
         Rationale: {{$item.rationale}}
 
-        Return JSON: {"findings": [{"sub_question_id": "{{$item.id}}", "claim": "...", "evidence": "...", "url": "..."}]}
+        Return JSON: {"raw_findings": [{"sub_question_id": "{{$item.id}}", "claim": "...", "evidence": "...", "url": "..."}]}
 
         Every finding must have a URL.
       for_each: { source: $.gemini_subqs, concurrency: 2 }
@@ -126,9 +126,9 @@ graph:
       output_format: json
       schema:
         type: object
-        required: [findings]
+        required: [raw_findings]
         properties:
-          findings:
+          raw_findings:
             type: array
             items:
               type: object
