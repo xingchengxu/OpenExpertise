@@ -60,7 +60,7 @@ class ScriptedLLM implements LLMClient {
             input: {
               diagnosis: {
                 root_cause:
-                  "validateUserId uses `id < MAX_USER_ID` where `id > MAX_USER_ID` was intended, rejecting the boundary value.",
+                  'validateUserId uses `id < MAX_USER_ID` where `id > MAX_USER_ID` was intended, rejecting the boundary value.',
                 location: 'fixtures/buggy_repo/index.mjs:11',
                 supported_hypothesis_id: 'h1',
               },
@@ -146,7 +146,10 @@ describe('systematic-debugging end-to-end (mocked LLM + cli-agent)', () => {
     expect(symptoms.exit_code).not.toBe(0)
     expect((result.finalState.hypotheses as unknown[]).length).toBe(2)
     expect((result.finalState.check_results as unknown[]).length).toBe(2)
-    const diag = result.finalState.diagnosis as { root_cause: string; supported_hypothesis_id: string }
+    const diag = result.finalState.diagnosis as {
+      root_cause: string
+      supported_hypothesis_id: string
+    }
     expect(diag.supported_hypothesis_id).toBe('h1')
     expect(diag.root_cause).toMatch(/off-by-one|MAX_USER_ID|boundary/i)
     expect(typeof result.finalState.fix_proposal).toBe('string')

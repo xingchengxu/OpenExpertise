@@ -81,13 +81,13 @@ That's the loop: skill → flow → run → advisor → upgraded flow.
 
 ## Mapping to the superpowers skill
 
-| superpowers skill phase            | OE node              |
-| ---------------------------------- | -------------------- |
-| Observe (capture symptoms)         | `capture_symptoms`   |
-| Hypothesize (generate candidates)  | `hypothesize`        |
+| superpowers skill phase            | OE node                       |
+| ---------------------------------- | ----------------------------- |
+| Observe (capture symptoms)         | `capture_symptoms`            |
+| Hypothesize (generate candidates)  | `hypothesize`                 |
 | Verify (test each hypothesis)      | `verify_hypothesis` (fan-out) |
-| Localize (single root cause)       | `localize`           |
-| Fix (minimum edit)                 | `propose_fix`        |
-| Verify the fix doesn't break tests | `verify_fix`         |
+| Localize (single root cause)       | `localize`                    |
+| Fix (minimum edit)                 | `propose_fix`                 |
+| Verify the fix doesn't break tests | `verify_fix`                  |
 
 Same discipline; durable, replayable, evolvable.

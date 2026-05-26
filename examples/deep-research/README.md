@@ -74,4 +74,4 @@ The decomposition heuristics are in `prompts/decompose.md`. Edit the "Two search
 
 - Bias toward one vendor (e.g. always Claude for confidentiality)
 - Add a third vendor (mirror the `claude_subqs` / `gemini_subqs` shape with `codex_subqs` etc. and add a third `search_*` node)
-- Change the parallelism — `for_each.concurrency: N` controls iterations per node; `runtime.concurrency: N` at the top of `experience.yaml` controls how many sibling nodes (the two search_* nodes) run in parallel.
+- Change the parallelism — `for_each.concurrency: N` controls iterations per node; `runtime.concurrency: N` at the top of `experience.yaml` controls how many sibling nodes (the two search\_\* nodes) run in parallel.

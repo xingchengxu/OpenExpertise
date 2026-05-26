@@ -53,9 +53,7 @@ class ScriptedLLM implements LLMClient {
               claude_subqs: [
                 { id: 'c1', text: 'Latency trade-offs', rationale: 'Established methodology.' },
               ],
-              gemini_subqs: [
-                { id: 'g1', text: 'Redis 8 release news', rationale: 'Very recent.' },
-              ],
+              gemini_subqs: [{ id: 'g1', text: 'Redis 8 release news', rationale: 'Very recent.' }],
             },
           },
         ],
@@ -73,7 +71,8 @@ class ScriptedLLM implements LLMClient {
                   'In-memory caching beats Redis below a single-host cap; switch once you scale horizontally.',
                 key_findings: [
                   {
-                    claim: 'Single-host in-memory latency is sub-microsecond vs ~100us for local Redis.',
+                    claim:
+                      'Single-host in-memory latency is sub-microsecond vs ~100us for local Redis.',
                     supporting_urls: ['https://example.com/c1'],
                   },
                   {

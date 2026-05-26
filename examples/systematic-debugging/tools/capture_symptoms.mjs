@@ -11,9 +11,7 @@ export default async function captureSymptoms(input) {
   const repoArg = input._state?.repo_path ?? input.repo_path
   const cmdArg = input._state?.failing_test_cmd ?? input.failing_test_cmd
   if (typeof repoArg !== 'string' || typeof cmdArg !== 'string') {
-    throw new Error(
-      'capture_symptoms requires repo_path and failing_test_cmd in state or args',
-    )
+    throw new Error('capture_symptoms requires repo_path and failing_test_cmd in state or args')
   }
   // Resolve repo_path relative to the experience directory when it's relative.
   const repoPath = resolve(HERE, '..', repoArg)
