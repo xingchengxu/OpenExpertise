@@ -6,6 +6,7 @@ state:
   schema:
     question: { type: string }
     clarified_question: { type: string }
+    assumptions: { type: array, items: { type: string } }
     research_plan: { type: object }
     claude_subqs: { type: array, items: { type: object } }
     gemini_subqs: { type: array, items: { type: object } }
@@ -37,7 +38,7 @@ graph:
         properties:
           clarified_question: { type: string }
           assumptions: { type: array, items: { type: string } }
-      writes: [clarified_question]
+      writes: [clarified_question, assumptions]
 
     - id: decompose
       kind: agent
