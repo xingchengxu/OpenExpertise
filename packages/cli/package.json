@@ -21,6 +21,7 @@
   "dependencies": {
     "@openexpertise/core": "workspace:*",
     "@openexpertise/schema": "workspace:*",
+    "@openexpertise/node-kinds-cli-agent": "workspace:*",
     "@openexpertise/node-kinds-tool": "workspace:*",
     "@openexpertise/node-kinds-agent": "workspace:*",
     "@openexpertise/node-kinds-skill": "workspace:*",

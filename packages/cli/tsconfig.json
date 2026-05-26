@@ -4,6 +4,7 @@
   "references": [
     { "path": "../schema" },
     { "path": "../core" },
+    { "path": "../node-kinds-cli-agent" },
     { "path": "../node-kinds-tool" },
     { "path": "../node-kinds-agent" },
     { "path": "../node-kinds-skill" },

@@ -79,6 +79,9 @@ importers:
       '@openexpertise/node-kinds-agent':
         specifier: workspace:*
         version: link:../node-kinds-agent
+      '@openexpertise/node-kinds-cli-agent':
+        specifier: workspace:*
+        version: link:../node-kinds-cli-agent
       '@openexpertise/node-kinds-dataset':
         specifier: workspace:*
         version: link:../node-kinds-dataset
