@@ -25,7 +25,7 @@ describe('mcp-server', () => {
     // Will grow to the full 5 as Tasks 4-8 register tools. Skeleton task asserts
     // the framework is wired and listTools round-trips.
     expect(Array.isArray(names)).toBe(true)
-    expect(names).toEqual(expect.arrayContaining(['oe_validate', 'oe_state', 'oe_inspect', 'oe_run']))
+    expect(names).toEqual(['oe_evolve', 'oe_inspect', 'oe_run', 'oe_state', 'oe_validate'])
   })
 
   it('oe_validate accepts a well-formed experience and reports valid', async () => {
@@ -136,6 +136,45 @@ graph: { nodes: [{ id: a, kind: tool, impl: ./x.mjs, writes: [x] }], edges: [] }
       const payload = JSON.parse(content[0]!.text) as { events: unknown[] }
       expect(payload.events.length).toBe(3)
       expect((payload.events[0] as { type: string }).type).toBe('run.started')
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it('oe_evolve throws a helpful error when no LLM env var is set', async () => {
+    const { client } = await connectClient()
+    const dir = mkdtempSync(join(tmpdir(), 'oe-mcp-evolve-'))
+    try {
+      const runsDir = join(dir, '.openexpertise', 'runs')
+      mkdirSync(runsDir, { recursive: true })
+      writeFileSync(
+        join(dir, 'experience.yaml'),
+        `name: t
+version: 0.1.0
+state: { schema: { x: { type: string } } }
+graph: { nodes: [{ id: a, kind: tool, impl: ./x.mjs, writes: [x] }], edges: [] }`,
+      )
+      writeFileSync(
+        join(runsDir, 'r1.jsonl'),
+        JSON.stringify({ type: 'run.started', run_id: 'r1' }),
+      )
+      // Clear any LLM env vars for this test.
+      const prevA = process.env.ANTHROPIC_API_KEY
+      const prevO = process.env.OPENAI_API_KEY
+      delete process.env.ANTHROPIC_API_KEY
+      delete process.env.OPENAI_API_KEY
+      try {
+        const result = await client.callTool({
+          name: 'oe_evolve',
+          arguments: { experience_path: dir, run_id: 'r1' },
+        })
+        expect(result.isError).toBe(true)
+        const content = result.content as Array<{ type: string; text: string }>
+        expect(content[0]!.text).toMatch(/ANTHROPIC_API_KEY|OPENAI_API_KEY/)
+      } finally {
+        if (prevA !== undefined) process.env.ANTHROPIC_API_KEY = prevA
+        if (prevO !== undefined) process.env.OPENAI_API_KEY = prevO
+      }
     } finally {
       rmSync(dir, { recursive: true, force: true })
     }
