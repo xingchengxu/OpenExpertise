@@ -1,0 +1,75 @@
+name: review-branch
+description: Review a PR across dimensions; verify each finding before counting it.
+version: 0.1.0
+
+state:
+  schema:
+    pr_id: { type: string }
+    dimensions: { type: array, items: { type: object } }
+    findings: { type: array, items: { type: object }, merge: array_append }
+    verified_findings: { type: array, items: { type: object }, merge: array_append }
+    risk_score: { type: number }
+
+phases:
+  - { id: collect }
+  - { id: review }
+  - { id: verify }
+  - { id: score }
+
+graph:
+  nodes:
+    - id: seed_dimensions
+      kind: tool
+      phase: collect
+      impl: ./tools/list_dimensions.mjs
+      writes: [dimensions]
+    - id: bug_review
+      kind: agent
+      phase: review
+      prompt: ./prompts/review.md
+      schema:
+        type: object
+        required: [findings]
+        properties:
+          findings:
+            type: array
+            items:
+              type: object
+              required: [title, severity]
+              properties:
+                title: { type: string }
+                severity: { type: string }
+      for_each: { source: $.dimensions }
+      writes: [findings]
+    - id: verify_finding
+      kind: agent
+      phase: verify
+      prompt: ./prompts/verify.md
+      schema:
+        type: object
+        required: [verified_findings]
+        properties:
+          verified_findings:
+            type: array
+            items:
+              type: object
+              required: [is_real]
+              properties:
+                is_real: { type: boolean }
+      for_each: { source: $.findings }
+      writes: [verified_findings]
+    - id: score
+      kind: agent
+      phase: score
+      prompt: ./prompts/score.md
+      reads: [verified_findings]
+      schema:
+        type: object
+        required: [risk_score]
+        properties:
+          risk_score: { type: number }
+      writes: [risk_score]
+  edges:
+    - { from: seed_dimensions, to: bug_review }
+    - { from: bug_review, to: verify_finding }
+    - { from: verify_finding, to: score, when: 'length($.findings) > 0' }

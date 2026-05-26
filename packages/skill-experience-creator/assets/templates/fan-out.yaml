@@ -1,0 +1,32 @@
+name: <NAME>
+description: Fan out a process across a list of items.
+version: 0.1.0
+
+state:
+  schema:
+    items:
+      type: array
+      items: { type: object }
+    results:
+      type: array
+      items: { type: object }
+      merge: array_append
+
+graph:
+  nodes:
+    - id: seed
+      kind: tool
+      impl: ./tools/seed.mjs
+      writes: [items]
+    - id: process_each
+      kind: agent
+      prompt: ./prompts/per-item.md
+      for_each: { source: $.items }
+      schema:
+        type: object
+        required: [result]
+        properties:
+          result: { type: object }
+      writes: [results]
+  edges:
+    - { from: seed, to: process_each }

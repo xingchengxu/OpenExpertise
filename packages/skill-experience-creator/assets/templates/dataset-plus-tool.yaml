@@ -1,0 +1,25 @@
+name: <NAME>
+description: <one-line description>
+version: 0.1.0
+
+state:
+  schema:
+    rows:
+      type: array
+      items: { type: object }
+    total:
+      type: number
+
+graph:
+  nodes:
+    - id: load
+      kind: dataset
+      source: { type: file, uri: ./data.csv, format: csv }
+      writes: [rows]
+    - id: aggregate
+      kind: tool
+      impl: ./tools/aggregate.mjs
+      reads: [rows]
+      writes: [total]
+  edges:
+    - { from: load, to: aggregate }

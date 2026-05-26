@@ -15,6 +15,9 @@
     "dist",
     "src/schemas"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -b && node -e \"require('node:fs').cpSync('src/schemas','dist/schemas',{recursive:true})\"",
     "typecheck": "tsc --noEmit"

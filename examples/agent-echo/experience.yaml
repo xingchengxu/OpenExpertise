@@ -1,0 +1,22 @@
+name: agent-echo
+description: Smallest LLM-backed experience — one agent node echoes a greeting.
+version: 0.1.0
+
+state:
+  schema:
+    name:
+      type: string
+      description: Subject to greet; passed via --args
+    greeting:
+      type: string
+      description: Agent's response
+
+graph:
+  nodes:
+    - id: greet
+      kind: agent
+      prompt: ./prompts/echo.md
+      args:
+        name: World
+      writes: [greeting]
+  edges: []

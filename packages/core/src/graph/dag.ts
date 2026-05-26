@@ -5,6 +5,7 @@ export interface DagNode {
   spec: NodeSpec
   predecessors: string[]
   successors: string[]
+  incomingEdges: import('@openexpertise/schema').EdgeSpec[]
 }
 
 export interface Dag {
@@ -16,7 +17,7 @@ export function buildDag(spec: ExperienceSpec): Dag {
   const nodes = new Map<string, DagNode>()
 
   for (const n of spec.graph.nodes) {
-    nodes.set(n.id, { id: n.id, spec: n, predecessors: [], successors: [] })
+    nodes.set(n.id, { id: n.id, spec: n, predecessors: [], successors: [], incomingEdges: [] })
   }
 
   for (const edge of spec.graph.edges) {
@@ -27,6 +28,7 @@ export function buildDag(spec: ExperienceSpec): Dag {
     }
     from.successors.push(edge.to)
     to.predecessors.push(edge.from)
+    to.incomingEdges.push(edge)
   }
 
   const topoOrder = topoSort(nodes)

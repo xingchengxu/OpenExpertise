@@ -1,5 +1,6 @@
 // Public exports — populated as Tasks 6–11 complete.
 export { resolveExpression } from './expressions/resolve.js'
+export { evaluateExpression } from './expressions/evaluate.js'
 export { StateStore } from './state/store.js'
 export { EventBus, type RunEvent } from './events/bus.js'
 export { JsonlEventSink } from './events/sink.js'
@@ -14,3 +15,15 @@ export {
   type ResolvedImpl,
 } from './dispatcher/registry.js'
 export { runExperience } from './runner.js'
+export type {
+  LLMClient,
+  LLMCompleteOpts,
+  LLMCompleteResult,
+  LLMMessage,
+  LLMTool,
+  LLMToolCall,
+  LLMUsage,
+} from './llm/client.js'
+export { interpolatePrompt } from './llm/prompt.js'
+export { computeCacheKey, type CacheKeyInput } from './cache/key.js'
+export { CacheStore, type CacheStoreOpts } from './cache/store.js'

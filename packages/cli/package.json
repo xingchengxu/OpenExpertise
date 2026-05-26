@@ -10,6 +10,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc --noEmit"
@@ -18,6 +21,12 @@
     "@openexpertise/core": "workspace:*",
     "@openexpertise/schema": "workspace:*",
     "@openexpertise/node-kinds-tool": "workspace:*",
+    "@openexpertise/node-kinds-agent": "workspace:*",
+    "@openexpertise/node-kinds-skill": "workspace:*",
+    "@openexpertise/node-kinds-dataset": "workspace:*",
+    "@openexpertise/node-kinds-experience": "workspace:*",
+    "@openexpertise/tui": "workspace:*",
+    "@openexpertise/evolution": "workspace:*",
     "commander": "^12.0.0",
     "pino": "^9.0.0",
     "pino-pretty": "^11.0.0"

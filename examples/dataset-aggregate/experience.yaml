@@ -1,0 +1,28 @@
+name: dataset-aggregate
+description: Load a CSV, then aggregate it with a tool node. No LLM involved.
+version: 0.1.0
+
+state:
+  schema:
+    rows:
+      type: array
+      items: { type: object }
+    total:
+      type: number
+
+graph:
+  nodes:
+    - id: load_rows
+      kind: dataset
+      source:
+        type: file
+        uri: ./data/sample.csv
+        format: csv
+      writes: [rows]
+    - id: aggregate
+      kind: tool
+      impl: ./tools/aggregate.mjs
+      reads: [rows]
+      writes: [total]
+  edges:
+    - { from: load_rows, to: aggregate }

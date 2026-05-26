@@ -1,0 +1,25 @@
+name: <NAME>
+description: <one-line description>
+version: 0.1.0
+
+state:
+  schema:
+    input_text:
+      type: string
+    result:
+      type: object
+
+graph:
+  nodes:
+    - id: classify
+      kind: agent
+      prompt: ./prompts/classify.md
+      reads: [input_text]
+      schema:
+        type: object
+        required: [label, confidence]
+        properties:
+          label: { type: string }
+          confidence: { type: number }
+      writes: [result]
+  edges: []

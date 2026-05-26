@@ -7,15 +7,20 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@openexpertise/schema": "workspace:*",
-    "better-sqlite3": "^11.0.0"
+    "better-sqlite3": "^11.0.0",
+    "object-hash": "^3.0.0"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.0"
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/object-hash": "^3.0.6"
   }
 }
