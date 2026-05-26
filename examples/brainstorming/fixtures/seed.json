@@ -1,0 +1,17 @@
+{
+  "topic": "How should an open-source developer-tools project reduce time-to-first-successful-run for new users (the time from `git clone` to a working demo)?",
+  "angles": [
+    {
+      "name": "practitioner",
+      "description": "An engineer who installs OSS dev tools weekly and has a low frustration tolerance. What kills momentum for them?"
+    },
+    {
+      "name": "contrarian",
+      "description": "Deliberately oppose the common 'add more docs' instinct. What if more docs is the WRONG fix?"
+    },
+    {
+      "name": "analogist",
+      "description": "Different field — how do videogames onboard new players in 60 seconds? How does Stripe make signing up feel inevitable? Borrow from there."
+    }
+  ]
+}
