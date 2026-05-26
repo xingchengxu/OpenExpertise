@@ -168,3 +168,85 @@ describe('OpenAILLMClient — edge cases', () => {
     expect((fakeSdk as any).lastReq.max_tokens).toBe(100)
   })
 })
+
+describe('OpenAILLMClient — 429 retry', () => {
+  it('retries on 429 and succeeds', async () => {
+    let callCount = 0
+    const sdkClient = {
+      chat: {
+        completions: {
+          create: async () => {
+            callCount++
+            if (callCount === 1) {
+              const err: Error & { status?: number } = new Error('rate limited')
+              err.status = 429
+              throw err
+            }
+            return {
+              choices: [{ message: { content: 'ok' }, finish_reason: 'stop' }],
+              usage: { prompt_tokens: 1, completion_tokens: 1 },
+            } as never
+          },
+        },
+      },
+    }
+    const client = new OpenAILLMClient({
+      sdkClient: sdkClient as never,
+      retry: { max_attempts: 3, base_ms: 1 },
+    })
+    const result = await client.complete({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: 'x' }],
+    })
+    expect(callCount).toBe(2)
+    expect(result.text).toBe('ok')
+  })
+
+  it('exhausts retries then throws', async () => {
+    let callCount = 0
+    const sdkClient = {
+      chat: {
+        completions: {
+          create: async () => {
+            callCount++
+            const err: Error & { status?: number } = new Error('rate limited')
+            err.status = 429
+            throw err
+          },
+        },
+      },
+    }
+    const client = new OpenAILLMClient({
+      sdkClient: sdkClient as never,
+      retry: { max_attempts: 3, base_ms: 1 },
+    })
+    await expect(
+      client.complete({ model: 'gpt-4o', messages: [{ role: 'user', content: 'x' }] }),
+    ).rejects.toThrow(/rate limited|429/)
+    expect(callCount).toBe(3)
+  })
+
+  it('does not retry on non-429', async () => {
+    let callCount = 0
+    const sdkClient = {
+      chat: {
+        completions: {
+          create: async () => {
+            callCount++
+            const err: Error & { status?: number } = new Error('bad request')
+            err.status = 400
+            throw err
+          },
+        },
+      },
+    }
+    const client = new OpenAILLMClient({
+      sdkClient: sdkClient as never,
+      retry: { max_attempts: 3, base_ms: 1 },
+    })
+    await expect(
+      client.complete({ model: 'gpt-4o', messages: [{ role: 'user', content: 'x' }] }),
+    ).rejects.toThrow(/bad request/)
+    expect(callCount).toBe(1)
+  })
+})
