@@ -1,0 +1,58 @@
+name: tri-cli-orchestration
+description: Real cross-vendor AI chain — Claude Code summarizes, OpenAI Codex critiques, Google Gemini delivers the final verdict. All three rival coding CLIs talking to each other in a single graph with shared SQLite state.
+version: 0.1.0
+
+state:
+  schema:
+    topic: { type: string }
+    summary: { type: string }
+    critique: { type: string }
+    verdict: { type: string }
+
+graph:
+  nodes:
+    - id: summarize
+      kind: cli-agent
+      provider: claude-code
+      prompt: |
+        Write a single-sentence summary of the topic.
+        No preamble, no markdown.
+
+        Topic: {{topic}}
+      # Node-level args (NOT run-level --args) flow into the prompt via
+      # interpolatePrompt. Edit `topic` below to point this experience at
+      # a different subject.
+      args:
+        topic: 'In-memory caching strategies for HTTP APIs'
+      writes: [summary]
+      timeout_ms: 180000
+
+    - id: critique
+      kind: cli-agent
+      provider: codex
+      prompt: |
+        In one sentence, point out the single biggest thing this summary misses.
+        Be specific. No preamble.
+
+        Summary: {{summary}}
+      reads: [summary]
+      writes: [critique]
+      timeout_ms: 180000
+
+    - id: verdict
+      kind: cli-agent
+      provider: gemini
+      prompt: |
+        Given the summary and the critique, deliver a one-sentence verdict
+        on whether the summary is production-ready (yes/no + the single
+        most actionable fix). No preamble.
+
+        Summary: {{summary}}
+        Critique: {{critique}}
+      reads: [summary, critique]
+      writes: [verdict]
+      timeout_ms: 180000
+
+  edges:
+    - { from: summarize, to: critique }
+    - { from: critique, to: verdict }

@@ -1,0 +1,6 @@
+{
+  "name": "@openexpertise/example-tri-cli-orchestration",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module"
+}

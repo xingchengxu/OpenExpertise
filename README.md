@@ -4,7 +4,7 @@
 
 ### **AI-era Makefile.** Codify expert workflows as runnable, evolving graphs.
 
-[![tests](https://img.shields.io/badge/tests-223%20passing-brightgreen)](#) [![typecheck](https://img.shields.io/badge/typecheck-strict-blue)](#) [![packages](https://img.shields.io/badge/packages-14-blueviolet)](#) [![license](https://img.shields.io/badge/license-TBD-lightgrey)](#)
+[![tests](https://img.shields.io/badge/tests-225%20passing-brightgreen)](#) [![typecheck](https://img.shields.io/badge/typecheck-strict-blue)](#) [![packages](https://img.shields.io/badge/packages-14-blueviolet)](#) [![license](https://img.shields.io/badge/license-TBD-lightgrey)](#)
 
 [**60-second demo**](#60-second-demo) · [**Why**](#why-openexpertise) · [**Examples**](#built-in-examples) · [**Compare**](#vs-the-alternatives) · [**Docs**](#docs)
 
@@ -120,9 +120,54 @@ Every built-in example has been smoke-run against **real APIs** — not just moc
 | **OpenAI Codex CLI** (`codex exec`)                            |   ✓    | `cli-agent` provider. Same.                                                                                                                                        |
 | **Gemini CLI** (`gemini --prompt`)                             |   ✓    | `cli-agent` provider. Live-tested in a 3-CLI chain: Claude summarized → Codex critiqued → **Gemini delivered the final verdict**, state flowing between all three. |
 
-**Smoke-test coverage:** all **8 example experiences** (`hello-tool`, `dataset-aggregate`, `agent-echo`, `oncall-runbook`, `issue-triage`, `review-branch`, `cli-orchestration`, `release-gates`) pass end-to-end with real APIs and real CLIs. The mocked e2e suites are the safety net; the live smokes are the proof.
+**Smoke-test coverage:** all **9 example experiences** (`hello-tool`, `dataset-aggregate`, `agent-echo`, `oncall-runbook`, `issue-triage`, `review-branch`, `cli-orchestration`, `release-gates`, **`tri-cli-orchestration`**) pass end-to-end with real APIs and real CLIs. The mocked e2e suites are the safety net; the live smokes are the proof.
 
-> **One graph, three rival AI coding CLIs, talking to each other** — Claude Code, OpenAI Codex, and Google Gemini chained sequentially with shared SQLite state. No other workflow framework does this today.
+### One graph, three rival AI coding CLIs talking to each other
+
+No other workflow framework does this today. The hero `cli-agent` demo:
+
+```yaml
+# examples/tri-cli-orchestration/experience.yaml (excerpt)
+graph:
+  nodes:
+    - {
+        id: summarize,
+        kind: cli-agent,
+        provider: claude-code,
+        prompt: 'Summarize this topic in one sentence: {{topic}}',
+        args: { topic: 'In-memory caching for HTTP APIs' },
+        writes: [summary],
+      }
+    - {
+        id: critique,
+        kind: cli-agent,
+        provider: codex,
+        prompt: 'What does this summary miss? {{summary}}',
+        reads: [summary],
+        writes: [critique],
+      }
+    - {
+        id: verdict,
+        kind: cli-agent,
+        provider: gemini,
+        prompt: 'Verdict on production-readiness given: {{summary}} + {{critique}}',
+        reads: [summary, critique],
+        writes: [verdict],
+      }
+  edges:
+    - { from: summarize, to: critique }
+    - { from: critique, to: verdict }
+```
+
+Real run (state captured live, 37s wall time):
+
+> **Claude Code →** _"In-memory caching strategies for HTTP APIs store frequently requested response data directly in application memory to reduce latency, lower backend load, and improve throughput, using techniques like time-based expiration, LRU eviction, and cache invalidation on writes."_
+>
+> **Codex →** _"It misses that in-memory caches are per-process, so horizontally scaled APIs can serve inconsistent or stale data across instances unless you add coordination or use a distributed cache."_
+>
+> **Gemini →** _"**No**; specify that in-memory caches are per-process, which can lead to data inconsistency across horizontally scaled API instances."_
+
+One DAG, three vendors, shared SQLite state, replayable event log. Run it yourself: [`examples/tri-cli-orchestration/`](examples/tri-cli-orchestration/).
 
 ### Self-host your LLM
 
@@ -157,16 +202,17 @@ When npm-published: `npm i -g @openexpertise/cli` → `oe run examples/hello-too
 
 > Pick the one closest to your use case. Each ships with fixtures and a mocked-LLM e2e test in `e2e/` — no real API key required to validate the structure.
 
-| Example                                            | What it shows                                                              | Nodes                          |
-| -------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------ |
-| [`hello-tool`](examples/hello-tool/)               | Smallest possible flow. No LLM.                                            | `tool`                         |
-| [`dataset-aggregate`](examples/dataset-aggregate/) | Load CSV → aggregate.                                                      | `dataset` + `tool`             |
-| [`agent-echo`](examples/agent-echo/)               | Single agent with structured output.                                       | `agent`                        |
-| [`review-branch`](examples/review-branch/) ★       | The hero demo. Multi-dim review + verifier + score + evolution.            | `tool` + `agent` ×3            |
-| [`oncall-runbook`](examples/oncall-runbook/)       | Investigate an incident across 3 dimensions via `for_each` fan-out.        | `tool` + `agent`               |
-| [`issue-triage`](examples/issue-triage/)           | Classify → search dupes → conditional dedup → route. Shows `when:` edges.  | `tool` + `agent`               |
-| [`release-gates`](examples/release-gates/)         | License + changelog + coverage + Claude-Code security scan → release gate. | `tool` + `cli-agent` + `agent` |
-| [`cli-orchestration`](examples/cli-orchestration/) | Claude Code summarizes; Codex critiques. Two providers in one flow.        | `cli-agent` ×2                 |
+| Example                                                      | What it shows                                                              | Nodes                          |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------- | ------------------------------ |
+| [`hello-tool`](examples/hello-tool/)                         | Smallest possible flow. No LLM.                                            | `tool`                         |
+| [`dataset-aggregate`](examples/dataset-aggregate/)           | Load CSV → aggregate.                                                      | `dataset` + `tool`             |
+| [`agent-echo`](examples/agent-echo/)                         | Single agent with structured output.                                       | `agent`                        |
+| [`review-branch`](examples/review-branch/) ★                 | The hero demo. Multi-dim review + verifier + score + evolution.            | `tool` + `agent` ×3            |
+| [`oncall-runbook`](examples/oncall-runbook/)                 | Investigate an incident across 3 dimensions via `for_each` fan-out.        | `tool` + `agent`               |
+| [`issue-triage`](examples/issue-triage/)                     | Classify → search dupes → conditional dedup → route. Shows `when:` edges.  | `tool` + `agent`               |
+| [`release-gates`](examples/release-gates/)                   | License + changelog + coverage + Claude-Code security scan → release gate. | `tool` + `cli-agent` + `agent` |
+| [`cli-orchestration`](examples/cli-orchestration/)           | Claude Code summarizes; Codex critiques. Two providers in one flow.        | `cli-agent` ×2                 |
+| [`tri-cli-orchestration`](examples/tri-cli-orchestration/) ★ | Claude → Codex → Gemini in one DAG. The headline cross-vendor demo.        | `cli-agent` ×3                 |
 
 ---
 
