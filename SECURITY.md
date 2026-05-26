@@ -4,10 +4,10 @@
 
 OpenExpertise is pre-1.0. Only the latest `main` branch is supported for security fixes. Once we tag the first stable release the table below will be updated.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| main    | ✓                  |
-| < 1.0   | best-effort        |
+| Version | Supported   |
+| ------- | ----------- |
+| main    | ✓           |
+| < 1.0   | best-effort |
 
 ## Reporting a vulnerability
 
