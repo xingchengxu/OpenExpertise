@@ -2,12 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import {
-  DispatcherRegistry,
-  EventBus,
-  runExperience,
-  type NodeDispatcher,
-} from '../src/index.js'
+import { DispatcherRegistry, EventBus, runExperience, type NodeDispatcher } from '../src/index.js'
 
 class CountingTool implements NodeDispatcher {
   readonly kind = 'tool' as const

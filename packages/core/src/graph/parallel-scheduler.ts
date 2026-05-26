@@ -25,9 +25,7 @@ export class ParallelScheduler extends SequentialScheduler {
     const skipped = new Set<string>()
     let anyFailed = false
 
-    const pipelineStageIds = new Set(
-      (this.ctx.spec.graph.pipelines ?? []).flatMap((p) => p.stages),
-    )
+    const pipelineStageIds = new Set((this.ctx.spec.graph.pipelines ?? []).flatMap((p) => p.stages))
     const loopBodyIds = new Set((this.ctx.spec.graph.loops ?? []).map((l) => l.body))
 
     // Filter the topo order to nodes handled by the main pass.

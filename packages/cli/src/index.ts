@@ -37,13 +37,21 @@ export function buildProgram(): Command {
     .option('--tui', 'show interactive dashboard instead of log output', false)
     .option('--evolve', 'after a successful run, generate evolution proposals', false)
     .option('--llm <provider>', 'LLM provider: anthropic | openai (auto-detected from env)')
-    .option('--concurrency <n>', 'node-level concurrency (overrides runtime.concurrency in YAML)', (v) =>
-      Number.parseInt(v, 10),
+    .option(
+      '--concurrency <n>',
+      'node-level concurrency (overrides runtime.concurrency in YAML)',
+      (v) => Number.parseInt(v, 10),
     )
     .action(
       async (
         path: string,
-        cmdOpts: { args: string; tui: boolean; evolve: boolean; llm?: string; concurrency?: number },
+        cmdOpts: {
+          args: string
+          tui: boolean
+          evolve: boolean
+          llm?: string
+          concurrency?: number
+        },
         cmd: Command,
       ) => {
         const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()

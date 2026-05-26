@@ -100,7 +100,12 @@ export class SequentialScheduler {
         }
       }
 
-      const { anyFanFailed } = await this.runSingleNodeWithForEach(node, edgeBuffer, skipped, results)
+      const { anyFanFailed } = await this.runSingleNodeWithForEach(
+        node,
+        edgeBuffer,
+        skipped,
+        results,
+      )
       if (anyFanFailed) anyFailed = true
     }
 
@@ -129,13 +134,7 @@ export class SequentialScheduler {
       const concurrency = forEach.concurrency ?? 1
       const resultsBefore = results.length
       await runWithLimit(items, concurrency, async (item, idx) => {
-        await this.runNodeOnce(
-          node,
-          { $item: item, $index: idx },
-          skipped,
-          results,
-          edgeBuffer,
-        )
+        await this.runNodeOnce(node, { $item: item, $index: idx }, skipped, results, edgeBuffer)
       })
       // After all iterations, check whether any of the results added by THIS
       // for_each saw 'failed'. (In sequential mode the last result is for this
