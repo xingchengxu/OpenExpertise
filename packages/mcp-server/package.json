@@ -1,0 +1,30 @@
+{
+  "name": "@openexpertise/mcp-server",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "oe-mcp": "./dist/bin.js"
+  },
+  "files": ["dist"],
+  "publishConfig": { "access": "public" },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@openexpertise/cli": "workspace:*",
+    "@openexpertise/core": "workspace:*",
+    "@openexpertise/evolution": "workspace:*",
+    "@openexpertise/node-kinds-agent": "workspace:*",
+    "@openexpertise/node-kinds-cli-agent": "workspace:*",
+    "@openexpertise/node-kinds-dataset": "workspace:*",
+    "@openexpertise/node-kinds-experience": "workspace:*",
+    "@openexpertise/node-kinds-skill": "workspace:*",
+    "@openexpertise/node-kinds-tool": "workspace:*",
+    "@openexpertise/schema": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}
