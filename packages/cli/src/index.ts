@@ -35,10 +35,11 @@ export function buildProgram(): Command {
     .option('--args <json>', 'JSON object passed as args to the experience', '{}')
     .option('--tui', 'show interactive dashboard instead of log output', false)
     .option('--evolve', 'after a successful run, generate evolution proposals', false)
+    .option('--llm <provider>', 'LLM provider: anthropic | openai (auto-detected from env)')
     .action(
       async (
         path: string,
-        cmdOpts: { args: string; tui: boolean; evolve: boolean },
+        cmdOpts: { args: string; tui: boolean; evolve: boolean; llm?: string },
         cmd: Command,
       ) => {
         const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
@@ -51,7 +52,14 @@ export function buildProgram(): Command {
           process.exit(2)
         }
         process.exit(
-          await runCommand({ path, args, logger, tui: cmdOpts.tui, evolve: cmdOpts.evolve }),
+          await runCommand({
+            path,
+            args,
+            logger,
+            tui: cmdOpts.tui,
+            evolve: cmdOpts.evolve,
+            ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
+          }),
         )
       },
     )
@@ -133,11 +141,21 @@ export function buildProgram(): Command {
     .description('Generate evolution proposals for a prior run')
     .argument('<run-id>', 'prior run id')
     .option('--experience <path>', 'experience path', '.')
-    .action(async (runId: string, cmdOpts: { experience: string }, cmd: Command) => {
-      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
-      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
-      process.exit(await evolveCommand({ experiencePath: cmdOpts.experience, runId, logger }))
-    })
+    .option('--llm <provider>', 'LLM provider: anthropic | openai (auto-detected from env)')
+    .action(
+      async (runId: string, cmdOpts: { experience: string; llm?: string }, cmd: Command) => {
+        const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+        const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+        process.exit(
+          await evolveCommand({
+            experiencePath: cmdOpts.experience,
+            runId,
+            logger,
+            ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
+          }),
+        )
+      },
+    )
 
   return program
 }

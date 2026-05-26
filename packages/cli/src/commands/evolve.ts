@@ -2,14 +2,16 @@ import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { parseExperienceYaml } from '@openexpertise/schema'
 import { StateStore } from '@openexpertise/core'
+import type { LLMClient } from '@openexpertise/core'
 import { EvolutionAdvisor } from '@openexpertise/evolution'
-import { AnthropicLLMClient } from '@openexpertise/node-kinds-agent'
+import { makeLLMClient, resolveLLMProvider } from '../llm-factory.js'
 import type { Logger } from 'pino'
 
 export interface EvolveOpts {
   experiencePath: string
   runId: string
   logger: Logger
+  llm?: string
 }
 
 export async function evolveCommand(opts: EvolveOpts): Promise<number> {
@@ -53,7 +55,19 @@ export async function evolveCommand(opts: EvolveOpts): Promise<number> {
     }
   }
 
-  const advisor = new EvolutionAdvisor({ client: new AnthropicLLMClient() })
+  // Lazy: resolves provider + constructs client only on first complete() call.
+  // Consistent with run.ts closure pattern for multi-provider support.
+  let cached: LLMClient | null = null
+  const llm: LLMClient = {
+    async complete(llmOpts) {
+      if (!cached) {
+        const provider = resolveLLMProvider(opts.llm !== undefined ? { flag: opts.llm } : {})
+        cached = await makeLLMClient(provider)
+      }
+      return cached.complete(llmOpts)
+    },
+  }
+  const advisor = new EvolutionAdvisor({ client: llm })
   const proposals = await advisor.analyze({
     experienceSpec: spec,
     experienceYamlSource: yamlSource,
