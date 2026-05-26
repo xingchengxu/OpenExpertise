@@ -1,47 +1,77 @@
 # OpenExpertise
 
-An open-source execution engine for **experience flows** — heterogeneous executable graphs that codify expert knowledge into runnable, evolving artifacts.
+> Heterogeneous executable graphs that codify expert knowledge — deterministic, persistent, and self-improving.
 
-Think of it as: deterministic graph orchestrator (like `/workflows`) **plus** a persistent blackboard for domain state **plus** an evolution loop that proposes graph edits after each run. Authoring is mediated by a Claude Code skill so non-engineers can capture their expertise.
+OpenExpertise is the **execution engine for "experience flows"**: graphs whose nodes can be tools, datasets, Claude/GPT agents, callable skills, or other experiences. Runs are durable artifacts (SQLite blackboard, JSONL event log), and the evolution advisor proposes graph upgrades after each run.
 
-## Status
+![hero demo placeholder](docs/assets/hero.gif)
 
-V1 complete. All 6 plans landed. ≥100 tests pass.
+## 90-second demo — the graph improves itself
+
+```bash
+git clone <repo-url> && cd OpenExpertise
+pnpm install && pnpm -r build
+
+export ANTHROPIC_API_KEY=sk-...    # or OPENAI_API_KEY
+node packages/cli/dist/bin.js run examples/review-branch --tui
+```
+
+**Run 1** — three reviewers (bugs / perf / tests) read the diff. The SQL injection is missed:
+
+```
+ⓘ run-2026-05-26-a1b2c3 finished
+  findings: 3 issues (null deref, missing test, unclosed cursor)
+  risk_score: 0.30
+```
+
+**Evolve** — ask the advisor what's missing:
+
+```bash
+node packages/cli/dist/bin.js evolve run-2026-05-26-a1b2c3
+# → wrote .openexpertise/proposals/run-2026-05-26-a1b2c3.md
+#   proposal: "Add `security` dimension"
+git apply .openexpertise/proposals/run-2026-05-26-a1b2c3.diff
+```
+
+**Run 2** — same command. Now four reviewers. SQL injection caught:
+
+```
+ⓘ run-2026-05-26-d4e5f6 finished
+  findings: 4 issues (+ SQL injection in /users/<id>)
+  risk_score: 0.85
+```
+
+The experience improved itself. State persisted across runs. The graph is a versioned artifact.
+
+## Why OpenExpertise
+
+- **Heterogeneous nodes.** Mix tools (deterministic code), agents (LLM calls with structured output), skills (SKILL.md packages), datasets (file / SQLite / HTTP), and nested experiences in a single graph.
+- **Durable state.** A per-experience SQLite blackboard with declared schema and merge strategies. `oe state findings` works hours later.
+- **Evolution loop.** After every run, the advisor reads the events + state diff and proposes graph upgrades (add node, tune param, add dataset case) as `git apply`-ready diffs.
+- **Two LLM providers.** Anthropic and OpenAI, switch via `--llm` or env-var auto-detect.
+
+For a fuller comparison vs LangGraph / CrewAI / Mastra / Inngest see [`docs/comparison.md`](docs/comparison.md).
 
 ## Install
 
 ```bash
-# From source (workspace):
-git clone <repo-url>
-cd OpenExpertise
-pnpm install
-pnpm -r build
-
-# Use the CLI:
+git clone <repo-url> && cd OpenExpertise
+pnpm install && pnpm -r build
 node packages/cli/dist/bin.js --help
 ```
 
 (Publication to npm is configured per-package; once npm-published you'll be able to `npm i -g @openexpertise/cli`.)
 
-## Quick start — `hello-tool`
+## Quick start — smaller examples
 
 ```bash
+# Pure-tool, no LLM needed:
 node packages/cli/dist/bin.js run examples/hello-tool
 # → finalState: { greeting: 'hello, World' }
-```
 
-## Quick start — `dataset-aggregate`
-
-```bash
+# Dataset aggregate:
 node packages/cli/dist/bin.js run examples/dataset-aggregate
-# → finalState: { rows: [...4 rows...], total: 60 }
-```
-
-## Quick start — `review-branch` (requires `ANTHROPIC_API_KEY`)
-
-```bash
-export ANTHROPIC_API_KEY=sk-...
-node packages/cli/dist/bin.js run examples/review-branch --args '{"pr_id":"PR-1"}'
+# → finalState: { rows: [...], total: 60 }
 ```
 
 ## All CLI commands
