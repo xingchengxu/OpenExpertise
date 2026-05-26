@@ -166,3 +166,45 @@ git merge worktree-overnight-plans-2-6 --no-ff
 - Concurrency in `for_each` (V1 parses `concurrency:` but runs sequentially)
 - `oe inspect --tui` (Plan 4's TUI is only wired into `oe run --tui`)
 
+
+---
+
+## Post-V1 Polish — Hero Demo + OpenAI Support (2026-05-26)
+
+Branch: `feat/hero-demo-and-openai` (off `main`)
+Spec: `docs/superpowers/specs/2026-05-26-hero-demo-and-openai-support-design.md` (`06fb316`)
+Plan: `docs/superpowers/plans/2026-05-26-hero-demo-and-openai-support.md` (`cf8abe3`)
+Final commit: `3707aa8`
+
+### What shipped
+
+| Area | Result |
+|---|---|
+| New package | `@openexpertise/llm-openai` — wraps OpenAI chat-completions behind `LLMClient`; 7 tests covering text path, tool round-trip, edge cases |
+| CLI | `--llm anthropic\|openai` flag on `oe run` and `oe evolve`; `packages/cli/src/llm-factory.ts` (`resolveLLMProvider` + `makeLLMClient` + `defaultModelFor`) with 7 tests |
+| Demo | `examples/review-branch/` rebuilt around a fixture diff (`fixtures/add-user-lookup.diff`) with SQL injection + null deref + missing test + unclosed cursor; new `fetch_diff` tool; narrowed reviewer prompts that inject `{{diff}}` and stay in lane |
+| Advisor | `packages/evolution/src/prompts/proposal.md` tightened toward "missing-dimension" proposals when a diff state field is present |
+| Docs | Root `README.md` rewritten with hero pitch + 90-second demo narrative; `docs/comparison.md` (vs LangGraph / CrewAI / Mastra / Inngest); `docs/demo-script.md` per-scene recording checklist; `docs/assets/.gitkeep` placeholder for the GIF |
+| Tests | 119/119 pass across 35 files (was 105/105 before) |
+| Lint | 0 errors (16 `as any` warnings in tests, expected) |
+| Typecheck + Prettier | clean |
+| hello-tool regression | `oe run examples/hello-tool` still succeeds with NO LLM env vars set |
+
+### Commits (chronological)
+
+`6abd3c1` scaffold llm-openai · `ac13605` text path · `a4940e3` tool round-trip · `f6ea067` edge cases · `492b8d3` cli factory · `6e1e514` --llm flag · `bf38541` fixture diff · `f356163` fetch_diff tool · `cc52164` narrow prompts · `1b39e36` e2e update · `db64573` advisor prompt · `2b16f4b` README hero · `defa31e` comparison.md · `8c6b456` demo-script.md · `8688f7c` prettier · `3707aa8` final-review fixes (defaultModelFor wiring + evolve path corrections in docs)
+
+### Final reviewer caught
+
+1. **Dispatchers defaulted to `claude-sonnet-4-5` regardless of provider** — `oe run --llm openai` would have sent a Claude model name to OpenAI. Fixed by eagerly resolving the provider name (string, cheap) and passing `defaultModelFor(provider)` to `AgentDispatcher`, `SkillDispatcher`, and `EvolutionAdvisor` constructors. SDK construction stays lazy via the proxy.
+2. **README + demo-script referenced wrong evolve output paths** — `.openexpertise/proposals/<id>.md` and a separate `.diff` file. Actual path is `.openexpertise/evolution/<id>.md` with the diff embedded as a fenced block. Both docs corrected; demo includes an `awk` one-liner to extract the embedded diff for `git apply`.
+
+### Next concrete actions (in priority order)
+
+1. **Record the hero GIF** following `docs/demo-script.md` — replace `docs/assets/.gitkeep` placeholder with `hero.gif`.
+2. **Unmocked smoke-test** with real `ANTHROPIC_API_KEY` (and separately with `OPENAI_API_KEY`) — verify Run 1 misses the SQL injection, advisor proposes `security`, Run 2 catches it. If real models leak under prompt narrowing (Risk 1 in spec), tighten further.
+3. **Launch prep:** npm publish (publishConfig already set on all 12 packages), GitHub remote, Docusaurus/Starlight docs site, HN/Twitter announcement.
+4. **Optional follow-ups from final review** (not blocking):
+   - Add `"test": "vitest"` script to `packages/llm-openai/package.json` for `pnpm --filter` parity.
+   - Two more factory tests (unknown flag value; `--llm anthropic` with no `ANTHROPIC_API_KEY`).
+   - Consider extracting `makeLazyLLMClient(opts)` helper to llm-factory to remove the closure duplication between run.ts and evolve.ts.
