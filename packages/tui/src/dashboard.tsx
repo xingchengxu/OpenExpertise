@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useReducer } from 'react'
 import { Box, Text } from 'ink'
 import type { EventBus, RunEvent } from '@openexpertise/core'
-
-interface NodeState {
-  id: string
-  phase?: string
-  status: 'pending' | 'running' | 'done' | 'failed' | 'skipped'
-  error?: string
-}
+import {
+  initialDashboardState,
+  reduceDashboardState,
+  type NodeState,
+} from './reducer.js'
 
 interface Props {
   events: EventBus
@@ -15,55 +13,58 @@ interface Props {
 }
 
 export function Dashboard({ events, nodes }: Props): React.ReactElement {
-  const [state, setState] = useState<Record<string, NodeState>>(() => {
-    const initial: Record<string, NodeState> = {}
-    for (const n of nodes) {
-      initial[n.id] = { id: n.id, status: 'pending', ...(n.phase ? { phase: n.phase } : {}) }
-    }
-    return initial
-  })
-  const [runStatus, setRunStatus] = useState<string>('starting')
+  const [state, dispatch] = useReducer(
+    reduceDashboardState,
+    nodes,
+    initialDashboardState,
+  )
 
   useEffect(() => {
-    const unsub = events.subscribe((event: RunEvent) => {
-      if (event.type === 'run.started') setRunStatus('running')
-      else if (event.type === 'run.finished') setRunStatus(`finished: ${event.status}`)
-      else if (
-        event.type === 'node.started' ||
-        event.type === 'node.finished' ||
-        event.type === 'node.failed' ||
-        event.type === 'node.skipped'
-      ) {
-        setState((prev) => {
-          const current = prev[event.node_id] ?? { id: event.node_id, status: 'pending' as const }
-          let nextStatus: NodeState['status'] = current.status
-          if (event.type === 'node.started') nextStatus = 'running'
-          if (event.type === 'node.finished') nextStatus = 'done'
-          if (event.type === 'node.failed') nextStatus = 'failed'
-          if (event.type === 'node.skipped') nextStatus = 'skipped'
-          const next: NodeState = { ...current, status: nextStatus }
-          if (event.type === 'node.failed') next.error = event.error
-          return { ...prev, [event.node_id]: next }
-        })
-      }
-    })
+    const unsub = events.subscribe((event: RunEvent) => dispatch(event))
     return () => {
       unsub()
     }
   }, [events])
 
+  const { input_tokens, output_tokens } = state.totals
+
   return (
     <Box flexDirection="column">
-      <Text>OpenExpertise run — {runStatus}</Text>
-      {Object.values(state).map((n) => (
-        <Box key={n.id}>
-          <Text color={colorFor(n.status)}>
-            {symbolFor(n.status)} {n.id}
+      <Text>
+        OpenExpertise run — {state.runStatus}
+        {(input_tokens > 0 || output_tokens > 0) && (
+          <Text dimColor>
+            {'  · Σ in='}
+            {input_tokens}
+            {' out='}
+            {output_tokens}
           </Text>
-          {n.phase && <Text dimColor> [{n.phase}]</Text>}
-          {n.error && <Text color="red"> — {n.error}</Text>}
-        </Box>
+        )}
+      </Text>
+      {Object.values(state.nodes).map((n) => (
+        <NodeRow key={n.id} node={n} />
       ))}
+    </Box>
+  )
+}
+
+function NodeRow({ node }: { node: NodeState }): React.ReactElement {
+  return (
+    <Box>
+      <Text color={colorFor(node.status)}>
+        {symbolFor(node.status)} {node.id}
+      </Text>
+      {node.phase && <Text dimColor> [{node.phase}]</Text>}
+      {node.activity && <Text dimColor> · {truncate(node.activity, 40)}</Text>}
+      {node.tokens && (node.tokens.input > 0 || node.tokens.output > 0) && (
+        <Text dimColor>
+          {' · '}
+          {node.tokens.input}
+          {'/'}
+          {node.tokens.output}
+        </Text>
+      )}
+      {node.error && <Text color="red"> — {node.error}</Text>}
     </Box>
   )
 }
@@ -82,6 +83,7 @@ function symbolFor(s: NodeState['status']): string {
       return '–'
   }
 }
+
 function colorFor(s: NodeState['status']): string {
   switch (s) {
     case 'pending':
@@ -95,4 +97,9 @@ function colorFor(s: NodeState['status']): string {
     case 'skipped':
       return 'yellow'
   }
+}
+
+function truncate(s: string, max: number): string {
+  if (s.length <= max) return s
+  return s.slice(0, max - 1) + '…'
 }
