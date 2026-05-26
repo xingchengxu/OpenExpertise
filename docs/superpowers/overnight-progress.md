@@ -398,3 +398,47 @@ Plan: `docs/superpowers/plans/2026-05-26-parallel-scheduler.md`
 1. Merge `feat/parallel-scheduler` into `main`.
 2. Manual smoke: run an example with `--concurrency 4` and verify TUI shows multiple nodes "▶" simultaneously.
 3. V2 sprint complete after merge. Project should now exceed `/workflows`' published feature set on every architectural axis.
+
+---
+
+## Post-V2 Live-Smoke + Documentation Polish (2026-05-26)
+
+Worked directly on `main` (small fixes + content edits, not feature work). No new spec — these were either bug fixes surfaced by real-API smoke tests, content rewrites, or housekeeping.
+
+### Live-smoke fixes
+
+Three real bugs surfaced when running the examples against actual provider APIs and CLIs. All three were reduced to failing tests and fixed.
+
+| Commit | Fix |
+|---|---|
+| `d1fcae0` | `fix(llm-openai)`: strip `<think>...</think>` prefix from tool-call arguments. Reasoning models (DeepSeek-R1, o1, qwq) prefix tool-call arguments with chain-of-thought blocks; the OpenAI client's `parseArguments` now strips them before JSON.parse. |
+| `7761bf8` | `fix(cli-agent)`: unwrap Claude Code's JSON envelope + strip markdown ` ```json ` code fence from stdout. Claude Code wraps structured output in an outer envelope plus markdown fences; the cli-agent parser now handles both. |
+| `6751509` | `fix(cli-agent)`: GeminiProvider passes `--skip-trust` so the CLI runs outside its trust dir. Without this flag, `gemini` refused to run in tmp dirs and CI workdirs. |
+
+### New showcase example
+
+| Commit | Example |
+|---|---|
+| `bbb3800` | `examples/tri-cli-orchestration` — Claude Code → Codex → Gemini in one DAG, state flowing between three rival vendors. 9 examples total now. |
+
+### Content + housekeeping
+
+| Commit | Change |
+|---|---|
+| `e2a7c97` | Root README rewrite — "AI-era Makefile" positioning, vs-alternatives comparison table, install-and-run quickstart. |
+| `a633339` | README "Verified end-to-end" section + self-hosted LLM (`OPENAI_BASE_URL`) callout. |
+| `04df328` | README: bump Gemini CLI to verified ✓ + add 3-CLI orchestration callout. |
+| `bf5f201` / `05ba537` | MIT License added; copyright corrected to OpenExpertise. |
+| `a8773a2` | README: replaced `<repo-url>` placeholders with the actual GitHub URL. |
+
+### Stats at end of post-V2 polish
+
+- **Test count:** 225 passing (was 218 at end of Plan D; +7 from regression tests + tri-cli-orchestration e2e).
+- **Examples:** 9.
+- **Packages:** 14.
+- All packages have `publishConfig: { access: "public" }`. CI on Node 20 (Plan E expands to 20/22/24).
+
+### Next concrete actions
+
+1. Plan E — Launch Readiness (community docs + CI matrix + CHANGELOG + launch checklist).
+2. After Plan E: `npm publish` all 14 packages + tag v0.1.0 + write launch post.

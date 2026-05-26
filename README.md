@@ -398,6 +398,15 @@ This project is built largely via [Claude Code](https://claude.com/claude-code)-
 
 ---
 
+## Community
+
+- [Contributing guide](CONTRIBUTING.md) — setup, conventions, the spec → plan → execute rhythm.
+- [Code of Conduct](CODE_OF_CONDUCT.md) — we follow Contributor Covenant 2.1.
+- [Security policy](SECURITY.md) — how to report vulnerabilities.
+- [Changelog](CHANGELOG.md) — what's in each release.
+
+---
+
 ## License
 
 [MIT](LICENSE) © 2026 OpenExpertise.

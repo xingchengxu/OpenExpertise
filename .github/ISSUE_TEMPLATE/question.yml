@@ -1,0 +1,25 @@
+name: Question
+description: How do I ... ? Why does ... ?
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have you checked the [docs](https://github.com/xingchengxu/OpenExpertise/tree/main/docs)? Open-ended discussion belongs in [Discussions](https://github.com/xingchengxu/OpenExpertise/discussions); specific "how do I" with a concrete attempted-this-and-it-didn't-work is welcome here.
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried?
+      description: Paste your `experience.yaml` snippet + the command output if relevant.
+      render: yaml
+  - type: textarea
+    id: where_looked
+    attributes:
+      label: Where you've already looked
+      description: Links to docs you read, similar issues you found, etc.

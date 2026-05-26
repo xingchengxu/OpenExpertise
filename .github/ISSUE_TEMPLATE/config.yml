@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/xingchengxu/OpenExpertise/security/advisories/new
+    about: Please report security issues via Security Advisories, not public issues.
+  - name: Discussion / chat
+    url: https://github.com/xingchengxu/OpenExpertise/discussions
+    about: Open-ended questions go in Discussions, not issues.
