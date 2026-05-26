@@ -4,6 +4,10 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" },
+    "./llm-factory": { "import": "./dist/llm-factory.js", "types": "./dist/llm-factory.d.ts" }
+  },
   "bin": {
     "oe": "./dist/bin.js"
   },
