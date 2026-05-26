@@ -1,0 +1,21 @@
+{
+  "name": "@openexpertise/llm-openai",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openexpertise/core": "workspace:*",
+    "openai": "^4.77.0"
+  }
+}

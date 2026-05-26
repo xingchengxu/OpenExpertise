@@ -1,10 +1,11 @@
 name: review-branch
-description: Review a PR across dimensions; verify each finding before counting it.
+description: Review a code diff across dimensions; verify each finding before counting it.
 version: 0.1.0
 
 state:
   schema:
     pr_id: { type: string }
+    diff: { type: string }
     dimensions: { type: array, items: { type: object } }
     findings: { type: array, items: { type: object }, merge: array_append }
     verified_findings: { type: array, items: { type: object }, merge: array_append }
@@ -18,6 +19,11 @@ phases:
 
 graph:
   nodes:
+    - id: fetch_diff
+      kind: tool
+      phase: collect
+      impl: ./tools/fetch_diff.mjs
+      writes: [diff]
     - id: seed_dimensions
       kind: tool
       phase: collect
@@ -27,6 +33,7 @@ graph:
       kind: agent
       phase: review
       prompt: ./prompts/review.md
+      reads: [diff]
       schema:
         type: object
         required: [findings]
@@ -45,6 +52,7 @@ graph:
       kind: agent
       phase: verify
       prompt: ./prompts/verify.md
+      reads: [diff]
       schema:
         type: object
         required: [verified_findings]
@@ -70,6 +78,7 @@ graph:
           risk_score: { type: number }
       writes: [risk_score]
   edges:
+    - { from: fetch_diff, to: seed_dimensions }
     - { from: seed_dimensions, to: bug_review }
     - { from: bug_review, to: verify_finding }
     - { from: verify_finding, to: score, when: 'length($.findings) > 0' }

@@ -2,14 +2,16 @@ import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { parseExperienceYaml } from '@openexpertise/schema'
 import { StateStore } from '@openexpertise/core'
+import type { LLMClient } from '@openexpertise/core'
 import { EvolutionAdvisor } from '@openexpertise/evolution'
-import { AnthropicLLMClient } from '@openexpertise/node-kinds-agent'
+import { makeLLMClient, resolveLLMProvider, defaultModelFor } from '../llm-factory.js'
 import type { Logger } from 'pino'
 
 export interface EvolveOpts {
   experiencePath: string
   runId: string
   logger: Logger
+  llm?: string
 }
 
 export async function evolveCommand(opts: EvolveOpts): Promise<number> {
@@ -53,7 +55,20 @@ export async function evolveCommand(opts: EvolveOpts): Promise<number> {
     }
   }
 
-  const advisor = new EvolutionAdvisor({ client: new AnthropicLLMClient() })
+  // Resolve provider eagerly so the advisor sends a provider-appropriate model
+  // name (Claude vs GPT). evolve always needs an LLM, so any resolution error
+  // here surfaces immediately rather than being deferred.
+  const provider = resolveLLMProvider(opts.llm !== undefined ? { flag: opts.llm } : {})
+  const model = defaultModelFor(provider)
+
+  let cached: LLMClient | null = null
+  const llm: LLMClient = {
+    async complete(llmOpts) {
+      if (!cached) cached = await makeLLMClient(provider)
+      return cached.complete(llmOpts)
+    },
+  }
+  const advisor = new EvolutionAdvisor({ client: llm, model })
   const proposals = await advisor.analyze({
     experienceSpec: spec,
     experienceYamlSource: yamlSource,

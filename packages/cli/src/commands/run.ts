@@ -2,13 +2,15 @@ import { readFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { parseExperienceYaml } from '@openexpertise/schema'
 import { DispatcherRegistry, EventBus, runExperience } from '@openexpertise/core'
+import type { LLMClient } from '@openexpertise/core'
 import { ToolDispatcher } from '@openexpertise/node-kinds-tool'
-import { AgentDispatcher, AnthropicLLMClient } from '@openexpertise/node-kinds-agent'
+import { AgentDispatcher } from '@openexpertise/node-kinds-agent'
 import { SkillDispatcher } from '@openexpertise/node-kinds-skill'
 import { DatasetDispatcher } from '@openexpertise/node-kinds-dataset'
 import { ExperienceDispatcher } from '@openexpertise/node-kinds-experience'
 import { startTui } from '@openexpertise/tui'
 import { resolveExperienceYaml } from './validate.js'
+import { makeLLMClient, resolveLLMProvider, defaultModelFor } from '../llm-factory.js'
 import type { Logger } from 'pino'
 
 export interface RunOpts {
@@ -17,6 +19,7 @@ export interface RunOpts {
   logger: Logger
   tui: boolean
   evolve: boolean
+  llm?: string
 }
 
 export async function runCommand(opts: RunOpts): Promise<number> {
@@ -28,29 +31,33 @@ export async function runCommand(opts: RunOpts): Promise<number> {
   const dispatchers = new DispatcherRegistry()
   dispatchers.register(new ToolDispatcher())
 
-  // LLM-backed dispatchers share one Anthropic client. If ANTHROPIC_API_KEY is
-  // absent, instantiation is deferred — the dispatchers throw only when actually
-  // invoked, so experiences that don't use agent/skill nodes still work fine.
-  let lazyClient: AnthropicLLMClient | undefined
-  const getClient = (): AnthropicLLMClient => {
-    if (!lazyClient) lazyClient = new AnthropicLLMClient()
-    return lazyClient
+  // Resolve provider eagerly so dispatchers know which default model to send
+  // (Anthropic vs OpenAI model names). When no env var or flag is configured,
+  // we keep going with a fallback default — agent/skill dispatchers won't fire
+  // for experiences like hello-tool, so the bogus default is never used.
+  // SDK construction itself stays lazy via the proxy below.
+  let eagerProvider: ReturnType<typeof resolveLLMProvider> | null = null
+  try {
+    eagerProvider = resolveLLMProvider(opts.llm !== undefined ? { flag: opts.llm } : {})
+  } catch (err) {
+    if (opts.llm !== undefined) throw err // explicit --llm with missing/unknown value → surface
+    // otherwise: no LLM configured; tolerable if no agent/skill nodes fire
   }
-  // We register with a getter-based proxy so construction is lazy.
-  dispatchers.register(
-    new AgentDispatcher({
-      get client() {
-        return getClient()
-      },
-    } as any),
-  )
-  dispatchers.register(
-    new SkillDispatcher({
-      get client() {
-        return getClient()
-      },
-    } as any),
-  )
+  const defaultModel = eagerProvider ? defaultModelFor(eagerProvider) : 'claude-sonnet-4-5'
+
+  let cached: LLMClient | null = null
+  const llm: LLMClient = {
+    async complete(llmOpts) {
+      if (!cached) {
+        const provider =
+          eagerProvider ?? resolveLLMProvider(opts.llm !== undefined ? { flag: opts.llm } : {})
+        cached = await makeLLMClient(provider)
+      }
+      return cached.complete(llmOpts)
+    },
+  }
+  dispatchers.register(new AgentDispatcher({ client: llm, defaultModel }))
+  dispatchers.register(new SkillDispatcher({ client: llm, defaultModel }))
 
   dispatchers.register(new DatasetDispatcher())
   dispatchers.register(new ExperienceDispatcher({ runExperience }))
