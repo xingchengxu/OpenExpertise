@@ -106,7 +106,12 @@ export class StateStore {
       for (const [field, incoming] of Object.entries(delta)) {
         const fieldSchema: StateFieldSchema | undefined = schema[field]
         if (!fieldSchema) {
-          throw new Error(`Write to undeclared state field "${field}". Declare it in state.schema.`)
+          throw new Error(
+            `Node "${meta.nodeId}" wrote to undeclared state field "${field}". ` +
+              `Either add \`${field}: { type: <type> }\` to \`state.schema\` in experience.yaml, ` +
+              `or remove "${field}" from the node's output. ` +
+              `(Every output key must be declared in state.schema.)`,
+          )
         }
         this.assertTypeMatches(field, fieldSchema, incoming)
 
@@ -155,19 +160,34 @@ export class StateStore {
     const t = schema.type
     if (!t) return
     if (t === 'array' && !Array.isArray(value)) {
-      throw new Error(`Field "${field}" expects type array; got ${typeof value}`)
+      throw new Error(
+        `State field "${field}" is declared as type array in state.schema, but the node wrote a ${typeof value}. ` +
+          `Fix the node's output to produce an array, or update state.schema to match the actual type.`,
+      )
     }
     if (t === 'object' && (typeof value !== 'object' || Array.isArray(value))) {
-      throw new Error(`Field "${field}" expects type object; got ${typeof value}`)
+      throw new Error(
+        `State field "${field}" is declared as type object in state.schema, but the node wrote a ${Array.isArray(value) ? 'array' : typeof value}. ` +
+          `Fix the node's output to produce a plain object, or update state.schema to match the actual type.`,
+      )
     }
     if (t === 'string' && typeof value !== 'string') {
-      throw new Error(`Field "${field}" expects type string; got ${typeof value}`)
+      throw new Error(
+        `State field "${field}" is declared as type string in state.schema, but the node wrote a ${typeof value}. ` +
+          `Fix the node's output to produce a string, or update state.schema to match the actual type.`,
+      )
     }
     if (t === 'number' && typeof value !== 'number') {
-      throw new Error(`Field "${field}" expects type number; got ${typeof value}`)
+      throw new Error(
+        `State field "${field}" is declared as type number in state.schema, but the node wrote a ${typeof value}. ` +
+          `Fix the node's output to produce a number, or update state.schema to match the actual type.`,
+      )
     }
     if (t === 'boolean' && typeof value !== 'boolean') {
-      throw new Error(`Field "${field}" expects type boolean; got ${typeof value}`)
+      throw new Error(
+        `State field "${field}" is declared as type boolean in state.schema, but the node wrote a ${typeof value}. ` +
+          `Fix the node's output to produce a boolean, or update state.schema to match the actual type.`,
+      )
     }
   }
 }

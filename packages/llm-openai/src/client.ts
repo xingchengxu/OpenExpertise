@@ -30,7 +30,10 @@ export class OpenAILLMClient implements LLMClient {
     const apiKey = opts.apiKey ?? process.env.OPENAI_API_KEY
     if (!apiKey) {
       throw new Error(
-        'OpenAILLMClient requires OPENAI_API_KEY (env or constructor opt) or an injected sdkClient',
+        'OpenAILLMClient: no API key found. ' +
+          'Set the OPENAI_API_KEY environment variable, pass `{ apiKey: "..." }` to the constructor, ' +
+          'or inject a pre-configured `sdkClient`. ' +
+          'Example: `new OpenAILLMClient({ apiKey: process.env.OPENAI_API_KEY })`.',
       )
     }
     this.sdk = new OpenAI({ apiKey })

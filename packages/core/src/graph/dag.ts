@@ -24,7 +24,13 @@ export function buildDag(spec: ExperienceSpec): Dag {
     const from = nodes.get(edge.from)
     const to = nodes.get(edge.to)
     if (!from || !to) {
-      throw new Error(`Edge references missing node: ${edge.from} -> ${edge.to}`)
+      const missing = !from ? edge.from : edge.to
+      const defined = [...nodes.keys()]
+      throw new Error(
+        `Edge \`${edge.from} → ${edge.to}\` references node \`${missing}\` which doesn't exist. ` +
+          `Add it to \`graph.nodes:\` or fix the typo. ` +
+          `Defined nodes: ${defined.length > 0 ? defined.join(', ') : '(none)'}`,
+      )
     }
     from.successors.push(edge.to)
     to.predecessors.push(edge.from)

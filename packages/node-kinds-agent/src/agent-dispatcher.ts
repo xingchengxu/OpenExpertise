@@ -111,7 +111,11 @@ export class AgentDispatcher implements NodeDispatcher {
     if (ai.ajvValidator) {
       const call = result.tool_calls?.find((c) => c.name === STRUCTURED_TOOL_NAME)
       if (!call) {
-        throw new Error(`Agent "${ai.spec.id}" expected a structured_output tool call but got none`)
+        throw new Error(
+          `Agent "${ai.spec.id}" expected a structured_output tool call but got none. ` +
+            `The model returned text only. Check that the \`schema:\` on the agent node is a valid JSON Schema object, ` +
+            `and that the model supports tool use (model: ${completeOpts.model}).`,
+        )
       }
       if (!ai.ajvValidator(call.input)) {
         const msgs = ai.ajvErrors?.() ?? ['schema mismatch']
@@ -141,7 +145,11 @@ export class AgentDispatcher implements NodeDispatcher {
 function loadPromptTemplate(impl: string, experienceDir: string): string {
   const abs = isAbsolute(impl) ? impl : resolve(experienceDir, impl)
   if (!existsSync(abs)) {
-    throw new Error(`Agent prompt template not found: ${abs} (declared as "${impl}")`)
+    throw new Error(
+      `Agent prompt template not found: ${abs} (declared as "${impl}"). ` +
+        `Check the \`prompt:\` field on the agent node in experience.yaml — ` +
+        `paths are resolved relative to the experience.yaml directory.`,
+    )
   }
   return readFileSync(abs, 'utf8')
 }

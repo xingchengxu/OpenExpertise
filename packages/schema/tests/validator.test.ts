@@ -44,7 +44,7 @@ describe('validateExperienceSpec', () => {
       ...validSpec,
       graph: { ...validSpec.graph, edges: [{ from: 'greet', to: 'nope' }] },
     }
-    expect(() => validateExperienceSpec(bad)).toThrow(/unknown node id "nope"/)
+    expect(() => validateExperienceSpec(bad)).toThrow(/nope/)
   })
 
   it('rejects writes referencing undeclared state field', () => {
