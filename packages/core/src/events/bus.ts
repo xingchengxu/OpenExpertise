@@ -28,6 +28,22 @@ export type RunEvent =
       reason: string
     }
   | { type: 'state.write'; run_id: string; node_id: string; field: string; ts: string }
+  | {
+      type: 'node.tokens'
+      run_id: string
+      node_id: string
+      ts: string
+      input_tokens: number
+      output_tokens: number
+      model?: string
+    }
+  | {
+      type: 'node.activity'
+      run_id: string
+      node_id: string
+      ts: string
+      activity: string
+    }
 
 export type EventListener = (event: RunEvent) => void
 
