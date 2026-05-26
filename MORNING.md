@@ -174,7 +174,7 @@ You CAN'T unpublish if anyone has installed. Deprecate + republish is the patter
 
 - `pnpm publish` errors with "you must be logged in" → `npm login --auth-type=web`
 - `pnpm publish` errors with "package already exists" → some package on `0.1.0` already published. Bump it to `0.1.1` and try again, or check `npm view` to confirm which one is conflicting.
-- `pnpm publish` reports workspace:* in tarball → use `pnpm publish -r`, never raw `npm publish` from a workspace package.
+- `pnpm publish` reports workspace:\* in tarball → use `pnpm publish -r`, never raw `npm publish` from a workspace package.
 
 ### Tests fail in CI but pass locally
 
