@@ -34,7 +34,7 @@ export class SkillDispatcher implements NodeDispatcher {
     return { spec: t, skill }
   }
 
-  async run(impl: ResolvedImpl, bundle: NodeInputBundle, _ctx: RunContext): Promise<NodeOutput> {
+  async run(impl: ResolvedImpl, bundle: NodeInputBundle, ctx: RunContext): Promise<NodeOutput> {
     const si = impl as SkillImpl
     const userPayload = {
       ...bundle.state_view,
@@ -48,7 +48,35 @@ export class SkillDispatcher implements NodeDispatcher {
       max_tokens: this.opts.defaultMaxTokens ?? 4096,
     }
 
+    const ts = () => new Date().toISOString()
+    ctx.events.emit({
+      type: 'node.activity',
+      run_id: ctx.runId,
+      node_id: si.spec.id,
+      ts: ts(),
+      activity: `calling ${completeOpts.model} (skill: ${si.skill.frontmatter.name ?? si.spec.id})`,
+    })
+
     const result = await this.opts.client.complete(completeOpts)
+
+    if (result.usage) {
+      ctx.events.emit({
+        type: 'node.tokens',
+        run_id: ctx.runId,
+        node_id: si.spec.id,
+        ts: ts(),
+        input_tokens: result.usage.input_tokens,
+        output_tokens: result.usage.output_tokens,
+        model: completeOpts.model,
+      })
+    }
+    ctx.events.emit({
+      type: 'node.activity',
+      run_id: ctx.runId,
+      node_id: si.spec.id,
+      ts: ts(),
+      activity: 'parsing text output',
+    })
 
     const writes = si.spec.writes ?? []
     if (writes.length !== 1) {

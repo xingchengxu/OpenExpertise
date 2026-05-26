@@ -64,6 +64,15 @@ export class CliAgentDispatcher implements NodeDispatcher {
     const cmd = provider.buildCommand(buildOpts)
     const timeoutMs = spec.timeout_ms ?? this.defaultTimeoutMs
 
+    const ts = () => new Date().toISOString()
+    ctx.events.emit({
+      type: 'node.activity',
+      run_id: ctx.runId,
+      node_id: spec.id,
+      ts: ts(),
+      activity: `spawning ${spec.provider} (timeout ${timeoutMs}ms)`,
+    })
+
     const res = await this.runner.run(cmd, { timeoutMs, cwd: workdir })
 
     if (res.timedOut) {
@@ -77,6 +86,14 @@ export class CliAgentDispatcher implements NodeDispatcher {
           `stderr: ${res.stderr.slice(0, 500)}`,
       )
     }
+
+    ctx.events.emit({
+      type: 'node.activity',
+      run_id: ctx.runId,
+      node_id: spec.id,
+      ts: ts(),
+      activity: outputFormat === 'json' ? 'parsing JSON output' : 'parsing text output',
+    })
 
     const parseOpts: Parameters<typeof parseOutput>[0] = {
       stdout: res.stdout,
