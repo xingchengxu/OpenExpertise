@@ -484,3 +484,106 @@ These two examples complete the "real cognitive workflows" story:
    - `node packages/cli/dist/bin.js run examples/deep-research --tui --concurrency 4` with a real question
    - `node packages/cli/dist/bin.js run examples/systematic-debugging --tui` against the bundled buggy_repo
 3. After merge: project has **11 examples**, ready for the v0.1.0 launch.
+
+---
+
+## Plan G — Overnight launch prep (2026-05-27)
+
+Branch: `feat/overnight-launch-prep` (off `main`)
+Trigger: User went to sleep at ~midnight saying "明天天亮能发布的状态" and asked for ecosystem-focused work alongside publish-readiness.
+
+### What shipped (9 waves, ~25 commits)
+
+#### Wave 1 — npm-ready package metadata
+- All 15 publishable packages now declare `description / keywords / author / repository / bugs / homepage / license`
+- Field order standardized across packages
+- `exports` field added where missing (single-entry `.` pattern)
+- `README.md` added to `files` allowlist on every package
+- `pnpm pack` audited for every package: dist/ ships, no test/source files leak
+- Commit: `feb12d0`
+
+#### Wave 2 — Quality polish
+- 16 `@typescript-eslint/no-explicit-any` warnings → 0 (real type narrowing, not blanket disables)
+- `CHANGELOG.md` v0.1.0 entry — full Keep-a-Changelog format consolidating Plans 1-6 + A-G
+- Commits: `6913760`, `b30be56`, `47b35ec`, `1b16fdc`
+
+#### Wave 3 — Launch artifacts + DX
+- `oe doctor` command — 9-check first-run readiness audit. `--json` mode for CI. Commit: `a1dedd5` (+8 tests)
+- `docs/launch-announcement.md` — three drafts (HN long-form, Reddit medium, X thread). Truth-checked: no benchmarks we haven't run, limitations called out. Commit: `15be9ae`
+
+#### Wave 4 — 12th flagship example
+- `examples/brainstorming/` — translates the superpowers `brainstorming` skill. Diverge (3 angles in parallel) → cluster → critique (per-cluster) → synthesize top 3
+- Mocked e2e test (`e2e/brainstorming.e2e.test.ts`)
+- 8 files, ~600 lines including yaml + 2 prompts + load_seed tool + README + e2e
+- Commit: `4bcac19`
+
+#### Wave 7 — Actionable error messages
+- 10 runtime error paths rewritten with WHAT / WHERE / HOW-TO-FIX hints across `packages/core/`, `packages/schema/`, `packages/node-kinds-*/`
+- 13 new tests pinning the new format so regressions don't strip the hints
+- Commit: `f582487`
+
+#### Wave 8 — Experience registry (the ecosystem play)
+- `oe install <name>` — install a curated experience by registry name
+- `oe install gh:owner/repo[@v]` — install any GitHub repo with `experience.yaml`
+- `oe registry` — list curated experiences (5 shipped: deep-research, systematic-debugging, brainstorming, review-branch, tri-cli-orchestration)
+- `oe installed` — list what's in `.openexpertise/experiences/`
+- `registry.json` in both repo root + `packages/cli/registry.json` (bundled)
+- `docs/registry.md` — submission process
+- 18 new tests (10 install + 8 registry)
+- Commit: `544a127`
+
+#### Wave 9 — Docs site gallery
+- Committed substantial pre-existing untracked site/ WIP: concepts/, examples/, reference/, guide/tui.md, compare/, operations/
+- New pages: 5 hero examples (review-branch, tri-cli-orchestration, deep-research, systematic-debugging, brainstorming)
+- `site/examples/index.md` — gallery hub splitting hero examples from primitive demos
+- Sidebar updates in `.vitepress/config.ts`
+- VitePress build clean (warnings only — `ignoreDeadLinks: true` for not-yet-written pages)
+- `.github/workflows/docs.yml` for GitHub Pages auto-deploy
+- Commits: `387ba91`, `2a5fb01`, `fec6c67`, `529e1b4`, `b2c50c6`, and several follow-ups for site/ WIP that appeared during the session
+
+#### Wave 5 — Final regression + MORNING.md
+- Clean rebuild: `pnpm clean && install && build` ✓
+- Typecheck: clean ✓
+- Lint: 0 warnings, 0 errors ✓
+- Format: clean ✓
+- Tests: **265 passing across 64 test files** (was 227 → +38)
+- Site build: clean ✓
+- `MORNING.md` — concrete morning checklist with publish commands, smoke tests, and runbook for things going wrong
+- Final commit on this entry
+
+### Test count trajectory
+
+| Phase | Tests | Files |
+|---|---|---|
+| Plan F end (start of overnight) | 227 | 58 |
+| After Wave 3a (doctor) | +8 = 235 | 59 |
+| After Wave 4 (brainstorming) | +1 = 236 | 60 |
+| After Wave 7 (error messages) | +13 / -1 = 247 (1 flaky pre-existing fixed) | 62 |
+| After Wave 8 (install + registry) | +18 = 265 | 64 |
+| Final | **265 passing, 0 failing** | 64 |
+
+### Ecosystem plays
+
+The user specifically asked for work that grows OE into an ecosystem similar to skills. The ecosystem-relevant deliverables:
+
+1. **`oe install` + registry.json** — anyone can publish an OE experience to a GH repo, submit a PR to `registry.json`, and have `oe install <name>` work for everyone. Mirrors npm-and-anthropic-skills patterns.
+2. **`oe doctor`** — first-run experience for newly-installed users. WARN on missing optional CLIs (claude/codex/gemini) rather than fail. Gates the obvious failure modes before they hit a real run.
+3. **Better error messages** — every error a new user hits now names the file/field/node and gives concrete next action.
+4. **`brainstorming` flagship example** — third superpowers-skill-as-flow translation (after systematic-debugging in Plan F). Shows the pattern is repeatable: any well-defined skill can become an OE flow.
+5. **VitePress site with examples gallery** — 12 example pages, hero/primitive split, gh-pages auto-deploy. Discovery layer for the registry.
+
+### What's NOT done (intentional)
+
+- No npm publish (user does this)
+- No git push (user does this)
+- No PR creation (user decides path A vs B in MORNING.md)
+- No backwards-compat handling for hypothetical multi-version support
+- No cookbook docs (deferred — would be Plan H if shipped)
+- No performance benchmarks (post-launch based on real reports)
+
+### Branch state at handoff
+
+- 22 commits ahead of `main`
+- Tree clean
+- All gates green
+- Ready for `pnpm publish -r --access public --no-git-checks` plus `git tag v0.1.0`
