@@ -1,11 +1,11 @@
 import { readFileSync, existsSync } from 'node:fs'
-import { resolve, join } from 'node:path'
 import {
   parseExperienceYaml,
   validateExperienceSpec,
   ValidationError,
 } from '@openexpertise/schema'
 import type { ToolHandler } from './types.js'
+import { resolveExperienceYaml } from './validate-path.js'
 
 export const validateTool: ToolHandler = {
   name: 'oe_validate',
@@ -45,8 +45,3 @@ export const validateTool: ToolHandler = {
   },
 }
 
-function resolveExperienceYaml(input: string): string {
-  const abs = resolve(input)
-  if (abs.endsWith('.yaml') || abs.endsWith('.yml')) return abs
-  return join(abs, 'experience.yaml')
-}

@@ -5,7 +5,7 @@ import {
 } from '@modelcontextprotocol/sdk/inMemory.js'
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import { createServer } from '../src/server.js'
 
 async function connectClient() {
@@ -25,7 +25,7 @@ describe('mcp-server', () => {
     // Will grow to the full 5 as Tasks 4-8 register tools. Skeleton task asserts
     // the framework is wired and listTools round-trips.
     expect(Array.isArray(names)).toBe(true)
-    expect(names).toEqual(expect.arrayContaining(['oe_validate', 'oe_state', 'oe_inspect']))
+    expect(names).toEqual(expect.arrayContaining(['oe_validate', 'oe_state', 'oe_inspect', 'oe_run']))
   })
 
   it('oe_validate accepts a well-formed experience and reports valid', async () => {
@@ -93,6 +93,25 @@ graph: { nodes: [{ id: a, kind: tool, impl: ./x.mjs, writes: [x] }], edges: [] }
       rmSync(dir, { recursive: true, force: true })
     }
   })
+
+  it('oe_run executes hello-tool and returns final state', async () => {
+    const { client } = await connectClient()
+    // Use the actual hello-tool example (LLM-free, deterministic).
+    const helloPath = resolve(import.meta.dirname, '..', '..', '..', 'examples', 'hello-tool')
+    const result = await client.callTool({
+      name: 'oe_run',
+      arguments: { experience_path: helloPath },
+    })
+    const content = result.content as Array<{ type: string; text: string }>
+    const payload = JSON.parse(content[0]!.text) as {
+      run_id: string
+      status: string
+      final_state: Record<string, unknown>
+    }
+    expect(payload.status).toBe('success')
+    expect(payload.final_state).toHaveProperty('greeting')
+    expect(payload.run_id).toMatch(/^[0-9a-f-]+$/)
+  }, 30000)
 
   it('oe_inspect reads the event log for a run', async () => {
     const { client } = await connectClient()

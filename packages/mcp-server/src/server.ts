@@ -7,10 +7,11 @@ import type { ToolHandler } from './tools/types.js'
 import { validateTool } from './tools/validate.js'
 import { stateTool } from './tools/state.js'
 import { inspectTool } from './tools/inspect.js'
+import { runTool } from './tools/run.js'
 
 // Tasks 4-8 append imports and entries here as each tool lands. Once all
 // 5 land, this is the full set: validate, state, inspect, run, evolve.
-const ALL_TOOLS: ToolHandler[] = [validateTool, stateTool, inspectTool]
+const ALL_TOOLS: ToolHandler[] = [validateTool, stateTool, inspectTool, runTool]
 
 export interface CreateServerOpts {
   // Reserved for future DI (e.g., custom logger or test overrides).
