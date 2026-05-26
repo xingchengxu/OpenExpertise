@@ -54,7 +54,7 @@ export class AgentDispatcher implements NodeDispatcher {
     return impl
   }
 
-  async run(impl: ResolvedImpl, bundle: NodeInputBundle, _ctx: RunContext): Promise<NodeOutput> {
+  async run(impl: ResolvedImpl, bundle: NodeInputBundle, ctx: RunContext): Promise<NodeOutput> {
     const ai = impl as AgentImpl
     const userPrompt = interpolatePrompt({
       template: ai.promptTemplate,
@@ -77,7 +77,35 @@ export class AgentDispatcher implements NodeDispatcher {
       completeOpts.tools = [tool]
     }
 
+    const ts = () => new Date().toISOString()
+    ctx.events.emit({
+      type: 'node.activity',
+      run_id: ctx.runId,
+      node_id: ai.spec.id,
+      ts: ts(),
+      activity: `calling ${completeOpts.model}`,
+    })
+
     const result = await this.opts.client.complete(completeOpts)
+
+    if (result.usage) {
+      ctx.events.emit({
+        type: 'node.tokens',
+        run_id: ctx.runId,
+        node_id: ai.spec.id,
+        ts: ts(),
+        input_tokens: result.usage.input_tokens,
+        output_tokens: result.usage.output_tokens,
+        model: completeOpts.model,
+      })
+    }
+    ctx.events.emit({
+      type: 'node.activity',
+      run_id: ctx.runId,
+      node_id: ai.spec.id,
+      ts: ts(),
+      activity: ai.ajvValidator ? 'validating structured output' : 'parsing text output',
+    })
 
     let stateDelta: Record<string, unknown>
     if (ai.ajvValidator) {
