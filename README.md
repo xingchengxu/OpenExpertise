@@ -53,6 +53,7 @@ The experience improved itself. State persisted across runs. The graph is a vers
 - **Durable state.** A per-experience SQLite blackboard with declared schema and merge strategies. `oe state findings` works hours later.
 - **Evolution loop.** After every run, the advisor reads the events + state diff and proposes graph upgrades (add node, tune param, add dataset case) as `git apply`-ready diffs.
 - **Two LLM providers.** Anthropic and OpenAI, switch via `--llm` or env-var auto-detect.
+- **Two-way agentic-CLI integration.** Outbound: the `cli-agent` node kind delegates steps to Claude Code, Codex, or Gemini. Inbound: `@openexpertise/mcp-server` exposes 5 OE tools over MCP, callable from any of those CLIs. See [`docs/cli-agent.md`](docs/cli-agent.md) and [`docs/mcp-server.md`](docs/mcp-server.md).
 
 For a fuller comparison vs LangGraph / CrewAI / Mastra / Inngest see [`docs/comparison.md`](docs/comparison.md).
 
