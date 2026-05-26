@@ -23,6 +23,7 @@ export interface RunOpts {
   runId?: string
   eventLogPath?: string
   cache?: boolean
+  concurrency?: number
 }
 
 export interface RunResult {
@@ -73,10 +74,12 @@ export async function runExperience(opts: RunOpts): Promise<RunResult> {
       args: opts.args ?? {},
       ...(cache ? { cache } : {}),
     })
-    const yamlConc = opts.spec.runtime?.concurrency ?? 1
+    const cliConc = opts.concurrency
+    const yamlConc = opts.spec.runtime?.concurrency
+    const effectiveConcurrency = cliConc ?? yamlConc ?? 1
     const scheduler =
-      yamlConc > 1
-        ? new ParallelScheduler(dag, ctx, yamlConc)
+      effectiveConcurrency > 1
+        ? new ParallelScheduler(dag, ctx, effectiveConcurrency)
         : new SequentialScheduler(dag, ctx)
     const { status } = await scheduler.run()
 
