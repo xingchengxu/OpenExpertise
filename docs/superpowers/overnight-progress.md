@@ -208,3 +208,50 @@ Final commit: `3707aa8`
    - Add `"test": "vitest"` script to `packages/llm-openai/package.json` for `pnpm --filter` parity.
    - Two more factory tests (unknown flag value; `--llm anthropic` with no `ANTHROPIC_API_KEY`).
    - Consider extracting `makeLazyLLMClient(opts)` helper to llm-factory to remove the closure duplication between run.ts and evolve.ts.
+
+---
+
+## Plan A — cli-agent Node Kind (2026-05-26)
+
+Branch: `feat/cli-agent-node-kind` (off `main`)
+Spec: `docs/superpowers/specs/2026-05-26-agentic-cli-integration-design.md` (Plan A section)
+Plan: `docs/superpowers/plans/2026-05-26-cli-agent-node-kind.md`
+HEAD: `ab5908d` (12 task commits + 1 inline fix + 1 prettier + 1 final-review fix)
+
+### What shipped
+
+| Area | Result |
+|---|---|
+| New schema variant | `cli-agent` added to NodeKind, NodeSpec union, and JSON Schema oneOf |
+| New package | `@openexpertise/node-kinds-cli-agent` — 8 source files, 6 test files |
+| Providers | `claude-code` / `codex` / `gemini` — all CLI flags verified against real `--help` |
+| Subprocess runner | DefaultSubprocessRunner with SIGTERM→SIGKILL timeout + DI shim for tests |
+| Dispatcher | CliAgentDispatcher with prompt interpolation, workdir resolution, error propagation |
+| Output parser | text mode + json mode + AJV schema validation, identified per-provider in errors |
+| CLI registration | `oe run` registers the dispatcher; `hello-tool` regression-checked clean |
+| Example | `examples/cli-orchestration/` — two-provider summarize→critique flow |
+| e2e | `e2e/cli-agent.e2e.test.ts` — 2-node flow with scripted runner |
+| Docs | `docs/cli-agent.md` reference + V1 caveats |
+| Tests | 119 baseline → 157 (+38) — 6 runner + 5 claude + 4 codex + 4 gemini + 6 parse + 7 dispatcher + 5 schema + 1 e2e |
+| Lint | 0 errors (16 pre-existing `as any` warnings in test files) |
+| Format | clean after one prettier commit |
+| Typecheck | clean across all packages |
+
+### Final reviewer caught
+
+1. **codex/gemini silently ignore `output_format: json`** — they have no `--output-format` flag. Documented as a V1 caveat in `docs/cli-agent.md`; users must prompt the agent to emit JSON for those providers.
+2. **e2e test args wiring** — `runExperience({args: {topic}})` doesn't propagate to `bundle.args` (the scheduler only feeds bundle.args from per-node `spec.args`). Switched the e2e test + cli-orchestration example to use node-level `args:` and added a positive assertion that the topic reaches the prompt.
+
+### Surfaced as design gap (not blocking)
+
+Run-level args from `runExperience({args})` are stored on RunContext but never flow into per-node `bundle.args`. The scheduler only constructs `bundle.args` from `node.spec.args`. Two paths forward:
+- Treat as intentional (run-level args are observability only) and document
+- Plumb `ctx.args` into `bundle.args` in `scheduler.assembleBundle` so `oe run --args '{...}'` works as users expect
+
+Logging for v1.1 consideration.
+
+### Next concrete actions
+
+1. **Merge `feat/cli-agent-node-kind` into `main`** when satisfied.
+2. **Manual smoke** with at least one real CLI installed: `node packages/cli/dist/bin.js run examples/cli-orchestration` (requires `claude` + `codex` on PATH).
+3. **Start Plan B** — `@openexpertise/mcp-server` exposing 5 tools (oe_run/validate/state/inspect/evolve) over stdio MCP. Spec section already written in the integration spec doc.
