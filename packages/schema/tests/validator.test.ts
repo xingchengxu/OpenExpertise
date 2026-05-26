@@ -84,3 +84,60 @@ describe('validateExperienceSpec', () => {
     expect(() => validateExperienceSpec(bad)).toThrow(/duplicate node ids/i)
   })
 })
+
+describe('cli-agent node kind', () => {
+  const base = {
+    name: 'x',
+    version: '0.1.0',
+    state: { schema: { result: { type: 'string' } } },
+    graph: {
+      nodes: [
+        {
+          id: 'n1',
+          kind: 'cli-agent',
+          provider: 'claude-code',
+          prompt: 'do the thing',
+          writes: ['result'],
+        },
+      ],
+      edges: [],
+    },
+  }
+
+  it('accepts a minimal cli-agent node', () => {
+    expect(() => validateExperienceSpec(structuredClone(base))).not.toThrow()
+  })
+
+  it('accepts all three providers', () => {
+    for (const provider of ['claude-code', 'codex', 'gemini'] as const) {
+      const spec = structuredClone(base)
+      ;(spec.graph.nodes[0] as { provider: string }).provider = provider
+      expect(() => validateExperienceSpec(spec)).not.toThrow()
+    }
+  })
+
+  it('rejects unknown provider', () => {
+    const spec = structuredClone(base) as { graph: { nodes: Array<Record<string, unknown>> } }
+    spec.graph.nodes[0]!['provider'] = 'gpt-9001'
+    expect(() => validateExperienceSpec(spec)).toThrow(/Schema validation failed/)
+  })
+
+  it('rejects missing prompt', () => {
+    const spec = structuredClone(base) as { graph: { nodes: Array<Record<string, unknown>> } }
+    delete spec.graph.nodes[0]!['prompt']
+    expect(() => validateExperienceSpec(spec)).toThrow(/Schema validation failed/)
+  })
+
+  it('accepts optional fields (workdir, output_format, timeout_ms, extra_args, model, schema)', () => {
+    const spec = structuredClone(base) as { graph: { nodes: Array<Record<string, unknown>> } }
+    Object.assign(spec.graph.nodes[0]!, {
+      model: 'gpt-4o-2024-11-20',
+      workdir: './sub',
+      output_format: 'json',
+      schema: { type: 'object' },
+      timeout_ms: 30000,
+      extra_args: ['--verbose'],
+    })
+    expect(() => validateExperienceSpec(spec)).not.toThrow()
+  })
+})

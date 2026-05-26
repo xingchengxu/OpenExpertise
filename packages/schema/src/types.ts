@@ -2,7 +2,7 @@
 // These are hand-authored to match `src/schemas/experience.schema.json`.
 // Keep the two in sync — see tests/parser.test.ts for the consistency check.
 
-export type NodeKind = 'agent' | 'skill' | 'tool' | 'dataset' | 'experience'
+export type NodeKind = 'agent' | 'skill' | 'tool' | 'dataset' | 'experience' | 'cli-agent'
 
 export type MergeStrategy = 'array_append' | 'set_once' | 'last_wins'
 
@@ -117,6 +117,24 @@ export interface ExperienceNodeSpec {
   for_each?: ForEachClause
 }
 
+export interface CliAgentNodeSpec {
+  id: string
+  kind: 'cli-agent'
+  phase?: string
+  provider: 'claude-code' | 'codex' | 'gemini'
+  prompt: string // inline only in V1 — no file-path loading
+  model?: string
+  workdir?: string // relative to experience dir; default = experience dir
+  output_format?: 'text' | 'json' // default 'text'
+  schema?: Record<string, unknown> // AJV schema validated against parsed JSON output
+  timeout_ms?: number // default 600_000
+  extra_args?: string[]
+  reads?: string[]
+  writes?: string[]
+  on_error?: ErrorPolicy
+  for_each?: ForEachClause
+}
+
 export type DatasetSource =
   | { type: 'file'; uri: string; format?: 'json' | 'jsonl' | 'csv' | 'parquet'; transform?: string }
   | { type: 'sqlite'; uri: string; query: string }
@@ -129,6 +147,7 @@ export type NodeSpec =
   | SkillNodeSpec
   | DatasetNodeSpec
   | ExperienceNodeSpec
+  | CliAgentNodeSpec
 
 export type ErrorPolicy =
   | { policy: 'skip' }

@@ -226,6 +226,26 @@
               }
             }
           ]
+        },
+        {
+          "allOf": [
+            { "$ref": "#/$defs/nodeBase" },
+            {
+              "type": "object",
+              "required": ["provider", "prompt"],
+              "properties": {
+                "kind": { "const": "cli-agent" },
+                "provider": { "enum": ["claude-code", "codex", "gemini"] },
+                "prompt": { "type": "string", "minLength": 1 },
+                "model": { "type": "string" },
+                "workdir": { "type": "string" },
+                "output_format": { "enum": ["text", "json"] },
+                "schema": {},
+                "timeout_ms": { "type": "integer", "minimum": 1000 },
+                "extra_args": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          ]
         }
       ]
     }
