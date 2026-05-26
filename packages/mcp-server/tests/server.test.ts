@@ -1,8 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import {
-  InMemoryTransport,
-} from '@modelcontextprotocol/sdk/inMemory.js'
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
@@ -124,10 +122,7 @@ graph: { nodes: [{ id: a, kind: tool, impl: ./x.mjs, writes: [x] }], edges: [] }
         { type: 'node.completed', run_id: 'r1', node_id: 'a', ts: '2026-05-26T00:00:01Z' },
         { type: 'run.finished', run_id: 'r1', ts: '2026-05-26T00:00:02Z', status: 'success' },
       ]
-      writeFileSync(
-        join(runsDir, 'r1.jsonl'),
-        events.map((e) => JSON.stringify(e)).join('\n'),
-      )
+      writeFileSync(join(runsDir, 'r1.jsonl'), events.map((e) => JSON.stringify(e)).join('\n'))
       const result = await client.callTool({
         name: 'oe_inspect',
         arguments: { experience_path: dir, run_id: 'r1' },

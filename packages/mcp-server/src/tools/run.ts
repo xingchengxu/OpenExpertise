@@ -1,23 +1,14 @@
 import { readFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { parseExperienceYaml } from '@openexpertise/schema'
-import {
-  DispatcherRegistry,
-  EventBus,
-  runExperience,
-  type LLMClient,
-} from '@openexpertise/core'
+import { DispatcherRegistry, EventBus, runExperience, type LLMClient } from '@openexpertise/core'
 import { ToolDispatcher } from '@openexpertise/node-kinds-tool'
 import { AgentDispatcher } from '@openexpertise/node-kinds-agent'
 import { SkillDispatcher } from '@openexpertise/node-kinds-skill'
 import { DatasetDispatcher } from '@openexpertise/node-kinds-dataset'
 import { ExperienceDispatcher } from '@openexpertise/node-kinds-experience'
 import { CliAgentDispatcher } from '@openexpertise/node-kinds-cli-agent'
-import {
-  makeLLMClient,
-  resolveLLMProvider,
-  defaultModelFor,
-} from '@openexpertise/cli/llm-factory'
+import { makeLLMClient, resolveLLMProvider, defaultModelFor } from '@openexpertise/cli/llm-factory'
 import { resolveExperienceYaml } from './validate-path.js'
 import type { ToolHandler } from './types.js'
 
@@ -32,8 +23,16 @@ export const runTool: ToolHandler = {
     required: ['experience_path'],
     properties: {
       experience_path: { type: 'string' },
-      args: { type: 'object', description: 'Per-node args passed via RunContext (V1 caveat: not auto-propagated into node bundles)' },
-      llm: { type: 'string', enum: ['anthropic', 'openai'], description: 'Optional LLM provider override' },
+      args: {
+        type: 'object',
+        description:
+          'Per-node args passed via RunContext (V1 caveat: not auto-propagated into node bundles)',
+      },
+      llm: {
+        type: 'string',
+        enum: ['anthropic', 'openai'],
+        description: 'Optional LLM provider override',
+      },
     },
   },
   async call(args) {

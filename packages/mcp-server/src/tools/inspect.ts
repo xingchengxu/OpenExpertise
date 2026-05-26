@@ -4,8 +4,7 @@ import type { ToolHandler } from './types.js'
 
 export const inspectTool: ToolHandler = {
   name: 'oe_inspect',
-  description:
-    'Return the parsed event log for a prior run. Each event is one parsed JSONL line.',
+  description: 'Return the parsed event log for a prior run. Each event is one parsed JSONL line.',
   inputSchema: {
     type: 'object',
     required: ['experience_path', 'run_id'],

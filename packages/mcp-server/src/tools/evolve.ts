@@ -3,11 +3,7 @@ import { resolve, join } from 'node:path'
 import { parseExperienceYaml } from '@openexpertise/schema'
 import { StateStore, type LLMClient } from '@openexpertise/core'
 import { EvolutionAdvisor } from '@openexpertise/evolution'
-import {
-  makeLLMClient,
-  resolveLLMProvider,
-  defaultModelFor,
-} from '@openexpertise/cli/llm-factory'
+import { makeLLMClient, resolveLLMProvider, defaultModelFor } from '@openexpertise/cli/llm-factory'
 import type { ToolHandler } from './types.js'
 
 export const evolveTool: ToolHandler = {

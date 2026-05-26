@@ -1,9 +1,5 @@
 import { readFileSync, existsSync } from 'node:fs'
-import {
-  parseExperienceYaml,
-  validateExperienceSpec,
-  ValidationError,
-} from '@openexpertise/schema'
+import { parseExperienceYaml, validateExperienceSpec, ValidationError } from '@openexpertise/schema'
 import type { ToolHandler } from './types.js'
 import { resolveExperienceYaml } from './validate-path.js'
 
@@ -44,4 +40,3 @@ export const validateTool: ToolHandler = {
     }
   },
 }
-

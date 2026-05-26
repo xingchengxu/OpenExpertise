@@ -7,7 +7,7 @@ import type { ToolHandler } from './types.js'
 export const stateTool: ToolHandler = {
   name: 'oe_state',
   description:
-    "Inspect the SQLite blackboard for an experience. " +
+    'Inspect the SQLite blackboard for an experience. ' +
     "Returns { field, value } if 'field' is provided, otherwise { snapshot } with all fields.",
   inputSchema: {
     type: 'object',
