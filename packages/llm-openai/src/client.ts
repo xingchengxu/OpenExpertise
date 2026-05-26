@@ -114,8 +114,12 @@ export class OpenAILLMClient implements LLMClient {
 
   private parseArguments(raw: string): unknown {
     if (!raw) return {}
+    // Some reasoning-style OpenAI-compatible servers (e.g. vLLM-served minimax)
+    // prefix the tool-call arguments string with a <think>...</think> block
+    // BEFORE the actual JSON. Strip it so the downstream JSON.parse can succeed.
+    const stripped = raw.replace(/^\s*<think>[\s\S]*?<\/think>\s*/, '')
     try {
-      return JSON.parse(raw)
+      return JSON.parse(stripped)
     } catch {
       return { _raw: raw }
     }
