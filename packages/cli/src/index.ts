@@ -8,6 +8,7 @@ import { stateCommand, resetStateCommand } from './commands/state.js'
 import { diffCommand } from './commands/diff.js'
 import { evolveCommand } from './commands/evolve.js'
 import { ultraCommand } from './commands/ultra.js'
+import { doctorCommand } from './commands/doctor.js'
 import { makeLogger } from './logger.js'
 
 export function buildProgram(): Command {
@@ -189,6 +190,14 @@ export function buildProgram(): Command {
           ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
         }),
       )
+    })
+
+  program
+    .command('doctor')
+    .description('Check environment readiness for running OpenExpertise')
+    .option('--json', 'output machine-readable JSON')
+    .action(async (cmdOpts: { json?: boolean }) => {
+      process.exit(await doctorCommand({ json: cmdOpts.json ?? false }))
     })
 
   return program

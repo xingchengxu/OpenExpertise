@@ -311,8 +311,11 @@ Five MCP tools are exposed: `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `
 
 ## CLI reference
 
+> First time? Run `oe doctor` to verify your environment.
+
 | Command                | Purpose                                                                                   |
 | ---------------------- | ----------------------------------------------------------------------------------------- |
+| `oe doctor`            | Check environment readiness (Node, pnpm, CLIs, API keys, writable dirs)                   |
 | `oe init <name>`       | Scaffold a new experience directory                                                       |
 | `oe validate [path]`   | Validate `experience.yaml`                                                                |
 | `oe run [path]`        | Execute an experience (`--tui`, `--evolve`, `--concurrency N`, `--llm anthropic\|openai`) |
