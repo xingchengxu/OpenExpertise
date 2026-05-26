@@ -23,7 +23,7 @@ describe('mcp-server', () => {
     // Will grow to the full 5 as Tasks 4-8 register tools. Skeleton task asserts
     // the framework is wired and listTools round-trips.
     expect(Array.isArray(names)).toBe(true)
-    expect(names).toEqual(['oe_evolve', 'oe_inspect', 'oe_run', 'oe_state', 'oe_validate'])
+    expect(names).toEqual(['oe_evolve', 'oe_inspect', 'oe_run', 'oe_state', 'oe_ultra', 'oe_validate'])
   })
 
   it('oe_validate accepts a well-formed experience and reports valid', async () => {
@@ -172,6 +172,31 @@ graph: { nodes: [{ id: a, kind: tool, impl: ./x.mjs, writes: [x] }], edges: [] }
       }
     } finally {
       rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it('oe_ultra returns a "needs LLM" error when no LLM env var is set', async () => {
+    const { client } = await connectClient()
+    const prevA = process.env.ANTHROPIC_API_KEY
+    const prevO = process.env.OPENAI_API_KEY
+    delete process.env.ANTHROPIC_API_KEY
+    delete process.env.OPENAI_API_KEY
+    try {
+      const dir = mkdtempSync(join(tmpdir(), 'oe-mcp-ultra-'))
+      try {
+        const result = await client.callTool({
+          name: 'oe_ultra',
+          arguments: { task: 'say hi', draft_root: dir },
+        })
+        expect(result.isError).toBe(true)
+        const content = result.content as Array<{ type: string; text: string }>
+        expect(content[0]!.text).toMatch(/ANTHROPIC_API_KEY|OPENAI_API_KEY/)
+      } finally {
+        rmSync(dir, { recursive: true, force: true })
+      }
+    } finally {
+      if (prevA !== undefined) process.env.ANTHROPIC_API_KEY = prevA
+      if (prevO !== undefined) process.env.OPENAI_API_KEY = prevO
     }
   })
 })

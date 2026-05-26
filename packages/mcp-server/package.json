@@ -19,6 +19,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@openexpertise/authoring": "workspace:*",
     "@openexpertise/cli": "workspace:*",
     "@openexpertise/core": "workspace:*",
     "@openexpertise/evolution": "workspace:*",
