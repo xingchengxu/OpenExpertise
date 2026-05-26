@@ -3,6 +3,7 @@ import { CliAgentDispatcher } from '../src/dispatcher.js'
 import type { SubprocessRunner, SpawnSpec, RunResult } from '../src/runner.js'
 import type { CliAgentNodeSpec } from '@openexpertise/schema'
 import type { RunContext } from '@openexpertise/core'
+import { EventBus, type RunEvent } from '@openexpertise/core'
 
 class FakeRunner implements SubprocessRunner {
   public lastSpec: SpawnSpec | null = null
@@ -15,10 +16,10 @@ class FakeRunner implements SubprocessRunner {
   }
 }
 
-// The CliAgentDispatcher only reads ctx.experienceDir; everything else is
-// safely cast away. If the implementer finds RunContext requires more fields
+// The CliAgentDispatcher reads ctx.experienceDir, ctx.runId, and ctx.events.
+// Everything else is safely cast away. If the implementer finds RunContext requires more fields
 // at compile time, add only what's strictly needed.
-const ctx = { experienceDir: '/tmp/exp' } as unknown as RunContext
+const ctx = { experienceDir: '/tmp/exp', runId: 'r1', events: new EventBus() } as unknown as RunContext
 
 describe('CliAgentDispatcher', () => {
   it('kind is "cli-agent"', () => {
@@ -148,5 +149,35 @@ describe('CliAgentDispatcher', () => {
     const impl = await d.resolve(node, ctx)
     await d.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, ctx)
     expect(runner.lastOpts?.cwd).toMatch(/sub$/)
+  })
+})
+
+describe('CliAgentDispatcher emits node.activity', () => {
+  it('emits at least two activity events (spawn + parse)', async () => {
+    const events = new EventBus()
+    const captured: RunEvent[] = []
+    events.subscribe((e) => captured.push(e))
+
+    const runner = new FakeRunner({ stdout: 'ok', stderr: '', exitCode: 0, timedOut: false })
+    const dispatcher = new CliAgentDispatcher({ runner })
+
+    const node: CliAgentNodeSpec = {
+      id: 'n1',
+      kind: 'cli-agent',
+      provider: 'claude-code',
+      prompt: 'hi',
+      writes: ['out'],
+    }
+    const ctx = { experienceDir: '/tmp/exp', runId: 'r1', events } as unknown as RunContext
+
+    const impl = await dispatcher.resolve(node, ctx)
+    await dispatcher.run(impl, { state_view: {}, edge_inputs: {}, args: {} }, ctx)
+
+    const activities = captured.filter((e) => e.type === 'node.activity')
+    expect(activities.length).toBeGreaterThanOrEqual(2)
+    expect(activities.every((a) => a.node_id === 'n1')).toBe(true)
+    // First activity mentions spawn / provider; final activity mentions parsing.
+    expect(activities[0].activity.toLowerCase()).toMatch(/spawn|claude-code/)
+    expect(activities[activities.length - 1].activity.toLowerCase()).toMatch(/parsing|output/)
   })
 })
