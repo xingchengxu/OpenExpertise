@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/demo-doctor.svg" alt="oe doctor output showing 7 passed, 2 warnings, 0 failures" width="720">
+  <img src="docs/assets/demo.svg" alt="animated demo: oe doctor → oe registry → oe init → oe run" width="720">
 </p>
 
 <div align="center">

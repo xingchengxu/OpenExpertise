@@ -29,7 +29,7 @@ export default defineConfig({
     ],
     [
       'meta',
-      { property: 'og:image', content: 'https://xingchengxu.github.io/OpenExpertise/og.svg' },
+      { property: 'og:image', content: 'https://xingchengxu.github.io/OpenExpertise/og.png' },
     ],
     ['meta', { property: 'og:image:width', content: '1200' }],
     ['meta', { property: 'og:image:height', content: '630' }],
@@ -45,7 +45,7 @@ export default defineConfig({
     ],
     [
       'meta',
-      { name: 'twitter:image', content: 'https://xingchengxu.github.io/OpenExpertise/og.svg' },
+      { name: 'twitter:image', content: 'https://xingchengxu.github.io/OpenExpertise/og.png' },
     ],
   ],
 
