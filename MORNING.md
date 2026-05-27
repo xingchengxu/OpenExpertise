@@ -161,7 +161,9 @@ You CAN'T unpublish if anyone has installed. Deprecate + republish is the patter
 
 These are nice-to-haves the user can decide on later. None block v0.1.0:
 
-- **Cookbook docs** — `docs/cookbook/` with recipe-style how-tos. Scaffolding exists in `site/guide/`; expand as needed.
+- **Cookbook docs** — DONE in Wave B. `site/cookbook/` has 10 recipes.
+- **og.png (Twitter Cards prefer PNG over SVG)** — `site/public/og.svg` is in place but Twitter cards strictly want PNG. To convert: open `site/public/og.svg` in a browser, screenshot at 1200×630, save as `site/public/og.png`. Or `brew install librsvg && rsvg-convert -h 630 site/public/og.svg > site/public/og.png`. After conversion, update `site/.vitepress/config.ts` head meta to point at `/og.png` instead of `/og.svg`.
+- **Real asciinema demo cast** — `scripts/record-demo.sh` exists. Run it (`./scripts/record-demo.sh`) when you have 90 seconds — produces `docs/assets/demo.cast` + an animated `.svg`.
 - **Performance benchmarks** — no harness yet. Add post-launch based on real-user reports.
 - **Windows CI** — `.github/workflows/` runs Linux only. Most users on macOS/Linux; Windows can come later.
 - **Multi-tenant state SQLite** — current store is single-process. Multi-process advisory locking is post-v0.1.0.
