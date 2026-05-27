@@ -1,8 +1,12 @@
+<p align="center">
+  <img src="docs/assets/demo-doctor.svg" alt="oe doctor output showing 7 passed, 2 warnings, 0 failures" width="720">
+</p>
+
 <div align="center">
 
 # OpenExpertise
 
-### **AI-era Makefile.** Codify expert workflows as runnable, evolving graphs.
+### Your team's best workflows — version-controlled, reproducible, self-improving.
 
 [![tests](https://img.shields.io/badge/tests-227%20passing-brightgreen)](#) [![typecheck](https://img.shields.io/badge/typecheck-strict-blue)](#) [![packages](https://img.shields.io/badge/packages-14-blueviolet)](#) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -14,22 +18,23 @@
 
 ## What it is (in one sentence)
 
-**OpenExpertise turns a team's standard operating procedures into version-controlled YAML graphs, runs them with deterministic flow + LLM-powered nodes, and uses the LLM again to evolve the graph after each run.**
+**OpenExpertise is the AI-era Makefile: write your team's SOPs as YAML graphs, run them with deterministic flow + LLM-powered nodes, and let the LLM propose graph upgrades after each run.**
 
+```yaml
+# examples/review-branch/experience.yaml — 10 lines, real result:
+graph:
+  nodes:
+    - { id: bugs, kind: agent, prompt: 'Find bugs in {{diff}}', writes: [findings] }
+    - { id: security, kind: agent, prompt: 'Find injection flaws in {{diff}}', writes: [findings] }
+    - { id: score, kind: agent, reads: [findings], writes: [risk_score] }
+  edges:
+    - { from: bugs, to: score }
+    - { from: security, to: score }
 ```
-┌─────────────────────────────────────┐    ┌───────────────────────────────────────┐
-│   Claude Code / Codex / Gemini      │    │   OpenExpertise                       │
-│   "AI bash"                         │    │   "AI Makefile"                       │
-│                                     │ vs │                                       │
-│   - improvised each run             │    │   - same DAG every run                │
-│   - opaque trajectory               │    │   - JSONL event log + SQLite state    │
-│   - one-shot, no memory             │    │   - evolves itself across runs        │
-│   - general-purpose                 │    │   - codifies a specific SOP           │
-└─────────────────────────────────────┘    └───────────────────────────────────────┘
 
-           autonomous worker                            workflow conductor
-                                                       (can call the workers)
-```
+- **Repeatable** — same DAG every run, JSONL audit log, SQLite state you can query hours later
+- **Multi-vendor** — one graph calls Claude Code, Codex, and Gemini; state flows between all three
+- **Self-improving** — `oe evolve <run-id>` reads what happened and proposes the next YAML patch
 
 It's NOT an autonomous agent. It's the **orchestration layer** that lets you wire deterministic code, LLM agents, and CLI agents (Claude Code / Codex / Gemini) into reproducible, persistent, self-improving pipelines.
 
