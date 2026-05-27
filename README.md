@@ -385,7 +385,8 @@ In-repo quick references:
 | [`docs/mcp-server.md`](docs/mcp-server.md)                                     | MCP server tools + per-CLI registration                                    |
 | [`docs/ultraexpertise.md`](docs/ultraexpertise.md)                             | Auto-SOP authoring — `oe ultra`, slash command, MCP `oe_ultra`             |
 | [`docs/registry.md`](docs/registry.md)                                         | `oe install` / `oe registry` and how to submit your experience             |
-| [`docs/superpowers/specs/`](docs/superpowers/specs/)                           | Architecture decisions                                                     |
+| [Docs site `/concepts`](https://xingchengxu.github.io/OpenExpertise/concepts/) | Mental model: code-as-law, state, dispatchers, control flow, 6 node kinds  |
+| [Docs site `/reference`](https://xingchengxu.github.io/OpenExpertise/reference/) | CLI command pages + API surface + full YAML schema                       |
 
 ---
 
@@ -418,7 +419,7 @@ If you want a chat-based assistant or one-off task automation, use the underlyin
 ## Development
 
 ```bash
-pnpm test            # 223 unit + e2e tests
+pnpm test            # 265 unit + e2e tests
 pnpm typecheck       # strict TS across all packages
 pnpm lint            # eslint (0 errors)
 pnpm format:check    # prettier
@@ -426,7 +427,7 @@ pnpm format          # prettier --write
 pnpm -r build        # tsc -b across the monorepo
 ```
 
-The repo is a pnpm workspace with 14 packages. New features land via spec → plan → subagent-driven execution; the cumulative history is in `docs/superpowers/overnight-progress.md`.
+The repo is a pnpm workspace with 15 publishable packages. New features land via spec → plan → subagent-driven execution (see [`CONTRIBUTING.md`](CONTRIBUTING.md)).
 
 ---
 

@@ -1,32 +1,31 @@
 # Contributing to OpenExpertise
 
-Thanks for the interest. This document is the short-form contributor guide; the longer reasoning lives in `docs/superpowers/specs/`.
+Thanks for the interest. This is the short-form contributor guide.
 
 ## TL;DR
 
 - **Bugs:** open an issue with a reproduction (failing test if possible) before sending a patch.
-- **Features:** open an issue first to discuss scope. Most new features land via a spec → plan → subagent-driven execution cycle (see below).
+- **Features:** open an issue first to discuss scope. Most non-trivial features land via a spec → plan → execute cycle (see below).
 - **Docs / typos:** PR directly, no issue needed.
+- **New experiences for the registry:** open a `📦 Submit an experience` issue — see [`docs/registry.md`](docs/registry.md).
 
 ## Setup
 
 ```bash
 pnpm install
 pnpm -r build
-pnpm test            # ~225 tests; expect green on main
+pnpm test            # 265 tests; expect green on main
 ```
 
 Node 20.x or newer (Node 22 / 24 / 26 are tested in CI). `better-sqlite3` requires a working native build toolchain on first install.
 
 ## The spec → plan → execute rhythm
 
-Non-trivial features go through three artifacts, each version-controlled:
+Non-trivial features go through three artifacts attached to the issue or PR:
 
-1. **Spec** in `docs/superpowers/specs/YYYY-MM-DD-<name>-design.md` — what problem, what shape, what non-goals.
-2. **Plan** in `docs/superpowers/plans/YYYY-MM-DD-<name>.md` — task-by-task breakdown with code blocks. Each task is small (~2-5 min of work) and ends with a test + commit.
-3. **Execution** via subagent-driven development (`superpowers:subagent-driven-development`) — fresh subagent per task, two-stage review (spec compliance + code quality).
-
-You don't need to use Claude Code to contribute, but if you do, the `superpowers:brainstorming` and `superpowers:writing-plans` skills are the entry points.
+1. **Spec** — what problem, what shape, what non-goals. One markdown doc in the PR description or a linked gist.
+2. **Plan** — task-by-task breakdown with code blocks. Each task is small (~2-5 min of work) and ends with a test + commit.
+3. **Execution** — implementation against the plan. If you use Claude Code, the `superpowers:subagent-driven-development` skill is a good fit (fresh subagent per task, two-stage review). If not, just iterate against the plan manually.
 
 For small fixes or pure-content PRs, skip this and just send the patch.
 
