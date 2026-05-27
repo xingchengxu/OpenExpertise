@@ -47,12 +47,12 @@ How to run OE in production:
 
 ## Limits
 
-| Surface | V1 limit | Workaround |
-| --- | --- | --- |
-| Max run duration | None (in-process), but `node` will hold memory | Run as subprocess and persist artifacts via filesystem |
-| Max concurrency | `runtime.concurrency` setting; default 1 | Tune per workflow; 429-retry handles overflow |
-| Max nodes per experience | None practical; tested up to ~50 | Split into nested experiences |
-| Max state field size | SQLite-bounded (~1 GB blob practically) | Externalize large blobs to filesystem + store paths |
-| Concurrent runs same workspace | Not coordinated — state is shared SQLite | One workspace per concurrent run if needed |
+| Surface                        | V1 limit                                       | Workaround                                             |
+| ------------------------------ | ---------------------------------------------- | ------------------------------------------------------ |
+| Max run duration               | None (in-process), but `node` will hold memory | Run as subprocess and persist artifacts via filesystem |
+| Max concurrency                | `runtime.concurrency` setting; default 1       | Tune per workflow; 429-retry handles overflow          |
+| Max nodes per experience       | None practical; tested up to ~50               | Split into nested experiences                          |
+| Max state field size           | SQLite-bounded (~1 GB blob practically)        | Externalize large blobs to filesystem + store paths    |
+| Concurrent runs same workspace | Not coordinated — state is shared SQLite       | One workspace per concurrent run if needed             |
 
 → **Need horizontal scale?** Layer OE on top of [Inngest](https://www.inngest.com/) or [Temporal](https://temporal.io/) for durable orchestration; OE handles the LLM-touching nodes within each invocation.

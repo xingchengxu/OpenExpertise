@@ -5,7 +5,7 @@ description: Hands-on path from install through authoring, running, evolving, an
 
 # Guide
 
-The hands-on path. Concepts page is the *what*; this is the *how*.
+The hands-on path. Concepts page is the _what_; this is the _how_.
 
 ## Getting started
 

@@ -287,11 +287,13 @@ Package a reusable Claude/Cursor-skill-style asset and invoke from any experienc
 ```
 
 ```markdown
-<!-- skills/code-review/SKILL.md -->
----
+## <!-- skills/code-review/SKILL.md -->
+
 description: Reviews a unified diff and reports findings as structured output.
 inputs:
-  - diff: string
+
+- diff: string
+
 ---
 
 Read the diff. Report findings as JSON with shape `{ findings: [...] }`.

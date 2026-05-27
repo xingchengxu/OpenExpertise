@@ -38,12 +38,12 @@ If you genuinely want a code-first DAG, see the programmatic [`runExperience`](/
 
 ### What's the difference between a `tool` and a `cli-agent`?
 
-| `tool`                                                                      | `cli-agent`                                                                        |
-| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Pure JS function. Deterministic. You write the .mjs.                        | Subprocess that spawns `claude` / `codex` / `gemini`. Non-deterministic.           |
-| Synchronous-ish (returns when the function returns).                        | Async — takes seconds to minutes per invocation.                                   |
-| No tokens, no metrics, no LLM dependency.                                   | Tokens spent inside the CLI's session. Not always exposed.                         |
-| Use for: HTTP fetch, file IO, parsing, deterministic logic, classification. | Use for: anything where you want a different vendor's CLI to do agentic work.      |
+| `tool`                                                                      | `cli-agent`                                                                   |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Pure JS function. Deterministic. You write the .mjs.                        | Subprocess that spawns `claude` / `codex` / `gemini`. Non-deterministic.      |
+| Synchronous-ish (returns when the function returns).                        | Async — takes seconds to minutes per invocation.                              |
+| No tokens, no metrics, no LLM dependency.                                   | Tokens spent inside the CLI's session. Not always exposed.                    |
+| Use for: HTTP fetch, file IO, parsing, deterministic logic, classification. | Use for: anything where you want a different vendor's CLI to do agentic work. |
 
 ### What's the difference between an `agent` and a `skill`?
 
@@ -173,13 +173,13 @@ This is documented as a known V1 limitation at [Evolution loop](/concepts/evolut
 
 Depends entirely on the graph. As reference points from our test suite:
 
-| Example                                                  | Tokens (in/out)  | API cost (USD, Claude 3.5 Sonnet) |
-| -------------------------------------------------------- | ---------------- | --------------------------------- |
-| `hello-tool`                                             | 0 / 0            | $0.00                             |
-| `agent-echo`                                             | ~600 / ~80       | $0.003                            |
-| `review-branch` (3 dimensions + verifier + score)        | ~12K / ~2K       | $0.07                             |
-| `tri-cli-orchestration` (Claude + Codex + Gemini chain)  | Varies by tier   | $0.05 – $0.15                     |
-| `deep-research` (multi-source synthesis)                 | ~40K / ~6K       | $0.20                             |
+| Example                                                 | Tokens (in/out) | API cost (USD, Claude 3.5 Sonnet) |
+| ------------------------------------------------------- | --------------- | --------------------------------- |
+| `hello-tool`                                            | 0 / 0           | $0.00                             |
+| `agent-echo`                                            | ~600 / ~80      | $0.003                            |
+| `review-branch` (3 dimensions + verifier + score)       | ~12K / ~2K      | $0.07                             |
+| `tri-cli-orchestration` (Claude + Codex + Gemini chain) | Varies by tier  | $0.05 – $0.15                     |
+| `deep-research` (multi-source synthesis)                | ~40K / ~6K      | $0.20                             |
 
 Use `oe inspect <run-id>` to see exact tokens per node. Use `node.tokens` events to integrate with your own cost tracker. See [Observability](/operations/observability).
 

@@ -49,6 +49,6 @@ Top-level sections: `meta`, `runtime`, `state.schema`, `graph` (`nodes` + `edges
 ## When to look here vs the guides
 
 - **Looking up a specific flag, command, or function signature?** → Reference.
-- **Trying to *do* something for the first time?** → [Guide](/guide/).
-- **Trying to *understand* something?** → [Concepts](/concepts/).
+- **Trying to _do_ something for the first time?** → [Guide](/guide/).
+- **Trying to _understand_ something?** → [Concepts](/concepts/).
 - **Looking for a copy-paste snippet?** → [Cookbook](/cookbook/).

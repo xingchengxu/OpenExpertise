@@ -13,20 +13,20 @@ All numbers below come from runs against `claude-sonnet-4-6` (Anthropic) and `gp
 
 ## Cost by example
 
-| Example | Real wall time | Tokens (in / out) | Cost (USD, Claude 3.5 Sonnet) | Cost (USD, gpt-4o) |
-| --- | --- | --- | --- | --- |
-| [`hello-tool`](/examples/hello-tool) | <1s | 0 / 0 | $0.000 | $0.000 |
-| [`dataset-aggregate`](/examples/dataset-aggregate) | ~2s | 0 / 0 | $0.000 | $0.000 |
-| [`agent-echo`](/examples/agent-echo) | ~3s | ~600 / ~80 | $0.003 | $0.002 |
-| [`review-branch`](/examples/review-branch) ★ | ~45s | ~12K / ~2K | $0.07 | $0.05 |
-| [`oncall-runbook`](/examples/oncall-runbook) | ~30s | ~8K / ~1.5K | $0.05 | $0.04 |
-| [`issue-triage`](/examples/issue-triage) | ~12s | ~3K / ~500 | $0.02 | $0.01 |
-| [`release-gates`](/examples/release-gates) | ~60s | ~5K / ~1K | $0.04 | $0.03 |
-| [`cli-orchestration`](/examples/cli-orchestration) | ~25s | (Tokens inside CLI sessions, not exposed) | varies | varies |
-| [`tri-cli-orchestration`](/examples/tri-cli-orchestration) ★ | ~37s | (Tokens inside CLI sessions, not exposed) | varies | varies |
-| [`deep-research`](/examples/deep-research) | ~90s | ~40K / ~6K | $0.20 | $0.15 |
-| [`systematic-debugging`](/examples/systematic-debugging) | ~50s | ~10K / ~2K | $0.07 | $0.05 |
-| [`brainstorming`](/examples/brainstorming) | ~45s | ~15K / ~3K | $0.10 | $0.07 |
+| Example                                                      | Real wall time | Tokens (in / out)                         | Cost (USD, Claude 3.5 Sonnet) | Cost (USD, gpt-4o) |
+| ------------------------------------------------------------ | -------------- | ----------------------------------------- | ----------------------------- | ------------------ |
+| [`hello-tool`](/examples/hello-tool)                         | <1s            | 0 / 0                                     | $0.000                        | $0.000             |
+| [`dataset-aggregate`](/examples/dataset-aggregate)           | ~2s            | 0 / 0                                     | $0.000                        | $0.000             |
+| [`agent-echo`](/examples/agent-echo)                         | ~3s            | ~600 / ~80                                | $0.003                        | $0.002             |
+| [`review-branch`](/examples/review-branch) ★                 | ~45s           | ~12K / ~2K                                | $0.07                         | $0.05              |
+| [`oncall-runbook`](/examples/oncall-runbook)                 | ~30s           | ~8K / ~1.5K                               | $0.05                         | $0.04              |
+| [`issue-triage`](/examples/issue-triage)                     | ~12s           | ~3K / ~500                                | $0.02                         | $0.01              |
+| [`release-gates`](/examples/release-gates)                   | ~60s           | ~5K / ~1K                                 | $0.04                         | $0.03              |
+| [`cli-orchestration`](/examples/cli-orchestration)           | ~25s           | (Tokens inside CLI sessions, not exposed) | varies                        | varies             |
+| [`tri-cli-orchestration`](/examples/tri-cli-orchestration) ★ | ~37s           | (Tokens inside CLI sessions, not exposed) | varies                        | varies             |
+| [`deep-research`](/examples/deep-research)                   | ~90s           | ~40K / ~6K                                | $0.20                         | $0.15              |
+| [`systematic-debugging`](/examples/systematic-debugging)     | ~50s           | ~10K / ~2K                                | $0.07                         | $0.05              |
+| [`brainstorming`](/examples/brainstorming)                   | ~45s           | ~15K / ~3K                                | $0.10                         | $0.07              |
 
 `★` = hero examples worth running first.
 
@@ -126,13 +126,13 @@ The tradeoff: you lose `node.tokens` visibility (tokens spent inside the CLI's s
 
 OE is **not free**. Per-node overhead from the dispatcher + state writes + event emission is roughly:
 
-| Operation | Time |
-| --- | --- |
-| Dispatcher resolve (one-time per node) | ~2–10ms |
-| State write per field | ~1–3ms (better-sqlite3 sync) |
-| Event emit + JSONL append | <1ms |
-| Cache lookup | ~2ms |
-| AJV validate (agent output) | ~1–5ms |
+| Operation                              | Time                         |
+| -------------------------------------- | ---------------------------- |
+| Dispatcher resolve (one-time per node) | ~2–10ms                      |
+| State write per field                  | ~1–3ms (better-sqlite3 sync) |
+| Event emit + JSONL append              | <1ms                         |
+| Cache lookup                           | ~2ms                         |
+| AJV validate (agent output)            | ~1–5ms                       |
 
 For a flow with 10 nodes and ~20 state writes, total framework overhead is **<100ms**. The LLM call dwarfs this entirely.
 
