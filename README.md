@@ -8,9 +8,9 @@
 
 ### Your team's best workflows — version-controlled, reproducible, self-improving.
 
-[![tests](https://img.shields.io/badge/tests-227%20passing-brightgreen)](#) [![typecheck](https://img.shields.io/badge/typecheck-strict-blue)](#) [![packages](https://img.shields.io/badge/packages-14-blueviolet)](#) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![npm](https://img.shields.io/npm/v/%40openexpertise%2Fcli?label=%40openexpertise%2Fcli&color=cb3837)](https://www.npmjs.com/package/@openexpertise/cli) [![docs](https://img.shields.io/badge/docs-xingchengxu.github.io%2FOpenExpertise-3b82f6)](https://xingchengxu.github.io/OpenExpertise/) [![tests](https://img.shields.io/badge/tests-265%20passing-brightgreen)](#) [![typecheck](https://img.shields.io/badge/typecheck-strict-blue)](#) [![packages](https://img.shields.io/badge/packages-15-blueviolet)](#) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-[**60-second demo**](#60-second-demo) · [**Why**](#why-openexpertise) · [**Examples**](#built-in-examples) · [**Compare**](#vs-the-alternatives) · [**Docs**](#docs)
+[**Install**](#install) · [**60-second demo**](#60-second-demo) · [**Why**](#why-openexpertise) · [**Examples**](#built-in-examples) · [**Compare**](#vs-the-alternatives) · [**Docs site →**](https://xingchengxu.github.io/OpenExpertise/)
 
 </div>
 
@@ -40,14 +40,34 @@ It's NOT an autonomous agent. It's the **orchestration layer** that lets you wir
 
 ---
 
+## Install
+
+```bash
+npm install -g @openexpertise/cli      # the `oe` command — Node 20+
+oe doctor                              # verify env (CLI agents, API keys, write perms)
+oe init my-first                       # scaffold a minimal no-LLM flow
+oe registry                            # see 5 curated experiences (need API key to run)
+```
+
+Pull any public GitHub repo with an `experience.yaml`:
+
+```bash
+oe install gh:owner/repo               # latest commit
+oe install gh:owner/repo@v1.2.3        # pin to tag/SHA
+```
+
+📖 **Full docs: https://xingchengxu.github.io/OpenExpertise/** — guide, all 12 examples, 10-recipe cookbook, API reference, comparison vs LangGraph/CrewAI/Mastra/Inngest, operations playbook.
+
+---
+
 ## 60-second demo
 
 ```bash
+npm install -g @openexpertise/cli
 git clone https://github.com/xingchengxu/OpenExpertise && cd OpenExpertise
-pnpm install && pnpm -r build
 
 export ANTHROPIC_API_KEY=sk-...        # or OPENAI_API_KEY=...
-node packages/cli/dist/bin.js run examples/review-branch --tui
+oe run examples/review-branch --tui
 ```
 
 You'll see three reviewers (`bugs`/`perf`/`tests`) fan out over a Python diff. They find missing null-check + missing test + unclosed cursor — but **miss the SQL injection**.
@@ -61,7 +81,7 @@ You'll see three reviewers (`bugs`/`perf`/`tests`) fan out over a Python diff. T
 Now ask the evolution advisor what's missing:
 
 ```bash
-node packages/cli/dist/bin.js evolve run-2026-05-26-a1b2c3
+oe evolve run-2026-05-26-a1b2c3
 # → wrote .openexpertise/evolution/run-2026-05-26-a1b2c3.md
 #   proposal: "Add `security` dimension — default reviewers focus on
 #              logic/tests; injection bugs need a dedicated reviewer."
@@ -181,7 +201,7 @@ Because `--llm openai` honors `OPENAI_BASE_URL`, anything that speaks the OpenAI
 ```bash
 export OPENAI_API_KEY=anything-the-server-accepts
 export OPENAI_BASE_URL=http://your-vllm-host:8000/v1
-node packages/cli/dist/bin.js run examples/oncall-runbook --llm openai
+oe run examples/oncall-runbook --llm openai
 ```
 
 That same flow handles reasoning-style models that prefix tool-call arguments with `<think>...</think>` blocks (auto-stripped by the client) and Claude Code's JSON envelopes (auto-unwrapped by the cli-agent parser).
@@ -191,15 +211,22 @@ That same flow handles reasoning-style models that prefix tool-call arguments wi
 ## Install & first run (under 60 seconds)
 
 ```bash
-git clone https://github.com/xingchengxu/OpenExpertise && cd OpenExpertise
-pnpm install && pnpm -r build
-
-# Hello world — pure tool, no API key needed:
-node packages/cli/dist/bin.js run examples/hello-tool
-# → finalState: { greeting: "hello, World" }
+npm install -g @openexpertise/cli
+oe doctor                              # verify env
+oe init my-first-experience            # scaffold a minimal flow (no API key needed)
+cd my-first-experience && oe run .
+# → finalState: { greeting: "Hello, OpenExpertise!" }
 ```
 
-When npm-published: `npm i -g @openexpertise/cli` → `oe run examples/hello-tool`.
+Want one of the bundled flagship flows? `oe registry` lists 5 curated experiences (`oe install deep-research`, `review-branch`, etc.) — those need an API key. Or pull any GitHub repo: `oe install gh:owner/repo`.
+
+Prefer source? Clone + build for hacking on the runtime:
+
+```bash
+git clone https://github.com/xingchengxu/OpenExpertise && cd OpenExpertise
+pnpm install && pnpm -r build
+node packages/cli/dist/bin.js run examples/hello-tool
+```
 
 ---
 
@@ -344,14 +371,21 @@ Independent DAG nodes (and `for_each` iterations whose `concurrency: N` is set) 
 
 ## Docs
 
-| Doc                                                  | What's inside                                                       |
-| ---------------------------------------------------- | ------------------------------------------------------------------- |
-| [`docs/cli-agent.md`](docs/cli-agent.md)             | `cli-agent` node kind: providers, command shapes, JSON-mode caveats |
-| [`docs/mcp-server.md`](docs/mcp-server.md)           | MCP server tools + per-CLI registration                             |
-| [`docs/ultraexpertise.md`](docs/ultraexpertise.md)   | Auto-SOP authoring — `oe ultra`, slash command, MCP `oe_ultra`      |
-| [`docs/comparison.md`](docs/comparison.md)           | Position vs LangGraph / CrewAI / Mastra / Inngest                   |
-| [`docs/demo-script.md`](docs/demo-script.md)         | Recording script for the hero GIF                                   |
-| [`docs/superpowers/specs/`](docs/superpowers/specs/) | Architecture decisions                                              |
+**📖 Full docs site: https://xingchengxu.github.io/OpenExpertise/** — 90 pages across 11 sections (guide, concepts, examples, cookbook, reference, comparisons, operations, FAQ, glossary, roadmap).
+
+In-repo quick references:
+
+| Doc                                                                            | What's inside                                                              |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| [Docs site `/guide`](https://xingchengxu.github.io/OpenExpertise/guide/)       | Hands-on path: install → first experience → authoring → running → evolving |
+| [Docs site `/examples`](https://xingchengxu.github.io/OpenExpertise/examples/) | Walkthroughs for all 12 shipped examples + gallery                         |
+| [Docs site `/cookbook`](https://xingchengxu.github.io/OpenExpertise/cookbook/) | 10 self-contained recipes — copy/paste YAML for common patterns            |
+| [Docs site `/compare`](https://xingchengxu.github.io/OpenExpertise/compare/)   | vs LangGraph / CrewAI / Mastra / Inngest / Workflows / Claude Code         |
+| [`docs/cli-agent.md`](docs/cli-agent.md)                                       | `cli-agent` node kind: providers, command shapes, JSON-mode caveats        |
+| [`docs/mcp-server.md`](docs/mcp-server.md)                                     | MCP server tools + per-CLI registration                                    |
+| [`docs/ultraexpertise.md`](docs/ultraexpertise.md)                             | Auto-SOP authoring — `oe ultra`, slash command, MCP `oe_ultra`             |
+| [`docs/registry.md`](docs/registry.md)                                         | `oe install` / `oe registry` and how to submit your experience             |
+| [`docs/superpowers/specs/`](docs/superpowers/specs/)                           | Architecture decisions                                                     |
 
 ---
 
