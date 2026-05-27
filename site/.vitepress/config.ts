@@ -16,17 +16,37 @@ export default defineConfig({
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/OpenExpertise/logo.svg' }],
     ['meta', { name: 'theme-color', content: '#6366f1' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:url', content: 'https://xingchengxu.github.io/OpenExpertise/' }],
     ['meta', { property: 'og:title', content: 'OpenExpertise — AI-era Makefile' }],
     [
       'meta',
       {
         property: 'og:description',
         content:
-          "Codify your team's SOPs as YAML graphs. Runs the same way every time, leaves a trail, gets better at it. The orchestration layer above Claude Code / Codex / Gemini.",
+          'Codify expert workflows as YAML graphs. Run with deterministic flow + LLM-powered nodes. Evolve after each run.',
       },
     ],
-    ['meta', { property: 'og:type', content: 'website' }],
+    [
+      'meta',
+      { property: 'og:image', content: 'https://xingchengxu.github.io/OpenExpertise/og.svg' },
+    ],
+    ['meta', { property: 'og:image:width', content: '1200' }],
+    ['meta', { property: 'og:image:height', content: '630' }],
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:title', content: 'OpenExpertise — AI-era Makefile' }],
+    [
+      'meta',
+      {
+        name: 'twitter:description',
+        content:
+          'Codify expert workflows as YAML graphs. Multi-vendor LLM CLI orchestration. Self-evolving.',
+      },
+    ],
+    [
+      'meta',
+      { name: 'twitter:image', content: 'https://xingchengxu.github.io/OpenExpertise/og.svg' },
+    ],
   ],
 
   themeConfig: {
