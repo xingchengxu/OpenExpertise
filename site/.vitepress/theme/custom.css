@@ -1,0 +1,166 @@
+/**
+ * OpenExpertise — custom theme tokens
+ * Brand palette: indigo → fuchsia gradient. Warm green for "success/ready" cues.
+ */
+
+:root {
+  --vp-c-brand-1: #6366f1;
+  --vp-c-brand-2: #818cf8;
+  --vp-c-brand-3: #a5b4fc;
+  --vp-c-brand-soft: rgba(99, 102, 241, 0.14);
+
+  --vp-c-brand-1-rgb: 99, 102, 241;
+  --vp-c-tip-1: var(--vp-c-brand-1);
+  --vp-c-tip-2: var(--vp-c-brand-2);
+
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(120deg, #6366f1 30%, #a855f7);
+  --vp-home-hero-image-background-image: linear-gradient(-45deg, #6366f1 50%, #a855f7 50%);
+  --vp-home-hero-image-filter: blur(60px);
+
+  --vp-c-success-1: #16a34a;
+  --vp-c-warning-1: #f59e0b;
+  --vp-c-danger-1: #ef4444;
+}
+
+.dark {
+  --vp-c-brand-1: #818cf8;
+  --vp-c-brand-2: #a5b4fc;
+  --vp-c-brand-3: #c7d2fe;
+  --vp-c-brand-soft: rgba(129, 140, 248, 0.18);
+}
+
+/* Tighten the hero so the right-side blob doesn't dominate */
+.VPHero .image {
+  max-width: 360px !important;
+}
+
+@media (min-width: 960px) {
+  .VPHero .container {
+    max-width: 1160px;
+  }
+}
+
+/* Make code blocks feel slightly elevated */
+.vp-doc div[class*='language-'] {
+  border-radius: 10px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+}
+
+/* Subtle inline-code emphasis without being noisy */
+.vp-doc :not(pre) > code {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.92em;
+}
+
+.vp-doc :not(pre) > code::before,
+.vp-doc :not(pre) > code::after {
+  content: none;
+}
+
+/* Bigger headings on long technical pages */
+.vp-doc h2 {
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 28px;
+  margin-top: 56px;
+  letter-spacing: -0.01em;
+}
+
+.vp-doc h1 {
+  letter-spacing: -0.02em;
+}
+
+/* Custom block: "diagram" — for ASCII art so it doesn't get prose styling */
+.diagram {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Liberation Mono', monospace;
+  white-space: pre;
+  line-height: 1.45;
+  font-size: 0.85em;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+/* Pretty status pills in tables */
+.pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.82em;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.pill-ok {
+  background: rgba(22, 163, 74, 0.14);
+  color: #16a34a;
+}
+.pill-warn {
+  background: rgba(245, 158, 11, 0.14);
+  color: #d97706;
+}
+.pill-no {
+  background: rgba(239, 68, 68, 0.14);
+  color: #ef4444;
+}
+.pill-na {
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-2);
+}
+
+/* Example index grid: dl-style listing with a brand-tinted left rule */
+.example-grid dt {
+  font-weight: 600;
+  font-size: 1.05em;
+  margin-top: 18px;
+  margin-bottom: 4px;
+}
+
+.example-grid dt a {
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+}
+
+.example-grid dt a:hover {
+  text-decoration: underline;
+}
+
+.example-grid dd {
+  margin: 0 0 4px 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--vp-c-brand-soft);
+  color: var(--vp-c-text-2);
+  font-size: 0.95em;
+}
+
+/* Cleaner table for compare matrices: zebra + sticky first column */
+.vp-doc table {
+  display: table;
+  width: 100%;
+  margin: 20px 0;
+}
+
+.vp-doc tr:nth-child(even) {
+  background: var(--vp-c-bg-soft);
+}
+
+/* Stronger emphasis on the hero tagline so it doesn't feel like body text */
+.VPHero .tagline {
+  font-size: 1.2em !important;
+  line-height: 1.55;
+  max-width: 640px;
+}
+
+/* Punchy "Used in" callouts on example pages */
+.used-in {
+  background: var(--vp-c-brand-soft);
+  border-left: 3px solid var(--vp-c-brand-1);
+  padding: 12px 16px;
+  border-radius: 0 6px 6px 0;
+  margin: 16px 0;
+}

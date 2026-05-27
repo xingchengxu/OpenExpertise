@@ -1,13 +1,41 @@
 {
   "name": "@openexpertise/evolution",
   "version": "0.1.0",
+  "description": "Advisor that reads a run's events+state and proposes graph upgrades as git-apply-ready diffs.",
+  "keywords": [
+    "openexpertise",
+    "workflow",
+    "dag",
+    "llm",
+    "yaml",
+    "evolution",
+    "optimization",
+    "advisor"
+  ],
+  "author": "OpenExpertise contributors",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xingchengxu/OpenExpertise.git",
+    "directory": "packages/evolution"
+  },
+  "bugs": {
+    "url": "https://github.com/xingchengxu/OpenExpertise/issues"
+  },
+  "homepage": "https://github.com/xingchengxu/OpenExpertise#readme",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
     "dist",
-    "src/prompts"
+    "src/prompts",
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"

@@ -1,15 +1,36 @@
 {
   "name": "@openexpertise/skill-experience-creator",
   "version": "0.1.0",
+  "description": "Anthropic SKILL.md package that teaches an LLM how to author OpenExpertise experiences.",
+  "keywords": [
+    "openexpertise",
+    "workflow",
+    "dag",
+    "llm",
+    "yaml",
+    "skill",
+    "anthropic",
+    "authoring"
+  ],
+  "author": "OpenExpertise contributors",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xingchengxu/OpenExpertise.git",
+    "directory": "packages/skill-experience-creator"
+  },
+  "bugs": {
+    "url": "https://github.com/xingchengxu/OpenExpertise/issues"
+  },
+  "homepage": "https://github.com/xingchengxu/OpenExpertise#readme",
   "type": "module",
-  "private": false,
   "files": [
     "SKILL.md",
     "references",
     "assets",
     "scripts",
-    "commands"
+    "commands",
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"

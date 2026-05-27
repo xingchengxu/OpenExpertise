@@ -1,7 +1,28 @@
 {
   "name": "@openexpertise/schema",
   "version": "0.1.0",
+  "description": "TypeScript types + JSON Schema + parser/validator for the OpenExpertise experience.yaml format.",
+  "keywords": [
+    "openexpertise",
+    "workflow",
+    "dag",
+    "llm",
+    "yaml",
+    "schema",
+    "json-schema",
+    "validation"
+  ],
+  "author": "OpenExpertise contributors",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xingchengxu/OpenExpertise.git",
+    "directory": "packages/schema"
+  },
+  "bugs": {
+    "url": "https://github.com/xingchengxu/OpenExpertise/issues"
+  },
+  "homepage": "https://github.com/xingchengxu/OpenExpertise#readme",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -14,7 +35,8 @@
   },
   "files": [
     "dist",
-    "src/schemas"
+    "src/schemas",
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"

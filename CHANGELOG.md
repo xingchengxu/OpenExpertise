@@ -1,53 +1,98 @@
 # Changelog
 
-All notable changes are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html).
+All notable changes to OpenExpertise will be documented in this file.
 
-The pre-1.0 series uses 0.X.0 for feature releases; behavior may change between releases without major-version bumps until 1.0 ships.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] — 2026-05-27
 
-_Nothing yet._
+First public release. OpenExpertise is an AI-era Makefile: codify expert
+workflows as YAML graphs, run them with deterministic flow + LLM-powered
+nodes, and evolve the graph after each run.
 
-## [0.1.0] — 2026-05-26
+### Added
 
-First public release. V1 walking skeleton + V2 polish.
+#### Runtime
 
-### Added — V1 (Plans 1–6)
+- **6 node kinds in a single graph schema:** `tool` (deterministic code),
+  `agent` (LLM with structured output), `skill` (Anthropic SKILL.md packages),
+  `dataset` (file / SQLite / HTTP / MCP-resource), `experience` (nested OE),
+  and `cli-agent` (delegate to Claude Code / Codex / Gemini subprocesses).
+- **Sequential and parallel schedulers** with bounded concurrency
+  (`--concurrency N` flag and `runtime.concurrency` in YAML); topological
+  wave execution; 429-aware exponential backoff retry.
+- **Persistent SQLite state store** (`.openexpertise/state.sqlite`) — every
+  node's writes land in a typed blackboard; resume across sessions with
+  `oe resume <run-id>`.
+- **JSONL event log** (`.openexpertise/runs/<id>.jsonl`) — every dispatch,
+  retry, write, and error captured for replay and audit.
+- **Per-node memoization cache** for cheap re-runs after edits.
+- **`for_each` fan-out** with `concurrency` honored, plus `when:` conditional
+  edges for branching.
+- **State merge strategies:** `array_append`, `set_once`, `last_wins`.
 
-- Walking skeleton: monorepo, schema package, core runtime, `ToolDispatcher`, `oe` CLI, `examples/hello-tool`.
-- Heterogeneous dispatchers: `AgentDispatcher` (Anthropic SDK), `SkillDispatcher`, `DatasetDispatcher`, `ExperienceDispatcher`, `on_error` policies (`skip` / `fail_run` / `retry`).
-- Control flow: `for_each` fan-out (sequential in V1), conditional edges (`when:`), pipeline groups, phase grouping. `examples/review-branch` demo.
-- Cache + resume (`oe resume <run-id>`), bounded loops (`repeat:`), `ink`-based TUI dashboard (`oe run --tui`), CLI commands `init`/`state`/`reset-state`/`diff`.
-- Authoring skill: `experience-creator` SKILL.md package for Claude Code.
-- `EvolutionAdvisor` + `oe evolve` + `oe diff` + `oe run --evolve` flag. Root README quickstart.
+#### CLI (`oe`)
 
-### Added — V2
+- `oe run <experience>` with `--tui`, `--concurrency`, `--resume`, `--once`.
+- `oe inspect <run-id>` — event-ordered run reconstruction (parallel-safe sort by ts).
+- `oe state <field>` — pull any field out of state SQLite.
+- `oe resume <run-id>` — replay from the last successful node.
+- `oe validate <experience>` — schema check before running.
+- `oe evolve <run-id>` — advisor writes proposal markdown with git-apply-ready diff.
+- `oe ultra "<intent>"` — one-keyword authoring: LLM scaffolds a full experience from a sentence.
 
-- **Hero demo + OpenAI** (`feat/hero-demo-and-openai`, 17 commits): `@openexpertise/llm-openai` package, `--llm anthropic|openai` flag with provider precedence (env-var auto-detect → flag override), `examples/review-branch` rebuilt around a fixture diff with SQL injection, narrowed reviewer prompts, `docs/comparison.md`, `docs/demo-script.md`.
-- **`cli-agent` node kind** (`feat/cli-agent-node-kind`, 14 commits): `@openexpertise/node-kinds-cli-agent` package with `claude-code` / `codex` / `gemini` providers, `SubprocessRunner` with DI for tests, JSON schema + text output parsing, `examples/cli-orchestration`, mocked e2e.
-- **MCP server** (`feat/mcp-server`, 13 commits): `@openexpertise/mcp-server` with `oe-mcp` binary, 5 tools (`oe_validate` / `oe_state` / `oe_inspect` / `oe_run` / `oe_evolve`), in-process MCP round-trip tests, `docs/mcp-server.md`. Bumped `better-sqlite3` to ^12.10 for Node 26 prebuilt binaries.
-- **Ultraexpertise** (`feat/ultraexpertise`, 14 commits): `@openexpertise/authoring` package, `oe ultra "<task>"` CLI command, `oe_ultra` MCP tool, `/ultraexpertise` Claude Code slash command. Two-phase LLM pipeline (analyze → synthesize) producing validated draft experiences in `.openexpertise/drafts/<slug>/`. Same `llm-factory` as `oe evolve` — author → run → evolve is one closed loop.
-- **TUI upgrade** (`feat/tui-upgrade`, 9 commits): new `node.tokens` and `node.activity` event variants; `AgentDispatcher`, `SkillDispatcher`, `CliAgentDispatcher` all emit. Dashboard reducer extracted into a pure module + 11 unit tests. Per-node activity (truncated), per-node tokens, run-total tokens header.
-- **Examples library** (`feat/examples-library`, 6 commits): `examples/oncall-runbook` (fan-out + sequential synthesis), `examples/issue-triage` (conditional dedup edge), `examples/release-gates` (tool + cli-agent + agent in one graph). All three with mocked e2e tests.
-- **Parallel scheduler + 429 handling** (`feat/parallel-scheduler`, 10 commits): `runtime.concurrency` schema field; `for_each.concurrency` honored via `runWithLimit`; new `ParallelScheduler` subclassing `SequentialScheduler` for wave-based execution; `oe run --concurrency N` flag overrides YAML; 429-aware retry with exponential backoff on both Anthropic and OpenAI clients; `oe inspect` sorts events by `ts` for parallel-safe rendering.
+#### CLI agent integration
 
-### Added — Post-Plan-D polish (between V2 and release)
+- Subprocess runner with timeout, retry, output-format parsing (`text` | `json`),
+  and AJV schema validation against parsed JSON.
+- Supported providers: `claude-code`, `codex`, `gemini`.
+- Two-way: outbound (delegate node to a CLI agent) AND inbound via `oe-mcp`
+  (5 MCP tools exposed so external agents can run experiences from their sessions).
 
-- Three real-API live-smoke fixes:
-  - `fix(llm-openai)`: strip `<think>...</think>` prefix from reasoning-model tool-call arguments (reasoning models like DeepSeek-R1 / o1 prefix tool calls with chain-of-thought blocks).
-  - `fix(cli-agent)`: unwrap Claude Code JSON envelope + strip markdown ` ```json ` fence from output.
-  - `fix(cli-agent)`: GeminiProvider passes `--skip-trust` to run outside trusted workdirs.
-- `examples/tri-cli-orchestration` — Claude Code → Codex → Gemini state-flow in one DAG (the cross-vendor headline demo).
-- README rewrite with "AI-era Makefile" positioning, vs-alternatives comparison table, "Verified end-to-end" section listing 6 verified providers / paths.
-- MIT License.
+#### Authoring
 
-### Stats
+- Schema-aware authoring helpers in `@openexpertise/authoring`.
+- `/ultraexpertise` slash command + matching `oe ultra` CLI.
+- Anthropic SKILL.md package (`@openexpertise/skill-experience-creator`) that
+  teaches a code-assistant LLM how to author OE experiences.
 
-- **Packages:** 14 (`schema`, `core`, `cli`, `evolution`, `authoring`, `mcp-server`, `llm-openai`, `tui`, `node-kinds-{tool,agent,skill,dataset,experience,cli-agent}`, `skill-experience-creator`).
-- **Tests:** 225 passing (unit + e2e), zero flaky, all run without API keys.
-- **Examples:** 9 (`hello-tool`, `dataset-aggregate`, `agent-echo`, `oncall-runbook`, `issue-triage`, `review-branch`, `cli-orchestration`, `release-gates`, `tri-cli-orchestration`).
-- **CLI surface:** 10 commands (`init`, `validate`, `run`, `resume`, `inspect`, `state`, `reset-state`, `evolve`, `diff`, `ultra`).
-- **MCP tools:** 6 (`oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `oe_evolve`, `oe_ultra`).
+#### TUI
 
-[Unreleased]: https://github.com/xingchengxu/OpenExpertise/compare/v0.1.0...HEAD
+- Ink-based live dashboard: phase progress, per-node status, live token stream,
+  activity feed of recent events. Toggle with `--tui`.
+
+#### Built-in examples (11)
+
+- `hello-tool` — smallest possible flow.
+- `dataset-aggregate` — CSV → aggregate.
+- `agent-echo` — single agent with structured output.
+- `review-branch` ★ — multi-dim code review + verifier + score + evolution. The hero demo.
+- `oncall-runbook` — incident triage via `for_each` fan-out.
+- `issue-triage` — classify → search dupes → conditional dedup → route. Shows `when:` edges.
+- `release-gates` — license + changelog + coverage + Claude-Code security scan → release gate.
+- `cli-orchestration` — Claude Code summarizes; Codex critiques.
+- `tri-cli-orchestration` ★ — Claude → Codex → Gemini in one DAG.
+- `deep-research` — Claude Code WebSearch + Gemini Google Search → cited synthesis.
+- `systematic-debugging` — translates the superpowers `systematic-debugging` skill into a YAML flow.
+
+#### Tests
+
+- 227 passing across 58 test files. Every example ships a mocked-LLM e2e test.
+
+#### Docs
+
+- README with 60-second demo, comparison vs LangGraph/CrewAI/Anthropic workflows/Claude Code.
+- Per-example README with run instructions and ASCII pipeline diagram.
+- `docs/comparison.md` deep-dive vs alternatives.
+- `docs/superpowers/` design diaries (one per major plan: 1-6 and A-F).
+- CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md.
+
+### Acknowledgements
+
+- The `systematic-debugging` example is a direct translation of the
+  [Anthropic superpowers](https://github.com/anthropics/skills) skill of the
+  same name — reused with attribution.
+- The TUI uses [Ink](https://github.com/vadimdemedes/ink) by Vadim Demedes.
+
 [0.1.0]: https://github.com/xingchengxu/OpenExpertise/releases/tag/v0.1.0

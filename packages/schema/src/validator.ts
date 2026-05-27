@@ -41,12 +41,21 @@ export function validateExperienceSpec(spec: unknown): asserts spec is Experienc
     throw new ValidationError('Duplicate node ids in graph.nodes')
   }
 
+  const definedNodeList = [...nodeIds].join(', ')
   for (const edge of s.graph.edges) {
     if (!nodeIds.has(edge.from)) {
-      throw new ValidationError(`Edge references unknown node id "${edge.from}"`)
+      throw new ValidationError(
+        `Edge \`${edge.from} → ${edge.to}\` references node \`${edge.from}\` which doesn't exist. ` +
+          `Add it to \`graph.nodes:\` or fix the typo. ` +
+          `Defined nodes: ${definedNodeList || '(none)'}`,
+      )
     }
     if (!nodeIds.has(edge.to)) {
-      throw new ValidationError(`Edge references unknown node id "${edge.to}"`)
+      throw new ValidationError(
+        `Edge \`${edge.from} → ${edge.to}\` references node \`${edge.to}\` which doesn't exist. ` +
+          `Add it to \`graph.nodes:\` or fix the typo. ` +
+          `Defined nodes: ${definedNodeList || '(none)'}`,
+      )
     }
   }
 

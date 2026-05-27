@@ -12,7 +12,7 @@ describe('AnthropicLLMClient.complete', () => {
         }),
       },
     }
-    const client = new AnthropicLLMClient({ sdkClient: fakeSdk as any })
+    const client = new AnthropicLLMClient({ sdkClient: fakeSdk as never })
     const result = await client.complete({
       model: 'claude-sonnet-4-5',
       messages: [{ role: 'user', content: 'hi' }],
@@ -42,7 +42,7 @@ describe('AnthropicLLMClient.complete', () => {
         }),
       },
     }
-    const client = new AnthropicLLMClient({ sdkClient: fakeSdk as any })
+    const client = new AnthropicLLMClient({ sdkClient: fakeSdk as never })
     const result = await client.complete({
       model: 'claude-sonnet-4-5',
       messages: [{ role: 'user', content: 'hi' }],

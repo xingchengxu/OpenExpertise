@@ -1,0 +1,150 @@
+name: brainstorming
+description: Translation of the superpowers `brainstorming` skill into an OpenExpertise flow. Diverge across 3 angles → cluster → critique each cluster → synthesize the top 3 picks. Uses Claude Code for divergent ideation and an LLM agent for synthesis.
+version: 0.1.0
+
+state:
+  schema:
+    topic: { type: string }
+    angles: { type: array, items: { type: object } }
+    raw_ideas: { type: array, items: { type: object }, merge: array_append }
+    clusters: { type: array, items: { type: object } }
+    critiques: { type: array, items: { type: object }, merge: array_append }
+    picks: { type: object }
+
+phases:
+  - { id: seed }
+  - { id: diverge }
+  - { id: converge }
+  - { id: critique }
+  - { id: synthesize }
+
+graph:
+  nodes:
+    - id: load_seed
+      kind: tool
+      phase: seed
+      impl: ./tools/load_seed.mjs
+      writes: [topic, angles]
+
+    - id: diverge
+      kind: cli-agent
+      provider: claude-code
+      phase: diverge
+      prompt: |
+        You are brainstorming from a specific angle. Generate 5 distinct, concrete ideas — not abstractions, not framings, ideas.
+
+        Topic: {{topic}}
+        Your angle: {{$item.name}} — {{$item.description}}
+
+        Return JSON:
+
+        {"raw_ideas": [{"angle": "{{$item.name}}", "idea": "<one-sentence concrete idea>", "rationale": "<one-sentence why-this-helps>"}]}
+
+        Exactly 5 ideas. Be concrete. Avoid platitudes ("focus on UX") in favor of specific actions ("add a `setup --dry-run` flag that prints what would happen").
+      for_each: { source: $.angles, concurrency: 3 }
+      reads: [topic, angles]
+      output_format: json
+      schema:
+        type: object
+        required: [raw_ideas]
+        properties:
+          raw_ideas:
+            type: array
+            items:
+              type: object
+              required: [angle, idea, rationale]
+              properties:
+                angle: { type: string }
+                idea: { type: string }
+                rationale: { type: string }
+      writes: [raw_ideas]
+      timeout_ms: 180000
+
+    - id: cluster
+      kind: agent
+      phase: converge
+      prompt: ./prompts/cluster.md
+      reads: [topic, raw_ideas]
+      schema:
+        type: object
+        required: [clusters]
+        properties:
+          clusters:
+            type: array
+            items:
+              type: object
+              required: [id, name, description, idea_indices]
+              properties:
+                id: { type: string }
+                name: { type: string }
+                description: { type: string }
+                idea_indices: { type: array, items: { type: number } }
+      writes: [clusters]
+
+    - id: critique
+      kind: cli-agent
+      provider: claude-code
+      phase: critique
+      prompt: |
+        You are critiquing a cluster of brainstormed ideas. Identify what fails, what's untested, what's the obvious objection.
+
+        Cluster: {{$item.name}}
+        Description: {{$item.description}}
+        Ideas in this cluster: {{$item.idea_indices}} (look up in `raw_ideas` by index)
+        Topic: {{topic}}
+
+        Return JSON:
+
+        {"critiques": [{"cluster_id": "{{$item.id}}", "biggest_weakness": "<one sentence>", "what_we_dont_know": "<one sentence>", "best_idea_in_cluster": "<the strongest one and why>"}]}
+
+        Exactly one entry. Be specific — name the thing that's actually fragile.
+      for_each: { source: $.clusters, concurrency: 2 }
+      reads: [topic, raw_ideas, clusters]
+      output_format: json
+      schema:
+        type: object
+        required: [critiques]
+        properties:
+          critiques:
+            type: array
+            items:
+              type: object
+              required: [cluster_id, biggest_weakness, what_we_dont_know, best_idea_in_cluster]
+              properties:
+                cluster_id: { type: string }
+                biggest_weakness: { type: string }
+                what_we_dont_know: { type: string }
+                best_idea_in_cluster: { type: string }
+      writes: [critiques]
+      timeout_ms: 180000
+
+    - id: synthesize
+      kind: agent
+      phase: synthesize
+      prompt: ./prompts/synthesize.md
+      reads: [topic, raw_ideas, clusters, critiques]
+      schema:
+        type: object
+        required: [picks]
+        properties:
+          picks:
+            type: object
+            required: [top_3, reasoning, next_actions]
+            properties:
+              top_3:
+                type: array
+                items:
+                  type: object
+                  required: [idea, why_strongest]
+                  properties:
+                    idea: { type: string }
+                    why_strongest: { type: string }
+              reasoning: { type: string }
+              next_actions: { type: array, items: { type: string } }
+      writes: [picks]
+
+  edges:
+    - { from: load_seed, to: diverge }
+    - { from: diverge, to: cluster }
+    - { from: cluster, to: critique }
+    - { from: critique, to: synthesize }

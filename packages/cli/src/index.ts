@@ -8,6 +8,9 @@ import { stateCommand, resetStateCommand } from './commands/state.js'
 import { diffCommand } from './commands/diff.js'
 import { evolveCommand } from './commands/evolve.js'
 import { ultraCommand } from './commands/ultra.js'
+import { doctorCommand } from './commands/doctor.js'
+import { installCommand } from './commands/install.js'
+import { registryCommand, installedCommand } from './commands/registry.js'
 import { makeLogger } from './logger.js'
 
 export function buildProgram(): Command {
@@ -189,6 +192,50 @@ export function buildProgram(): Command {
           ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
         }),
       )
+    })
+
+  program
+    .command('doctor')
+    .description('Check environment readiness for running OpenExpertise')
+    .option('--json', 'output machine-readable JSON')
+    .action(async (cmdOpts: { json?: boolean }) => {
+      process.exit(await doctorCommand({ json: cmdOpts.json ?? false }))
+    })
+
+  program
+    .command('install <spec>')
+    .description('Install an experience from a curated registry name or gh:user/repo[@ref]')
+    .option('--ref <ref>', 'override the ref (branch, tag, or SHA)')
+    .action(async (spec: string, cmdOpts: { ref?: string }, cmd: Command) => {
+      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+      process.exit(
+        await installCommand({
+          spec,
+          logger,
+          ...(cmdOpts.ref !== undefined ? { ref: cmdOpts.ref } : {}),
+        }),
+      )
+    })
+
+  program
+    .command('registry')
+    .description('List curated experiences in the OpenExpertise registry')
+    .option('--json', 'output as JSON')
+    .action(async (cmdOpts: { json?: boolean }, cmd: Command) => {
+      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+      process.exit(await registryCommand({ json: cmdOpts.json ?? false, logger }))
+    })
+
+  program
+    .command('installed')
+    .description('List experiences installed via `oe install`')
+    .option('--json', 'output as JSON')
+    .action(async (cmdOpts: { json?: boolean }, cmd: Command) => {
+      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+      process.exit(await installedCommand({ json: cmdOpts.json ?? false, logger }))
     })
 
   return program

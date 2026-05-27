@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "updated": "2026-05-27",
+  "description": "Curated OpenExpertise experiences. Submit a PR to add yours.",
+  "experiences": [
+    {
+      "name": "deep-research",
+      "owner": "xingchengxu",
+      "repo": "OpenExpertise",
+      "subpath": "examples/deep-research",
+      "ref": "v0.1.0",
+      "description": "Multi-vendor deep research: Claude Code WebSearch + Gemini Google Search → cited synthesis.",
+      "tags": ["research", "multi-vendor", "cli-agent"]
+    },
+    {
+      "name": "systematic-debugging",
+      "owner": "xingchengxu",
+      "repo": "OpenExpertise",
+      "subpath": "examples/systematic-debugging",
+      "ref": "v0.1.0",
+      "description": "The superpowers systematic-debugging skill as a YAML flow.",
+      "tags": ["debugging", "skill", "cli-agent"]
+    },
+    {
+      "name": "brainstorming",
+      "owner": "xingchengxu",
+      "repo": "OpenExpertise",
+      "subpath": "examples/brainstorming",
+      "ref": "v0.1.0",
+      "description": "The superpowers brainstorming skill: diverge → cluster → critique → synthesize top 3.",
+      "tags": ["ideation", "skill", "cli-agent"]
+    },
+    {
+      "name": "review-branch",
+      "owner": "xingchengxu",
+      "repo": "OpenExpertise",
+      "subpath": "examples/review-branch",
+      "ref": "v0.1.0",
+      "description": "Multi-dim code review + verifier + score + advisor evolution.",
+      "tags": ["code-review", "hero", "agent"]
+    },
+    {
+      "name": "tri-cli-orchestration",
+      "owner": "xingchengxu",
+      "repo": "OpenExpertise",
+      "subpath": "examples/tri-cli-orchestration",
+      "ref": "v0.1.0",
+      "description": "Claude → Codex → Gemini in one DAG.",
+      "tags": ["multi-vendor", "cli-agent", "hero"]
+    }
+  ]
+}

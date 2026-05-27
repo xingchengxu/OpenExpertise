@@ -42,15 +42,15 @@ describe('StateStore', () => {
   })
 
   it('rejects writes to undeclared fields', () => {
-    expect(() => store.write({ undeclared: 1 } as any, { runId: 'r', nodeId: 'x' })).toThrow(
-      /undeclared state field "undeclared"/,
-    )
+    expect(() =>
+      store.write({ undeclared: 1 } as Record<string, unknown>, { runId: 'r', nodeId: 'x' }),
+    ).toThrow(/undeclared state field "undeclared"/)
   })
 
   it('rejects writes that violate field type', () => {
-    expect(() => store.write({ greeting: 42 } as any, { runId: 'r', nodeId: 'x' })).toThrow(
-      /greeting/,
-    )
+    expect(() =>
+      store.write({ greeting: 42 } as Record<string, unknown>, { runId: 'r', nodeId: 'x' }),
+    ).toThrow(/greeting/)
   })
 
   it('appends arrays under array_append strategy', () => {
@@ -74,7 +74,7 @@ describe('StateStore', () => {
 
   it('persists across StateStore instances', () => {
     store.write({ greeting: 'persist' }, { runId: 'r', nodeId: 'x' })
-    const dbPath = (store as any).dbPath
+    const dbPath = (store as unknown as { dbPath: string }).dbPath
     store.close()
     const store2 = new StateStore({ dbPath, spec: baseSpec })
     expect(store2.get('greeting')).toBe('persist')

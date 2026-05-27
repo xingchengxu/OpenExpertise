@@ -130,7 +130,13 @@ export class SequentialScheduler {
     if (forEach) {
       const fullState = this.ctx.store.snapshot()
       const sourceVal = resolveExpression(forEach.source, fullState)
-      const items: unknown[] = Array.isArray(sourceVal) ? sourceVal : []
+      if (!Array.isArray(sourceVal)) {
+        throw new Error(
+          `for_each on node "${node.id}": source \`${forEach.source}\` resolved to ${sourceVal === null ? 'null' : typeof sourceVal}, expected array. ` +
+            `Either make the upstream node write an array to that field, or remove \`for_each:\` from this node.`,
+        )
+      }
+      const items: unknown[] = sourceVal
       const concurrency = forEach.concurrency ?? 1
       const resultsBefore = results.length
       await runWithLimit(items, concurrency, async (item, idx) => {

@@ -37,7 +37,7 @@ describe('resolveExpression', () => {
   })
 
   it('returns deep copies, not aliases', () => {
-    const r = resolveExpression('$.findings', state) as any[]
+    const r = resolveExpression('$.findings', state) as Array<{ file: string }>
     r[0].file = 'mutated'
     expect(state.findings[0].file).toBe('a.ts')
   })

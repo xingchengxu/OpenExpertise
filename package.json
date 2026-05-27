@@ -16,7 +16,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r typecheck",
-    "clean": "pnpm -r exec rm -rf dist tsconfig.tsbuildinfo .tsbuildinfo node_modules/.cache"
+    "clean": "pnpm -r exec rm -rf dist tsconfig.tsbuildinfo .tsbuildinfo node_modules/.cache",
+    "docs:dev": "pnpm --filter @openexpertise/site dev",
+    "docs:build": "pnpm --filter @openexpertise/site build",
+    "docs:preview": "pnpm --filter @openexpertise/site preview"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

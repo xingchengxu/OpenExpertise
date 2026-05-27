@@ -77,7 +77,9 @@ export class CliAgentDispatcher implements NodeDispatcher {
 
     if (res.timedOut) {
       throw new Error(
-        `cli-agent "${spec.id}" timed out after ${timeoutMs}ms (provider=${spec.provider})`,
+        `cli-agent node "${spec.id}" (provider: ${spec.provider}) timed out after ${timeoutMs}ms. ` +
+          `Increase \`timeout_ms:\` on the node in experience.yaml, ` +
+          `or check whether the CLI binary is responsive: \`which ${spec.provider === 'claude-code' ? 'claude' : spec.provider === 'codex' ? 'codex' : 'gemini'}\`.`,
       )
     }
     if (res.exitCode !== 0) {

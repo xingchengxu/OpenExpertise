@@ -30,7 +30,11 @@ export function parseOutput(opts: ParseOpts): Record<string, unknown> {
     parsed = JSON.parse(candidate)
   } catch (err) {
     throw new Error(
-      `cli-agent${tag}: stdout was not valid JSON (${(err as Error).message}); raw start: ${opts.stdout.slice(0, 120)}`,
+      `cli-agent${tag} was configured with \`output_format: json\` but stdout is not valid JSON ` +
+        `(${(err as Error).message}). ` +
+        `First 200 chars: '${opts.stdout.slice(0, 200)}'. ` +
+        `Common causes: the prompt didn't include a JSON contract; ` +
+        `the CLI wrapped JSON in markdown fences (add 'output JSON only, no markdown' to the prompt).`,
     )
   }
 
@@ -40,7 +44,11 @@ export function parseOutput(opts: ParseOpts): Record<string, unknown> {
       const msgs = (validate.errors ?? []).map(
         (e) => `${e.instancePath || '(root)'}: ${e.message ?? 'invalid'}`,
       )
-      throw new Error(`cli-agent${tag}: parsed output failed schema validation: ${msgs.join(', ')}`)
+      throw new Error(
+        `cli-agent${tag}: parsed JSON output failed schema validation: ${msgs.join(', ')}. ` +
+          `Check the \`schema:\` field on the node in experience.yaml and ensure the prompt ` +
+          `instructs the model to produce JSON that matches that schema.`,
+      )
     }
   }
 

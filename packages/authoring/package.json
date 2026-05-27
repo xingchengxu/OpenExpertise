@@ -1,13 +1,41 @@
 {
   "name": "@openexpertise/authoring",
   "version": "0.1.0",
+  "description": "Schema-aware authoring helpers — validate, scaffold, and edit experience.yaml files programmatically.",
+  "keywords": [
+    "openexpertise",
+    "workflow",
+    "dag",
+    "llm",
+    "yaml",
+    "authoring",
+    "scaffold",
+    "validation"
+  ],
+  "author": "OpenExpertise contributors",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xingchengxu/OpenExpertise.git",
+    "directory": "packages/authoring"
+  },
+  "bugs": {
+    "url": "https://github.com/xingchengxu/OpenExpertise/issues"
+  },
+  "homepage": "https://github.com/xingchengxu/OpenExpertise#readme",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
     "dist",
-    "src/prompts"
+    "src/prompts",
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"
