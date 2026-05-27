@@ -68,6 +68,7 @@ export default defineConfig({
         ],
       },
       { text: 'Compare', link: '/compare/', activeMatch: '^/compare/' },
+      { text: 'Ecosystem', link: '/ecosystem', activeMatch: '^/ecosystem' },
       {
         text: 'Help',
         items: [

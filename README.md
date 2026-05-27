@@ -132,6 +132,79 @@ Full write-up: [`docs/comparison.md`](docs/comparison.md).
 
 ---
 
+## Where OpenExpertise fits in the ecosystem
+
+```
+                    ┌────────────────────────────────────────┐
+                    │   OpenExpertise — workflow orchestrator │
+                    │   YAML graph · SQLite · scheduler · evolve │
+                    └──────────────────┬─────────────────────┘
+                                       │ composes
+        ┌──────────────────────────────┼──────────────────────────────┐
+        ▼                              ▼                              ▼
+   ┌──────────┐                  ┌──────────┐              ┌──────────────────────┐
+   │   MCP    │                  │  Skills  │              │  Autonomous agents   │
+   │ protocol │                  │ SKILL.md │              │  (executors)         │
+   │ for tools│                  │ reusable │              │  Claude Code · Codex │
+   │ + data   │                  │ LLM units│              │  · Gemini CLI        │
+   │          │                  │          │              │  + OSS frameworks    │
+   └──────────┘                  └──────────┘              └──────────────────────┘
+
+        ▲                              ▲                              ▲
+        └──────────────────────────────┼──────────────────────────────┘
+                                       │
+                  OE composes all three into one durable, replayable graph.
+                  Plus it exposes ITSELF as MCP tools (`oe-mcp`) so any agent
+                  can call OpenExpertise from inside its own session.
+```
+
+OE is **not** a protocol (that's MCP), **not** a reusable LLM unit (that's a Skill), and **not** an autonomous agent (that's Claude Code / Codex / Gemini / OpenHands / …). It's the workflow layer that orchestrates those pieces.
+
+### vs MCP — protocol bus, OE speaks both sides
+
+MCP is a protocol for exposing tools, data, and prompts to LLMs. OpenExpertise rides on top:
+
+- **Consumes MCP** — a `dataset` node with `source.type: mcp-resource` reads from any MCP server (declared in schema today; dispatcher wiring planned for a later 0.x).
+- **Exposes MCP** — [`@openexpertise/mcp-server`](https://www.npmjs.com/package/@openexpertise/mcp-server) (binary `oe-mcp`) ships 6 tools (`oe_run`, `oe_validate`, `oe_state`, `oe_inspect`, `oe_evolve`, `oe_ultra`) so any MCP client — Claude Code, Codex, Gemini, or anything else — can run OpenExpertise experiences from inside its own session.
+
+MCP is the wire format; OE is the workflow on top of the wire, AND offered ON the wire.
+
+### vs Skills (Anthropic SKILL.md packages) — units, OE composes
+
+A Skill is a packaged LLM capability: a `SKILL.md` system prompt + scripts + references + assets. Reusable across sessions, across projects.
+
+OE has a `skill` node kind — runs SKILL.md as a graph step. Three of the bundled examples are direct YAML translations of Anthropic skills:
+
+| Skill                  | Translated to OE                                                               | What it adds                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| `systematic-debugging` | [`examples/systematic-debugging`](examples/systematic-debugging)               | Persistent hypothesis log + replay + auto-evolve the hypothesis prompt       |
+| `brainstorming`        | [`examples/brainstorming`](examples/brainstorming)                             | 3-angle fan-out + per-cluster critique + synthesizable picks across sessions |
+| `experience-creator`   | [`@openexpertise/skill-experience-creator`](packages/skill-experience-creator) | Itself a Skill — teaches an LLM how to author OE flows. Used by `oe ultra`.  |
+
+Skills define what one LLM call does; OE arranges Skills (plus tools, agents, datasets, CLI agents) into a flow whose output is durable, replayable, and improvable.
+
+### vs Anthropic /workflows — different tradeoffs
+
+Anthropic's `/workflows` (the workflow-creator preview in Claude Code) is the first-party in-CLI option for multi-step procedures. It's the lightest path if you're already inside Claude Code and want a quick procedural sketch.
+
+OE is broader: YAML-declared (vs JS-coded), persistent SQLite state across runs (vs in-session ephemeral), multi-vendor by design (one graph can call Claude Code AND Codex AND Gemini), and **self-improving** (`oe evolve` reads the events + state diff and proposes graph upgrades as `git apply`-ready diffs).
+
+Different shapes for different jobs. Use `/workflows` for "I want to do this once-ish in Claude Code". Use OE for "this is my team's repeatable SOP, I want it version-controlled and getting better every quarter".
+
+### vs autonomous agents — executors, OE wraps and chains them
+
+"Autonomous agent" is a moving category: Claude Code, Codex CLI, Gemini CLI on the commercial side, plus the rapidly-growing OSS constellation — OpenHands, AutoGen, CrewAI agents, OpenClaw, Hermes Agent, OpenHuman, more launching every month.
+
+An agent is "AI bash": improvises each run, opaque trajectory, no shared state across invocations. OpenExpertise is "AI Makefile": same DAG every run, persistent state, replayable.
+
+OE's `cli-agent` node wraps any of these autonomous agents as a single graph step. Today, three providers ship: `claude-code`, `codex`, `gemini`. The same pattern (spawn a subprocess, capture stdout, parse JSON) is what makes the broader OSS constellation viable as future providers — adding `openhands`, `autogen`, `crewai`, `openclaw`, `hermes`, `openhuman` providers is roadmap work, not a re-architecture.
+
+**Bidirectional integration is the point.** Any agent can call OE back via `oe-mcp` (or just `oe run` in their shell). So you can run a Claude Code session that, when it hits "I need the team's SOP for incident triage", calls `oe_run` on `examples/oncall-runbook` — and the result of THAT graph (which itself called Gemini and Codex along the way) flows back into the Claude Code conversation. Each layer remembers, each layer is replayable, and the same graph improves itself over time.
+
+The two categories don't compete. Agents execute. OpenExpertise orchestrates, persists, and evolves.
+
+---
+
 ## Verified end-to-end (not just unit-tested)
 
 Every built-in example has been smoke-run against **real APIs** — not just mocks. Three real framework bugs surfaced by the live runs and all three were fixed + regression-tested before this README was written.
