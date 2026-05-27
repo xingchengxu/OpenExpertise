@@ -257,7 +257,41 @@ export default defineConfig({
         {
           text: 'Cookbook',
           collapsed: false,
-          items: [{ text: 'Recipes index', link: '/cookbook/' }],
+          items: [
+            { text: 'Recipes index', link: '/cookbook/' },
+            {
+              text: 'Control flow',
+              collapsed: false,
+              items: [
+                { text: 'Fan-out with concurrency', link: '/cookbook/fan-out-with-concurrency' },
+                { text: 'Branch by feature flag', link: '/cookbook/branch-by-feature-flag' },
+                { text: 'Retry with backoff', link: '/cookbook/retry-with-backoff' },
+                { text: 'Nested experiences', link: '/cookbook/nested-experiences' },
+              ],
+            },
+            {
+              text: 'State & output',
+              collapsed: false,
+              items: [
+                { text: 'Merge strategies', link: '/cookbook/merge-strategies' },
+                { text: 'Structured output schemas', link: '/cookbook/structured-output-schemas' },
+              ],
+            },
+            {
+              text: 'Running & recovery',
+              collapsed: false,
+              items: [{ text: 'Resume from cache', link: '/cookbook/resume-from-cache' }],
+            },
+            {
+              text: 'Multi-provider & integration',
+              collapsed: false,
+              items: [
+                { text: 'CLI agent with file edits', link: '/cookbook/cli-agent-with-edits' },
+                { text: 'Hybrid LLM routing', link: '/cookbook/hybrid-llm-routing' },
+                { text: 'oe-mcp as server', link: '/cookbook/mcp-as-server' },
+              ],
+            },
+          ],
         },
       ],
       '/use-cases/': [
