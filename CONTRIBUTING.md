@@ -17,7 +17,7 @@ pnpm -r build
 pnpm test            # 265 tests; expect green on main
 ```
 
-Node 20.x or newer (Node 22 / 24 / 26 are tested in CI). `better-sqlite3` requires a working native build toolchain on first install.
+Node 20.x or newer (Node 20 / 22 / 24 are tested in CI). `better-sqlite3` requires a working native build toolchain on first install.
 
 ## The spec → plan → execute rhythm
 

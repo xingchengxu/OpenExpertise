@@ -1,6 +1,6 @@
 # Lessons — hard-won gotchas from V1 development
 
-These are recorded inline in `docs/superpowers/overnight-progress.md` and worth surfacing here.
+A short list of recurring mistakes when authoring OpenExpertise experiences. Surface them to the LLM up front so it doesn't relearn them on every generation.
 
 ## State schema enforcement is strict
 

@@ -42,7 +42,7 @@ oe --version
 ```
 
 If `oe` is not on PATH, point the user at the OpenExpertise repo and tell them
-to either install the CLI (`npm i -g @openexpertise/cli`) or run via the
+to either install the CLI (`npm install -g @openexpertise/cli`) or run via the
 workspace (`node packages/cli/dist/bin.js`).
 
 ---

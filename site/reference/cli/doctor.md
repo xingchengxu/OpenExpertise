@@ -140,7 +140,7 @@ The current directory is not writable. Either:
 
 ### `✗ @openexpertise/core importable: import failed: Cannot find module ...`
 
-The workspace has not been built. Run `pnpm install && pnpm -r build` from the repo root. If you are using the global npm install, ensure you are on a compatible version: `npm i -g @openexpertise/cli`.
+The workspace has not been built. Run `pnpm install && pnpm -r build` from the repo root. If you are using the global npm install, ensure you are on a compatible version: `npm install -g @openexpertise/cli`.
 
 ## See also
 

@@ -459,11 +459,17 @@ The response body is parsed as JSON. If the response is a JSON array, the rows a
 ```yaml
 source:
   type: mcp-resource
-  # ... fields TBD
+  server: '<mcp-server-name>'
+  uri: '<resource-uri>'
 ```
 
+| Field    | Type     | Required | Notes                                           |
+| -------- | -------- | -------- | ----------------------------------------------- |
+| `server` | `string` | ✓        | The MCP server identifier to read from.         |
+| `uri`    | `string` | ✓        | Resource URI as understood by the named server. |
+
 ::: warning Not implemented in V1
-`mcp-resource` sources are defined in the schema but not yet implemented. Using this source type will throw at runtime.
+`mcp-resource` sources are defined in the schema but not yet wired to a dispatcher. Declaring one validates clean (`oe validate` passes), but running a flow that contains one will throw at runtime. Planned for a later 0.x release.
 :::
 
 ---
