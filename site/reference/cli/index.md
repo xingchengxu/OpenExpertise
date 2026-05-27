@@ -5,19 +5,25 @@ description: Complete reference for the oe binary — every command, every flag.
 
 # CLI reference
 
-The `oe` binary is the primary interface to OpenExpertise. Until the package is published to npm, invoke it directly:
+The `oe` binary is the primary interface to OpenExpertise. Install once:
 
 ```bash
-node packages/cli/dist/bin.js <command> [options]
+npm install -g @openexpertise/cli
 ```
 
-After `npm install -g @openexpertise/cli` (post-publish):
+Then use:
 
 ```bash
 oe <command> [options]
 ```
 
-All examples on this page use the short `oe` form for brevity.
+When developing from source (after `pnpm -r build`), you can also invoke via:
+
+```bash
+node packages/cli/dist/bin.js <command> [options]
+```
+
+All examples on this page use the short `oe` form.
 
 ## Verbs at a glance
 

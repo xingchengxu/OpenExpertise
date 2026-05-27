@@ -37,7 +37,7 @@ features:
     details: <code>oe evolve &lt;run-id&gt;</code> reads the events + state diff and proposes graph upgrades as <code>git apply</code>-ready diffs. The author → run → evolve loop closes.
   - icon: 🔗
     title: Two-way agentic-CLI integration
-    details: Outbound — delegate a node to Claude Code / Codex / Gemini. Inbound — <code>oe-mcp</code> exposes 5 OE tools so the same CLIs can run experiences from their own sessions.
+    details: Outbound — delegate a node to Claude Code / Codex / Gemini. Inbound — <code>oe-mcp</code> exposes 6 OE tools so the same CLIs can run experiences from their own sessions.
   - icon: ⚡
     title: Parallel + 429-aware
     details: <code>--concurrency N</code> runs independent nodes (and <code>for_each</code> iterations) in parallel. Both Anthropic and OpenAI clients retry on HTTP 429 with exponential backoff.
@@ -59,9 +59,9 @@ features:
 </style>
 
 <div class="tag-row">
-  <span class="pill pill-ok">227 tests</span>
+  <span class="pill pill-ok">265 tests</span>
   <span class="pill pill-ok">15 packages</span>
-  <span class="pill pill-ok">11 examples</span>
+  <span class="pill pill-ok">12 examples</span>
   <span class="pill pill-ok">MIT licensed</span>
   <span class="pill pill-ok">Node 20 / 22 / 24</span>
   <span class="pill pill-ok">live-API verified</span>
@@ -97,11 +97,8 @@ If your team has a SOP that someone has to follow every Monday morning — code 
 ## The 60-second story
 
 ```bash
-git clone https://github.com/xingchengxu/OpenExpertise && cd OpenExpertise
-pnpm install && pnpm -r build
-
 export ANTHROPIC_API_KEY=sk-...
-node packages/cli/dist/bin.js run examples/review-branch --tui
+oe run examples/review-branch --tui
 ```
 
 Three reviewers (`bugs` / `perf` / `tests`) fan out over a Python diff. They find a missing null-check, a missing test, and an unclosed cursor — but they **miss the SQL injection**.
@@ -115,7 +112,7 @@ Three reviewers (`bugs` / `perf` / `tests`) fan out over a Python diff. They fin
 Now ask the evolution advisor what's missing:
 
 ```bash
-node packages/cli/dist/bin.js evolve run-2026-05-26-a1b2c3
+oe evolve run-2026-05-26-a1b2c3
 # → wrote .openexpertise/evolution/run-2026-05-26-a1b2c3.md
 #   proposal: "Add `security` dimension — default reviewers focus on
 #              logic/tests; injection bugs need a dedicated reviewer."
@@ -191,8 +188,9 @@ One DAG, three vendors, shared SQLite state, replayable event log. **37s real wa
 | [`tri-cli-orchestration`](/examples/tri-cli-orchestration) ★ | Claude → Codex → Gemini in one DAG                                | `cli-agent` ×3                 |
 | [`deep-research`](/examples/deep-research)                   | Multi-source research with cross-referencing                      | `agent` fan-in                 |
 | [`systematic-debugging`](/examples/systematic-debugging)     | Hypothesize → localize → fix → verify loop                        | `tool` + `agent`               |
+| [`brainstorming`](/examples/brainstorming)                   | Diverge → cluster → critique → synthesize top 3                   | `cli-agent` fan-out + `agent`  |
 
-All 11 examples ship with mocked-LLM e2e tests so the structure is verifiable without API keys.
+All 12 examples ship with mocked-LLM e2e tests so the structure is verifiable without API keys.
 
 ---
 

@@ -27,7 +27,7 @@ Or:
 
 ## Environment
 
-- **OpenExpertise version:** (output of `node packages/cli/dist/bin.js --version` or `npm view @openexpertise/cli version`)
+- **OpenExpertise version:** (output of `oe --version` or `npm view @openexpertise/cli version`)
 - **Node version:** (output of `node --version`)
 - **OS:** macOS / Linux / Windows version
 - **CLI agents in use:** claude-code / codex / gemini / none

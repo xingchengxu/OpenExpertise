@@ -28,13 +28,13 @@ packages/cli build: Done
 ```
 
 ::: tip
-There's no need to install OpenExpertise globally yet — until npm publish lands, run via `node packages/cli/dist/bin.js`. After publish you'll be able to `npm i -g @openexpertise/cli` and use `oe` directly.
+You can also use `npm install -g @openexpertise/cli` and run `oe` directly without cloning the repo. Clone + build is for developing or hacking on the runtime itself.
 :::
 
 ## Run hello-tool — no API key required
 
 ```bash
-node packages/cli/dist/bin.js run examples/hello-tool
+oe run examples/hello-tool
 ```
 
 You should see:
@@ -69,7 +69,7 @@ That's the persistent state. Run it again — same output, plus a new run-id.
 
 ```bash
 RUN_ID=$(ls examples/hello-tool/.openexpertise/runs/ | head -1 | sed 's/.jsonl//')
-node packages/cli/dist/bin.js inspect $RUN_ID --experience examples/hello-tool
+oe inspect $RUN_ID --experience examples/hello-tool
 ```
 
 This dumps the event log (sorted by `ts`):
@@ -88,17 +88,17 @@ Every event is structured JSON. The same log replays the run for debugging or au
 ## Query the state
 
 ```bash
-node packages/cli/dist/bin.js state --experience examples/hello-tool
+oe state --experience examples/hello-tool
 # → full state snapshot
 
-node packages/cli/dist/bin.js state greeting --experience examples/hello-tool
+oe state greeting --experience examples/hello-tool
 # → just the greeting field
 ```
 
 ## Run with the TUI
 
 ```bash
-node packages/cli/dist/bin.js run examples/hello-tool --tui
+oe run examples/hello-tool --tui
 ```
 
 You get an ink-rendered dashboard showing each node's status. For one-node `hello-tool` it's modest — try it on [`examples/review-branch`](/examples/review-branch) for the full htop-grade view.
@@ -119,6 +119,6 @@ You get an ink-rendered dashboard showing each node's status. For one-node `hell
 
 **ESM import errors.** OpenExpertise is fully ESM (`"type": "module"` in every package). Don't `require()` any of it from CommonJS.
 
-**Workspace links.** If something complains about `@openexpertise/...` not being found, you skipped `pnpm install` or you're outside the repo root. The CLI binary resolves workspace deps relative to the repo, so it must be invoked from inside the cloned tree (until npm publish).
+**Workspace links.** If something complains about `@openexpertise/...` not being found when running from the cloned repo, you skipped `pnpm install` or you're outside the repo root. The CLI binary resolves workspace deps relative to the repo, so it must be invoked from inside the cloned tree.
 
 → Continue with [Your first experience](/guide/first-experience).

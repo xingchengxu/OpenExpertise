@@ -129,7 +129,7 @@ Say a friendly hello to {{name}}. Keep it short — one sentence.
 ```
 
 ```bash
-node packages/cli/dist/bin.js run examples/agent-echo
+oe run examples/agent-echo
 # finalState: { greeting: "Hello, World! ..." }
 ```
 

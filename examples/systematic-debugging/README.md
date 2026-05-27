@@ -31,7 +31,7 @@ The skill is excellent. What OE adds:
 The default `args` in `experience.yaml` point at `./fixtures/buggy_repo`, which has a known off-by-one in `validateUserId`. Run it:
 
 ```bash
-node packages/cli/dist/bin.js run examples/systematic-debugging --tui
+oe run examples/systematic-debugging --tui
 ```
 
 Expected wall time: ~2–4 minutes. The fix Claude Code lands should change `id < MAX_USER_ID` to `id > MAX_USER_ID` (or equivalent), the verify_fix tool re-runs the tests, and `verification_status` reads `passed`.
@@ -39,9 +39,9 @@ Expected wall time: ~2–4 minutes. The fix Claude Code lands should change `id 
 After the run:
 
 ```bash
-node packages/cli/dist/bin.js state diagnosis
-node packages/cli/dist/bin.js state fix_proposal
-node packages/cli/dist/bin.js state verification_status   # should print 'passed'
+oe state diagnosis
+oe state fix_proposal
+oe state verification_status   # should print 'passed'
 ```
 
 ## Run on your own repo
@@ -68,7 +68,7 @@ Override the args in `experience.yaml`:
 After ~5 real runs:
 
 ```bash
-node packages/cli/dist/bin.js evolve <recent-run-id>
+oe evolve <recent-run-id>
 ```
 
 Typical advisor proposals:

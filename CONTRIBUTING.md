@@ -58,7 +58,7 @@ A PR is ready to merge when:
 
 Use the **Bug report** issue template. Minimum bar:
 
-- OpenExpertise version (output of `git rev-parse HEAD` or `node packages/cli/dist/bin.js --version`).
+- OpenExpertise version (output of `oe --version` or `git rev-parse HEAD` when developing from source).
 - Node version (`node --version`).
 - OS.
 - Reproduction: the `experience.yaml` snippet + the command you ran + the actual vs expected output.

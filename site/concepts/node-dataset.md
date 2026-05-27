@@ -191,7 +191,7 @@ export default async function aggregate(args) {
 ```
 
 ```bash
-node packages/cli/dist/bin.js run examples/dataset-aggregate
+oe run examples/dataset-aggregate
 # finalState: { rows: [...], total: 123.45 }
 ```
 

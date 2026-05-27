@@ -110,14 +110,14 @@ oe doctor --json
 
 ```yaml
 - name: Check OE environment
-  run: node packages/cli/dist/bin.js doctor
+  run: oe doctor
   # exits 0 only if Node >= 20, .openexpertise/ writable, and core importable
 ```
 
 ### Parse JSON in a script
 
 ```bash
-result=$(node packages/cli/dist/bin.js doctor --json)
+result=$(oe doctor --json)
 failed=$(echo "$result" | jq '.summary.failed')
 if [ "$failed" -gt 0 ]; then
   echo "Environment check failed"

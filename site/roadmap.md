@@ -20,7 +20,7 @@ Shipped:
 - **`oe ultra` LLM authoring** — single-keyword YAML synthesis with tool stubs + prompt files
 - **MCP server** — `oe-mcp` exposes 6 tools for Claude Desktop / Cursor / other MCP clients
 - **TUI dashboard** — htop-grade live render with per-node activity, tokens, status glyphs
-- **11 examples** + 12th (brainstorming) — all with mocked-LLM e2e tests
+- **12 examples** — all with mocked-LLM e2e tests
 - **265 tests passing across 64 test files**
 - **Multi-LLM providers** — Anthropic + OpenAI SDKs; OpenAI-protocol redirect for vLLM/Ollama/LM Studio
 - **cli-agent providers** — Claude Code, Codex, Gemini subprocess integration with `--skip-trust` Gemini handling

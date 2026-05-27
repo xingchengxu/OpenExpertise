@@ -48,7 +48,7 @@ nodes, and evolve the graph after each run.
   and AJV schema validation against parsed JSON.
 - Supported providers: `claude-code`, `codex`, `gemini`.
 - Two-way: outbound (delegate node to a CLI agent) AND inbound via `oe-mcp`
-  (5 MCP tools exposed so external agents can run experiences from their sessions).
+  (6 MCP tools exposed so external agents can run experiences from their sessions).
 
 #### Authoring
 
@@ -62,7 +62,7 @@ nodes, and evolve the graph after each run.
 - Ink-based live dashboard: phase progress, per-node status, live token stream,
   activity feed of recent events. Toggle with `--tui`.
 
-#### Built-in examples (11)
+#### Built-in examples (12)
 
 - `hello-tool` — smallest possible flow.
 - `dataset-aggregate` — CSV → aggregate.
@@ -75,17 +75,17 @@ nodes, and evolve the graph after each run.
 - `tri-cli-orchestration` ★ — Claude → Codex → Gemini in one DAG.
 - `deep-research` — Claude Code WebSearch + Gemini Google Search → cited synthesis.
 - `systematic-debugging` — translates the superpowers `systematic-debugging` skill into a YAML flow.
+- `brainstorming` — translates the superpowers `brainstorming` skill into a YAML flow.
 
 #### Tests
 
-- 227 passing across 58 test files. Every example ships a mocked-LLM e2e test.
+- 265 passing across 64 test files. Every example ships a mocked-LLM e2e test.
 
 #### Docs
 
 - README with 60-second demo, comparison vs LangGraph/CrewAI/Anthropic workflows/Claude Code.
 - Per-example README with run instructions and ASCII pipeline diagram.
 - `docs/comparison.md` deep-dive vs alternatives.
-- `docs/superpowers/` design diaries (one per major plan: 1-6 and A-F).
 - CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md.
 
 ### Acknowledgements

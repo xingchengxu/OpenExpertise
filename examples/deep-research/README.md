@@ -39,7 +39,7 @@ If you only have one of the two CLIs, the planner can be steered toward that ven
 
 ```bash
 # Edit fixtures/question.json to your question, then:
-node packages/cli/dist/bin.js run examples/deep-research --tui --concurrency 4
+oe run examples/deep-research --tui --concurrency 4
 ```
 
 Expect ~3–8 minutes wall time depending on how many sub-questions the planner emits and how rate-limited the CLIs are. With `--concurrency 4`, the `search_claude` and `search_gemini` fan-outs run their iterations in parallel up to 2-wide each (per node-level `for_each.concurrency: 2`), and the two search nodes themselves run as siblings.
@@ -48,10 +48,10 @@ Expect ~3–8 minutes wall time depending on how many sub-questions the planner 
 
 ```bash
 # Pretty-print the final synthesis
-node packages/cli/dist/bin.js state cross_referenced
+oe state cross_referenced
 
 # Or replay the full event log (sorted by ts; parallel-safe)
-node packages/cli/dist/bin.js inspect <run-id>
+oe inspect <run-id>
 ```
 
 ## Evolve

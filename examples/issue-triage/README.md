@@ -18,7 +18,7 @@ Demonstrates: `tool → agent` chaining, **`when:` conditional edges** to skip w
 
 ```bash
 export ANTHROPIC_API_KEY=sk-...
-node packages/cli/dist/bin.js run examples/issue-triage --tui
+oe run examples/issue-triage --tui
 ```
 
 Replace `fixtures/issue.json` with a real GitHub issue payload, or replace `load_issue.mjs` with a call to the GitHub REST API.

@@ -119,7 +119,7 @@ export default async function greet(args) {
 ```
 
 ```bash
-node packages/cli/dist/bin.js run examples/hello-tool
+oe run examples/hello-tool
 # finalState: { greeting: "hello, World" }
 ```
 

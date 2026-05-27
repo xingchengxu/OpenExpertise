@@ -109,7 +109,7 @@ Apply the one-line YAML patch from the proposal and re-run:
 | **6 node kinds in one graph**       | `tool` (deterministic code) · `agent` (LLM + structured output) · `skill` (SKILL.md packages) · `dataset` (file / SQLite / HTTP) · `experience` (nested) · `cli-agent` (delegate to Claude Code / Codex / Gemini) |
 | **Persistent SQLite state**         | Every node's writes land in a typed blackboard. `oe state findings` works hours later. Resume with `oe resume <run-id>` and replay cached steps.                                                                  |
 | **Self-improving**                  | `oe evolve <run-id>` reads the events + state diff and proposes graph upgrades as `git apply`-ready diffs. The author → run → evolve loop closes.                                                                 |
-| **Two-way agentic-CLI integration** | **Outbound:** delegate a node to Claude Code / Codex / Gemini. **Inbound:** `oe-mcp` exposes 5 OE tools so the same CLIs can run experiences from inside their own sessions.                                      |
+| **Two-way agentic-CLI integration** | **Outbound:** delegate a node to Claude Code / Codex / Gemini. **Inbound:** `oe-mcp` exposes 6 OE tools so the same CLIs can run experiences from inside their own sessions.                                      |
 
 ---
 
@@ -247,6 +247,7 @@ node packages/cli/dist/bin.js run examples/hello-tool
 | [`tri-cli-orchestration`](examples/tri-cli-orchestration/) ★ | Claude → Codex → Gemini in one DAG. The headline cross-vendor demo.                                                | `cli-agent` ×3                    |
 | [`deep-research`](examples/deep-research/)                   | Multi-vendor research: Claude Code WebSearch + Gemini Google Search → cited synthesis.                             | `tool` + `agent` + `cli-agent` ×2 |
 | [`systematic-debugging`](examples/systematic-debugging/)     | The superpowers `systematic-debugging` skill as a YAML flow. Hypothesize → verify → fix via Claude Code → re-test. | `tool` ×2 + `agent` + `cli-agent` |
+| [`brainstorming`](examples/brainstorming/)                   | The superpowers `brainstorming` skill as a YAML flow. Diverge → cluster → critique → synthesize top 3.             | `tool` + `cli-agent` ×2 + `agent` |
 
 ---
 
@@ -337,7 +338,7 @@ Then inside any Claude Code session:
 > _"Use oe_run on examples/review-branch"_
 > _"Use oe_evolve on the last run id"_
 
-Five MCP tools are exposed: `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `oe_evolve`, `oe_ultra`. Reference: [`docs/mcp-server.md`](docs/mcp-server.md).
+Six MCP tools are exposed: `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `oe_evolve`, `oe_ultra`. Reference: [`docs/mcp-server.md`](docs/mcp-server.md).
 
 ---
 
@@ -375,18 +376,18 @@ Independent DAG nodes (and `for_each` iterations whose `concurrency: N` is set) 
 
 In-repo quick references:
 
-| Doc                                                                            | What's inside                                                              |
-| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| [Docs site `/guide`](https://xingchengxu.github.io/OpenExpertise/guide/)       | Hands-on path: install → first experience → authoring → running → evolving |
-| [Docs site `/examples`](https://xingchengxu.github.io/OpenExpertise/examples/) | Walkthroughs for all 12 shipped examples + gallery                         |
-| [Docs site `/cookbook`](https://xingchengxu.github.io/OpenExpertise/cookbook/) | 10 self-contained recipes — copy/paste YAML for common patterns            |
-| [Docs site `/compare`](https://xingchengxu.github.io/OpenExpertise/compare/)   | vs LangGraph / CrewAI / Mastra / Inngest / Workflows / Claude Code         |
-| [`docs/cli-agent.md`](docs/cli-agent.md)                                       | `cli-agent` node kind: providers, command shapes, JSON-mode caveats        |
-| [`docs/mcp-server.md`](docs/mcp-server.md)                                     | MCP server tools + per-CLI registration                                    |
-| [`docs/ultraexpertise.md`](docs/ultraexpertise.md)                             | Auto-SOP authoring — `oe ultra`, slash command, MCP `oe_ultra`             |
-| [`docs/registry.md`](docs/registry.md)                                         | `oe install` / `oe registry` and how to submit your experience             |
-| [Docs site `/concepts`](https://xingchengxu.github.io/OpenExpertise/concepts/) | Mental model: code-as-law, state, dispatchers, control flow, 6 node kinds  |
-| [Docs site `/reference`](https://xingchengxu.github.io/OpenExpertise/reference/) | CLI command pages + API surface + full YAML schema                       |
+| Doc                                                                              | What's inside                                                              |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| [Docs site `/guide`](https://xingchengxu.github.io/OpenExpertise/guide/)         | Hands-on path: install → first experience → authoring → running → evolving |
+| [Docs site `/examples`](https://xingchengxu.github.io/OpenExpertise/examples/)   | Walkthroughs for all 12 shipped examples + gallery                         |
+| [Docs site `/cookbook`](https://xingchengxu.github.io/OpenExpertise/cookbook/)   | 10 self-contained recipes — copy/paste YAML for common patterns            |
+| [Docs site `/compare`](https://xingchengxu.github.io/OpenExpertise/compare/)     | vs LangGraph / CrewAI / Mastra / Inngest / Workflows / Claude Code         |
+| [`docs/cli-agent.md`](docs/cli-agent.md)                                         | `cli-agent` node kind: providers, command shapes, JSON-mode caveats        |
+| [`docs/mcp-server.md`](docs/mcp-server.md)                                       | MCP server tools + per-CLI registration                                    |
+| [`docs/ultraexpertise.md`](docs/ultraexpertise.md)                               | Auto-SOP authoring — `oe ultra`, slash command, MCP `oe_ultra`             |
+| [`docs/registry.md`](docs/registry.md)                                           | `oe install` / `oe registry` and how to submit your experience             |
+| [Docs site `/concepts`](https://xingchengxu.github.io/OpenExpertise/concepts/)   | Mental model: code-as-law, state, dispatchers, control flow, 6 node kinds  |
+| [Docs site `/reference`](https://xingchengxu.github.io/OpenExpertise/reference/) | CLI command pages + API surface + full YAML schema                         |
 
 ---
 

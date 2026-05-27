@@ -27,7 +27,7 @@ Claude Code calls `oe_validate`, then `oe_run`, then reads the `final_state` fro
 
 ## How it works
 
-The MCP server (`packages/mcp-server/src/server.ts`) is a stdio MCP server built on `@modelcontextprotocol/sdk`. It exposes **6 tools** (the docs say 5, but the server ships `oe_ultra` as a sixth):
+The MCP server (`packages/mcp-server/src/server.ts`) is a stdio MCP server built on `@modelcontextprotocol/sdk`. It exposes **6 tools**:
 
 | Tool          | Input                               | Output                                                |
 | ------------- | ----------------------------------- | ----------------------------------------------------- |

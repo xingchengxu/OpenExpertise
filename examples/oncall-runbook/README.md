@@ -16,7 +16,7 @@ Demonstrates: tool → agent fan-out (`for_each`) → sequential agents → stru
 
 ```bash
 export ANTHROPIC_API_KEY=sk-...   # or OPENAI_API_KEY=...
-node packages/cli/dist/bin.js run examples/oncall-runbook --tui
+oe run examples/oncall-runbook --tui
 ```
 
 Replace `fixtures/incident.json` with a real PagerDuty payload to triage a different incident, or replace `fetch_incident.mjs` with a call to the PagerDuty API.

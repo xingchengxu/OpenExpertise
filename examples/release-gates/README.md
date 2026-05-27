@@ -17,7 +17,7 @@ Demonstrates: **mixing `tool` + `cli-agent` + `agent` in one experience**, four 
 ```bash
 export ANTHROPIC_API_KEY=sk-...           # for the `score` agent
 # `claude` CLI must be on PATH and authenticated for `security_scan`
-node packages/cli/dist/bin.js run examples/release-gates --tui
+oe run examples/release-gates --tui
 ```
 
 Replace `fixtures/diff.txt` with the actual unified diff of your release branch.

@@ -34,9 +34,7 @@ pnpm --filter @openexpertise/cli build
 
 ---
 
-## After npm publish
-
-Once `@openexpertise/cli` is published:
+## Global install (recommended for production)
 
 ```bash
 npm install -g @openexpertise/cli
@@ -112,7 +110,7 @@ The `.openexpertise/` directory is already in `.gitignore`. Confirm your experie
 - name: Run experience
   env:
     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-  run: node packages/cli/dist/bin.js run examples/review-branch
+  run: oe run examples/review-branch
 ```
 
 ---
@@ -197,7 +195,7 @@ Point the OpenAI client at any OpenAI-compatible endpoint:
 ```bash
 export OPENAI_API_KEY=anything-the-server-accepts
 export OPENAI_BASE_URL=http://your-vllm-host:8000/v1
-node packages/cli/dist/bin.js run examples/oncall-runbook --llm openai
+oe run examples/oncall-runbook --llm openai
 ```
 
 No code change needed. The `@openexpertise/llm-openai` client passes `OPENAI_BASE_URL` directly to the OpenAI SDK.

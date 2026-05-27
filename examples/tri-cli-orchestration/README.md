@@ -26,7 +26,7 @@ If any are missing, install them per their vendors' instructions and run them on
 ## Run
 
 ```bash
-node packages/cli/dist/bin.js run examples/tri-cli-orchestration --tui
+oe run examples/tri-cli-orchestration --tui
 ```
 
 The TUI shows each node's status, current activity (`spawning claude-code`, `spawning codex`, `spawning gemini`), and elapsed time per stage. Real wall-clock time for one round trip: roughly 30–60 seconds end-to-end (three sequential LLM calls).

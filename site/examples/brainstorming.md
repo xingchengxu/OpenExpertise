@@ -49,7 +49,7 @@ Phases: `seed` → `diverge` → `converge` → `critique` → `synthesize`.
 ```bash
 # Uses the bundled seed: "How should an open-source dev-tools project
 # reduce time-to-first-successful-run for new users?"
-node packages/cli/dist/bin.js run examples/brainstorming --tui
+oe run examples/brainstorming --tui
 ```
 
 The `claude` CLI must be on PATH and authenticated. `ANTHROPIC_API_KEY` (or `OPENAI_API_KEY`) must be set for the `cluster` and `synthesize` agent nodes. Expected wall time: 3–5 minutes.
@@ -57,9 +57,9 @@ The `claude` CLI must be on PATH and authenticated. `ANTHROPIC_API_KEY` (or `OPE
 After the run:
 
 ```bash
-node packages/cli/dist/bin.js state picks           # top 3 + reasoning + next actions
-node packages/cli/dist/bin.js state clusters        # thematic clusters
-node packages/cli/dist/bin.js state raw_ideas       # all 15 ideas across 3 angles
+oe state picks           # top 3 + reasoning + next actions
+oe state clusters        # thematic clusters
+oe state raw_ideas       # all 15 ideas across 3 angles
 ```
 
 ## What happens, step by step

@@ -27,7 +27,7 @@ Default seed asks: _"How should an open-source dev-tools project reduce time-to-
 ## Run on the default seed
 
 ```bash
-node packages/cli/dist/bin.js run examples/brainstorming --tui
+oe run examples/brainstorming --tui
 ```
 
 Expected wall time: ~3-5 minutes.
@@ -35,9 +35,9 @@ Expected wall time: ~3-5 minutes.
 After:
 
 ```bash
-node packages/cli/dist/bin.js state picks            # the top 3 + reasoning + next actions
-node packages/cli/dist/bin.js state clusters         # the 3-5 thematic clusters
-node packages/cli/dist/bin.js state raw_ideas        # all 15 raw ideas across 3 angles
+oe state picks            # the top 3 + reasoning + next actions
+oe state clusters         # the 3-5 thematic clusters
+oe state raw_ideas        # all 15 raw ideas across 3 angles
 ```
 
 ## Run on your own topic

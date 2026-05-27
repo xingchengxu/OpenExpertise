@@ -58,7 +58,7 @@ If you'd reuse the same prompt + schema across multiple experiences, package it 
 
 **Yes for `tool` and `dataset` nodes.** You can build a deterministic-only workflow (the [`hello-tool`](/examples/hello-tool) and [`dataset-aggregate`](/examples/dataset-aggregate) examples don't touch an LLM).
 
-For `agent` / `skill` / `cli-agent` nodes you need a configured provider (`ANTHROPIC_API_KEY`, or `OPENAI_API_KEY` + `OPENAI_BASE_URL`, or the CLI installed locally). The 11 examples ship with mocked-LLM e2e tests that exercise the structure without burning real tokens.
+For `agent` / `skill` / `cli-agent` nodes you need a configured provider (`ANTHROPIC_API_KEY`, or `OPENAI_API_KEY` + `OPENAI_BASE_URL`, or the CLI installed locally). The 12 examples ship with mocked-LLM e2e tests that exercise the structure without burning real tokens.
 
 ### Can I run experiences offline?
 
@@ -78,7 +78,7 @@ If you want to **change** the graph, that's `oe evolve` — but it writes a mark
 
 ### Why `pnpm` specifically?
 
-`@openexpertise/*` ships as a pnpm-workspace monorepo with internal `workspace:*` links. `pnpm install` resolves them transparently. You can use `npm` / `yarn` for downstream consumers post-publish, but for **developing inside the repo**, pnpm is required.
+`@openexpertise/*` ships as a pnpm-workspace monorepo with internal `workspace:*` links. `pnpm install` resolves them transparently. Downstream consumers installing from npm can use `npm` / `yarn`, but for **developing inside the repo**, pnpm is required.
 
 If `pnpm install` fails with `ERR_PNPM_UNSUPPORTED_ENGINE`, you need `pnpm@9+`. `npm i -g pnpm@9`.
 

@@ -12,7 +12,7 @@ Both `claude` and `codex` must be on `PATH` and authenticated. Run `claude` and 
 ## Run
 
 ```bash
-node packages/cli/dist/bin.js run examples/cli-orchestration
+oe run examples/cli-orchestration
 ```
 
 The topic is set via the `summarize` node's static `args.topic` in `experience.yaml`. Edit that line to point at a different topic. (Run-level `--args` are not auto-propagated into node bundles in V1; for dynamic topics, replace `args` with a seed `tool` node that writes `topic` to state.)
