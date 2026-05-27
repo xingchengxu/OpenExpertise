@@ -1,93 +1,66 @@
 # Morning checklist — v0.1.0 publish
 
-> Written overnight 2026-05-27. Branch: `feat/overnight-launch-prep` (22 commits ahead of `main`).
-> All gates green at commit time: **265 tests passing**, typecheck clean, lint clean, format clean, site builds, monorepo builds.
+> Updated 2026-05-27 after merging `feat/overnight-launch-prep` into `main`. The site agent + waves A/B/C added another ~25 commits to `main`.
+> All 9 pre-publish gates green at the last smoke run: **265 tests passing**, typecheck clean, lint clean, format clean, site builds, monorepo builds, version sync across 15 packages, `publishConfig.access=public` everywhere, no `workspace:*` leaks in dry-run tarballs.
 
 This file is your runbook. Work top-down.
 
 ---
 
-## 1. Wake-up sanity check (5 min)
+## 1. Wake-up sanity check (1 command)
 
 ```bash
 cd /Users/xuxingcheng/SHLAB/github/OpenExpertise
-git status                                  # should be clean (or only untracked site WIP)
-git log --oneline main..HEAD                # 22+ commits expected
-pnpm clean && pnpm install && pnpm -r build # rebuild from scratch
+./scripts/pre-publish-smoke.sh
+```
+
+That runs all 9 gates in order and exits non-zero on the first failure. Expected: `All pre-publish gates green.`
+
+If you want the old longhand:
+
+```bash
+pnpm clean && pnpm install && pnpm -r build
 pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
 ```
 
-**Expected:** `Tests 265 passed (265)` (or higher if anything was added overnight).
+**Expected:** `Tests 265 passed (265)`.
 
 If anything fails, stop and read the error before continuing. Don't paper over.
 
 ---
 
-## 2. Decide what to do with `feat/overnight-launch-prep`
+## 2. Decide whether to push `main` first or publish first
 
-Two paths:
+`feat/overnight-launch-prep` is already merged into local `main`. Two paths:
 
-### Path A — Merge to `main` locally then publish
-
-```bash
-git checkout main
-git merge --no-ff feat/overnight-launch-prep -m "Merge branch 'feat/overnight-launch-prep'"
-
-# Optional safety: rerun the gauntlet on main
-pnpm clean && pnpm install && pnpm -r build
-pnpm test
-```
-
-### Path B — Push the branch, open a PR, review, then merge
+### Path A — Push `main` then publish (recommended)
 
 ```bash
-git push -u origin feat/overnight-launch-prep
-gh pr create --base main --head feat/overnight-launch-prep \
-  --title "v0.1.0 launch prep — package metadata + CHANGELOG + 12th example + registry + docs site" \
-  --body "$(cat <<'BODY'
-## Summary
-
-22 commits of pre-publish prep. See \`docs/superpowers/overnight-progress.md\` Plan G for the full breakdown. Highlights:
-
-- All 15 publishable packages have full npm metadata (description / keywords / author / repository / bugs / homepage)
-- Brand new \`oe doctor\` / \`oe install\` / \`oe registry\` / \`oe installed\` commands
-- 12th flagship example: \`brainstorming\` (translates the superpowers brainstorming skill)
-- Lint: 16 \`any\` warnings → 0
-- CHANGELOG.md v0.1.0 entry consolidates Plans 1-6 + A-G
-- 10 runtime error messages rewritten with actionable WHAT/WHERE/HOW-TO-FIX hints
-- VitePress docs site with examples gallery + 12 example pages + concepts + reference + operations docs
-- GitHub Pages workflow for site auto-deploy
-
-## Test plan
-
-- [x] Tests: 227 baseline → 265 passing (+38)
-- [x] typecheck / lint / format / build all clean
-- [x] \`oe doctor\` smoke-runs on dev machine
-- [x] \`oe registry\` lists 5 curated experiences
-- [x] VitePress site builds
-- [ ] Manual smoke of \`oe install gh:xingchengxu/OpenExpertise --ref main\` (requires push first)
-BODY
-)"
+git push origin main             # publishes the merged commit to remote
+./scripts/pre-publish-smoke.sh   # re-verify after push (in case CI catches anything)
+pnpm publish -r --access public --no-git-checks
 ```
 
-**Recommendation:** Path A (merge locally) — fastest path to publish. PR is nice for archive but you've already reviewed by reading this file.
+### Path B — Publish first, then push (faster but riskier)
+
+```bash
+./scripts/pre-publish-smoke.sh
+pnpm publish -r --access public --no-git-checks
+git push origin main
+git tag -a v0.1.0 -m "OpenExpertise v0.1.0" && git push origin v0.1.0
+```
+
+If publish fails mid-way (e.g. one package errors out), some packages may be on npm but `main` doesn't have the corresponding tag. Path A avoids that ambiguity.
+
+Either path works — pick based on whether you want the git tag synchronized with the npm release (Path A) or want to fail fast on a bad tarball (Path B).
 
 ---
 
 ## 3. Publish-day checklist (the actual publish)
 
-The detailed checklist is at `docs/launch-checklist.md`. The TL;DR:
+The detailed checklist is at `docs/launch-checklist.md`. The TL;DR (and `scripts/pre-publish-smoke.sh` already does the sanity checks):
 
 ```bash
-# Sanity: every publishable package on 0.1.0
-for pkg in packages/*/package.json; do
-  node -e "console.log(require('./${pkg}').name + ' ' + require('./${pkg}').version)"
-done
-# Expect: every line ends with " 0.1.0"
-
-# Dry-run publish to inspect tarballs (no network writes)
-pnpm publish -r --dry-run --no-git-checks 2>&1 | tail -40
-
 # REAL PUBLISH — point of no return
 npm whoami                                  # confirm you're logged in
 pnpm publish -r --access public --no-git-checks
