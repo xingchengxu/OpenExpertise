@@ -30,7 +30,10 @@ export function resolveLLMProvider(opts: ResolveLLMProviderOpts): LLMProvider {
 }
 
 export function defaultModelFor(provider: LLMProvider): string {
-  return provider === 'anthropic' ? 'claude-sonnet-4-6' : 'gpt-4o-2024-11-20'
+  if (provider === 'anthropic') {
+    return process.env.OE_ANTHROPIC_MODEL ?? 'claude-sonnet-4-6'
+  }
+  return process.env.OE_OPENAI_MODEL ?? 'gpt-4o-2024-11-20'
 }
 
 export async function makeLLMClient(provider: LLMProvider): Promise<LLMClient> {
