@@ -52,6 +52,8 @@ oe demo                                # see pre-recorded runs of bundled exampl
 oe demo review-branch                  # preview the PR review flow + advisor's evolution proposal
 ```
 
+> **New to OpenExpertise?** Walk through the [30-minute "Your first experience" tutorial](https://xingchengxu.github.io/OpenExpertise/guide/first-experience) — by the end you'll have a tested, registry-submittable flow you built yourself.
+
 Pull any public GitHub repo with an `experience.yaml`:
 
 ```bash
