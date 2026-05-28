@@ -1,0 +1,58 @@
+[
+  {
+    "number": 142,
+    "title": "feat(scheduler): exponential backoff on 429 responses",
+    "author": "alice",
+    "merged_at": "2026-05-22T10:14:00Z",
+    "body": "Adds retry-with-backoff to the LLM client. Closes #138."
+  },
+  {
+    "number": 143,
+    "title": "fix(cli): oe state crashes when field is undefined",
+    "author": "bob",
+    "merged_at": "2026-05-22T15:02:00Z",
+    "body": "Use optional chaining on the state lookup path. Adds regression test."
+  },
+  {
+    "number": 144,
+    "title": "chore: bump @anthropic-ai/sdk to 0.42.0",
+    "author": "alice",
+    "merged_at": "2026-05-23T09:31:00Z",
+    "body": "Routine upgrade. Tests still pass."
+  },
+  {
+    "number": 145,
+    "title": "docs: README hero rewrite with animated demo",
+    "author": "carol",
+    "merged_at": "2026-05-23T14:50:00Z",
+    "body": "Replaces the static screenshot with an asciinema-generated SVG. Adds CI badge."
+  },
+  {
+    "number": 146,
+    "title": "refactor(dispatchers): extract common timeout handling",
+    "author": "bob",
+    "merged_at": "2026-05-24T11:11:00Z",
+    "body": "All three dispatcher kinds had duplicated 429-retry code. Lifted into core/retry.ts."
+  },
+  {
+    "number": 147,
+    "title": "feat(cli): oe inspect --html generates a self-contained report",
+    "author": "dave",
+    "merged_at": "2026-05-24T16:42:00Z",
+    "body": "Mermaid graph + timeline + state diff in a single .html. Pin to a PR."
+  },
+  {
+    "number": 148,
+    "title": "fix(tui): activity feed scrolls past the last event",
+    "author": "alice",
+    "merged_at": "2026-05-25T08:20:00Z",
+    "body": "Off-by-one in the Ink renderer's scroll buffer. Trivial."
+  },
+  {
+    "number": 149,
+    "title": "docs(cookbook): add retry-with-backoff recipe",
+    "author": "carol",
+    "merged_at": "2026-05-25T13:05:00Z",
+    "body": "Cross-links from the new on_error reference page. Companion to #142."
+  }
+]

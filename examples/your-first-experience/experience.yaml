@@ -1,0 +1,84 @@
+name: your-first-experience
+description: The canonical reference for /guide/first-experience — a weekly engineering digest. Loads recent PRs from a fixture → classifies each (fan-out) → synthesizes a 5-bullet digest → writes ./out/digest.md.
+version: 0.1.0
+
+state:
+  schema:
+    prs: { type: array, items: { type: object } }
+    classified: { type: array, items: { type: object }, merge: array_append }
+    digest: { type: object }
+    digest_path: { type: string }
+
+phases:
+  - { id: load }
+  - { id: classify }
+  - { id: synthesize }
+  - { id: save }
+
+graph:
+  nodes:
+    - id: load_prs
+      kind: tool
+      phase: load
+      impl: ./tools/load_prs.mjs
+      writes: [prs]
+
+    - id: classify_pr
+      kind: agent
+      phase: classify
+      prompt: ./prompts/classify.md
+      for_each: { source: $.prs, concurrency: 3 }
+      reads: [prs]
+      schema:
+        type: object
+        required: [classified]
+        properties:
+          classified:
+            type: array
+            items:
+              type: object
+              required: [number, category, summary]
+              properties:
+                number: { type: number }
+                category: { type: string, enum: [feature, fix, chore, refactor, docs] }
+                summary: { type: string }
+      writes: [classified]
+
+    - id: synthesize_digest
+      kind: agent
+      phase: synthesize
+      prompt: ./prompts/synthesize.md
+      reads: [classified]
+      schema:
+        type: object
+        required: [digest]
+        properties:
+          digest:
+            type: object
+            required: [headline, bullets, by_category]
+            properties:
+              headline: { type: string }
+              bullets:
+                type: array
+                items: { type: string }
+              by_category:
+                type: object
+                properties:
+                  feature: { type: number }
+                  fix: { type: number }
+                  chore: { type: number }
+                  refactor: { type: number }
+                  docs: { type: number }
+      writes: [digest]
+
+    - id: write_digest
+      kind: tool
+      phase: save
+      impl: ./tools/write_digest.mjs
+      reads: [digest, classified]
+      writes: [digest_path]
+
+  edges:
+    - { from: load_prs, to: classify_pr }
+    - { from: classify_pr, to: synthesize_digest }
+    - { from: synthesize_digest, to: write_digest }
