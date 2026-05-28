@@ -25,6 +25,12 @@ export interface UltraResult {
   synthesis: SynthesisOutput
 }
 
+export type PhaseEvent =
+  | { phase: 'analyze'; status: 'start' }
+  | { phase: 'analyze'; status: 'done'; duration_ms: number; result: AnalysisOutput }
+  | { phase: 'synthesize'; status: 'start' }
+  | { phase: 'synthesize'; status: 'done'; duration_ms: number; result: SynthesisOutput }
+
 export class UltraExpertise {
   private readonly ajv = new Ajv({ allErrors: true, strict: false })
   private readonly validateAnalysis = this.ajv.compile(ANALYSIS_SCHEMA)
@@ -98,11 +104,33 @@ export class UltraExpertise {
     taskDescription: string
     rootDir: string
     draftSlug?: string
+    stopAfterAnalyze?: boolean
+    onPhase?: (event: PhaseEvent) => void
   }): Promise<
-    UltraResult & WriteDraftResult & { validation: { valid: boolean; errors?: string[] } }
+    | (UltraResult & WriteDraftResult & { validation: { valid: boolean; errors?: string[] } })
+    | { analysis: AnalysisOutput; stopped: true }
   > {
+    const { onPhase } = opts
+
+    onPhase?.({ phase: 'analyze', status: 'start' })
+    const t0 = Date.now()
     const analysis = await this.analyze(opts.taskDescription)
+    onPhase?.({ phase: 'analyze', status: 'done', duration_ms: Date.now() - t0, result: analysis })
+
+    if (opts.stopAfterAnalyze) {
+      return { analysis, stopped: true }
+    }
+
+    onPhase?.({ phase: 'synthesize', status: 'start' })
+    const t1 = Date.now()
     const synthesis = await this.synthesize(opts.taskDescription, analysis)
+    onPhase?.({
+      phase: 'synthesize',
+      status: 'done',
+      duration_ms: Date.now() - t1,
+      result: synthesis,
+    })
+
     const slug = opts.draftSlug ?? slugify(analysis.name)
     const draftDir = join(opts.rootDir, slug)
     const writeResult = await writeDraft({

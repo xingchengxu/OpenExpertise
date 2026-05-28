@@ -40,14 +40,17 @@ export const ultraTool: ToolHandler = {
     }
 
     const ultra = new UltraExpertise({ client: llm, model })
-    const result = await ultra.author({ taskDescription: task, rootDir: resolve(draftRoot) })
+    const rawResult = await ultra.author({ taskDescription: task, rootDir: resolve(draftRoot) })
+    // stopAfterAnalyze is not set, so result is always the full type.
+    if ('stopped' in rawResult) throw new Error('unexpected dry-run result from mcp ultra tool')
+    const result = rawResult
     return {
       draft_dir: result.draftDir,
       slug: result.analysis.name,
       analysis: result.analysis,
       synthesis: {
         // omit file contents from MCP response — they're already on disk
-        file_paths: result.synthesis.files.map((f) => f.path),
+        file_paths: result.synthesis.files.map((f: { path: string }) => f.path),
         next_steps: result.synthesis.next_steps ?? [],
       },
       validation: result.validation,

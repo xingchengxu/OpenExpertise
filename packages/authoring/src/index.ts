@@ -1,4 +1,9 @@
-export { UltraExpertise, type UltraExpertiseOpts, type UltraResult } from './ultra.js'
+export {
+  UltraExpertise,
+  type UltraExpertiseOpts,
+  type UltraResult,
+  type PhaseEvent,
+} from './ultra.js'
 export {
   writeDraft,
   type WriteDraftOpts,

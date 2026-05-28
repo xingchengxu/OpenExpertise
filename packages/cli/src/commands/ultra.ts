@@ -2,13 +2,55 @@ import { resolve } from 'node:path'
 import type { Logger } from 'pino'
 import type { LLMClient } from '@openexpertise/core'
 import { UltraExpertise } from '@openexpertise/authoring'
+import type { AnalysisOutput } from '@openexpertise/authoring'
 import { makeLLMClient, resolveLLMProvider, defaultModelFor } from '../llm-factory.js'
+
+// ─── ANSI helpers ────────────────────────────────────────────────────────────
+const CYAN_DIM = '\x1b[36;2m'
+const GREEN = '\x1b[32m'
+const RED = '\x1b[31m'
+const BOLD = '\x1b[1m'
+const RESET = '\x1b[0m'
+
+function spinnerLine(text: string): string {
+  return `${CYAN_DIM}⟳ ${text}${RESET}`
+}
+
+function checkLine(text: string): string {
+  return `${GREEN}⟳ ${text} ✓${RESET}`
+}
+
+function out(line: string): void {
+  process.stdout.write(line + '\n')
+}
+
+function formatDuration(ms: number): string {
+  return (ms / 1000).toFixed(1) + 's'
+}
+
+function printAnalysisShape(analysis: AnalysisOutput): void {
+  const nodeCount = analysis.node_sketches.length
+  const kindCounts: Record<string, number> = {}
+  for (const n of analysis.node_sketches) {
+    kindCounts[n.kind] = (kindCounts[n.kind] ?? 0) + 1
+  }
+  const kindSummary = Object.entries(kindCounts)
+    .map(([k, v]) => `${v} ${k}`)
+    .join(', ')
+  out(`  Detected shape: ${nodeCount} nodes (${kindSummary})`)
+  if (analysis.phases.length > 0) {
+    out(`  Phases: ${analysis.phases.map((p) => p.id).join(' → ')}`)
+  }
+}
+
+// ─── Public API ──────────────────────────────────────────────────────────────
 
 export interface UltraOpts {
   taskDescription: string
   draftRoot: string
   logger: Logger
   llm?: string
+  dryRun?: boolean
 }
 
 export async function ultraCommand(opts: UltraOpts): Promise<number> {
@@ -25,42 +67,174 @@ export async function ultraCommand(opts: UltraOpts): Promise<number> {
   const ultra = new UltraExpertise({ client: llm, model })
   const rootDir = resolve(opts.draftRoot)
 
+  // Track current spinner line so we can replace it on completion
+  let currentSpinnerText = ''
+
+  function startPhase(label: string): void {
+    currentSpinnerText = label
+    process.stdout.write('\r' + spinnerLine(label))
+  }
+
+  function completePhase(label: string, durationMs: number): void {
+    // Overwrite the spinner line with a check line
+    const checkText = `${label} (${formatDuration(durationMs)})`
+    process.stdout.write(
+      '\r' +
+        ' '.repeat(spinnerLine(currentSpinnerText).replace(/\x1b\[[^m]*m/g, '').length + 4) +
+        '\r',
+    )
+    out(checkLine(checkText))
+  }
+
   opts.logger.info({ task: opts.taskDescription }, 'ultraexpertise: starting analyze phase')
+
+  const phase1Label = `Phase 1/2: Analyzing the task… (using ${provider} ${model})`
+  startPhase(phase1Label)
+
+  let analysisDurationMs = 0
+
   const result = await ultra.author({
     taskDescription: opts.taskDescription,
     rootDir,
+    stopAfterAnalyze: opts.dryRun ?? false,
+    onPhase(event) {
+      if (event.phase === 'analyze' && event.status === 'start') {
+        // Already shown above — no-op
+      } else if (event.phase === 'analyze' && event.status === 'done') {
+        analysisDurationMs = event.duration_ms
+        completePhase(`Phase 1/2: Analyzing the task`, event.duration_ms)
+        printAnalysisShape(event.result)
+      } else if (event.phase === 'synthesize' && event.status === 'start') {
+        startPhase('Phase 2/2: Synthesizing files… (this is the heavy LLM call)')
+      } else if (event.phase === 'synthesize' && event.status === 'done') {
+        completePhase('Phase 2/2: Synthesizing files', event.duration_ms)
+      }
+    },
   })
+
+  // ── Dry-run path ──────────────────────────────────────────────────────────
+  if ('stopped' in result && result.stopped) {
+    const analysis = result.analysis
+    out('')
+    out(`${BOLD}Detected shape:${RESET}`)
+    out(`  Name: ${analysis.name}`)
+    if (analysis.phases.length > 0) {
+      out(`  Phases: ${analysis.phases.map((p) => p.id).join(' → ')}`)
+    }
+    if (analysis.node_sketches.length > 0) {
+      out(`  Nodes:`)
+      for (const n of analysis.node_sketches) {
+        const fanOut = n.fan_out_over ? `, for_each over ${n.fan_out_over}` : ''
+        out(`    - ${n.id} (${n.kind}${fanOut})`)
+      }
+    }
+    if (analysis.open_questions && analysis.open_questions.length > 0) {
+      out(`  Open questions:`)
+      for (const q of analysis.open_questions) {
+        out(`    - ${q}`)
+      }
+    }
+    out('')
+    out(`${CYAN_DIM}(dry-run: stopped after analyze; no files written)${RESET}`)
+    out('')
+    out('If this shape looks right, re-run without --dry-run to synthesize.')
+    out('If not, refine the task description and try again.')
+
+    opts.logger.info(
+      {
+        slug: analysis.name,
+        phases: analysis.phases.map((p) => p.id),
+        nodes: analysis.node_sketches.map((n) => `${n.id}(${n.kind})`),
+        open_questions: analysis.open_questions ?? [],
+        dry_run: true,
+        duration_ms: analysisDurationMs,
+      },
+      'ultraexpertise: analyze phase complete (dry-run)',
+    )
+    return 0
+  }
+
+  // ── Full run path ─────────────────────────────────────────────────────────
+  // Narrow the type: we already returned for the dry-run case above.
+  const fullResult = result as Exclude<typeof result, { stopped: true }>
 
   opts.logger.info(
     {
-      slug: result.analysis.name,
-      draftDir: result.draftDir,
-      phases: result.analysis.phases.map((p) => p.id),
-      nodes: result.analysis.node_sketches.map((n) => `${n.id}(${n.kind})`),
-      open_questions: result.analysis.open_questions ?? [],
-      files_written: result.files_written,
-      valid: result.validation.valid,
-      validation_errors: result.validation.errors ?? [],
-      next_steps: result.synthesis.next_steps ?? [],
+      slug: fullResult.analysis.name,
+      draftDir: fullResult.draftDir,
+      phases: fullResult.analysis.phases.map((p) => p.id),
+      nodes: fullResult.analysis.node_sketches.map((n) => `${n.id}(${n.kind})`),
+      open_questions: fullResult.analysis.open_questions ?? [],
+      files_written: fullResult.files_written,
+      valid: fullResult.validation.valid,
+      validation_errors: fullResult.validation.errors ?? [],
+      next_steps: fullResult.synthesis.next_steps ?? [],
     },
     'ultraexpertise: draft created',
   )
 
-  if (!result.validation.valid) {
+  // ── Files summary ────────────────────────────────────────────────────────
+  const filesCount = fullResult.files_written.length
+  out(
+    `  Files written: ${filesCount} (${fullResult.files_written.slice(0, 3).join(', ')}${filesCount > 3 ? `×${filesCount - 3}` : ''})`,
+  )
+  out('')
+
+  // ── Validation result ────────────────────────────────────────────────────
+  if (!fullResult.validation.valid) {
+    out(`${RED}✗ Draft created with validation errors:${RESET}`)
+    for (const e of fullResult.validation.errors ?? []) {
+      out(`    - ${e}`)
+    }
+    out('')
+    out(`  The draft is still in ${fullResult.draftDir} — fix manually, or`)
+    out('  re-run oe ultra with a more specific task description.')
+
     opts.logger.warn(
-      { errors: result.validation.errors },
+      { errors: fullResult.validation.errors },
       'draft did not pass oe validate — inspect and fix before running',
     )
     return 2
   }
 
+  out(`${GREEN}✓ Draft created at ${fullResult.draftDir}/${RESET}`)
+  out('')
+  out(`  Validation: ${GREEN}✓ experience valid${RESET}`)
+  out('')
+  out('  Next steps:')
+
+  // Prefer synthesis.next_steps if available, else fall back to static checklist
+  const nextSteps: string[] =
+    fullResult.synthesis.next_steps && fullResult.synthesis.next_steps.length > 0
+      ? fullResult.synthesis.next_steps
+      : buildDefaultNextSteps(fullResult.draftDir, fullResult.analysis.name)
+
+  nextSteps.forEach((step: string, i: number) => {
+    out(`    ${i + 1}. ${step}`)
+  })
+
+  out('')
+  out('  Reference: https://xingchengxu.github.io/OpenExpertise/guide/authoring-ultra')
+
   opts.logger.info(
     {
-      run: `oe run ${result.draftDir}`,
-      promote: `mv ${result.draftDir} examples/${result.analysis.name}`,
+      run: `oe run ${fullResult.draftDir}`,
+      promote: `mv ${fullResult.draftDir} examples/${fullResult.analysis.name}`,
     },
     'next: run or promote',
   )
 
   return 0
+}
+
+function buildDefaultNextSteps(draftDir: string, name: string): string[] {
+  return [
+    `cd ${draftDir}`,
+    'Open tools/*.mjs and replace each // TODO: marker with real logic',
+    '(Optional) Edit prompts/*.md to fine-tune the LLM voice',
+    'oe run .                          — try the scaffold against fixtures',
+    'oe inspect <run-id>               — see the full event trail',
+    `Write an e2e test (copy pattern from e2e/your-first-experience.e2e.test.ts)`,
+    `(Optional) oe submit ${name}      — publish to the registry`,
+  ]
 }
