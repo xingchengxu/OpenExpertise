@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _Nothing yet — add entries here as features land._
 
+## [0.1.4] — 2026-05-28
+
+Post-release patch sweep findings. Both DX-only — no functional regressions in 0.1.3, no data-loss bugs. Just sharper errors.
+
+### Fixed
+
+- **`oe validate <non-existent-path>`** now prints a structured "experience.yaml not found" message instead of a bare `ENOENT` propagating from the file-system read. Matches the error style of every other command. (Reported by the v0.1.3 patch sweep — sweep finding #1.)
+- **`oe install gh:owner/repo/subpath/path`** now parses the trailing path components as a subpath instead of silently dropping them. `gh:jane/monorepo/examples/digest@v0.2.0` clones `jane/monorepo` at `v0.2.0` and installs only `examples/digest/` into `.openexpertise/experiences/digest/`. Previously this errored with "experience.yaml not found at the source" with no hint. (Sweep finding #2.)
+
+### Changed
+
+- The clone destination for subpath-based gh installs uses the last meaningful path segment as the name, so `gh:org/monorepo/examples/x` and `gh:org/monorepo/examples/y` co-exist in `.openexpertise/experiences/x/` and `…/y/` instead of colliding.
+
+[0.1.4]: https://github.com/xingchengxu/OpenExpertise/releases/tag/v0.1.4
+
 ## [0.1.3] — 2026-05-28
 
 Same-day patch — UX polish on the unique features (`oe ultra`) + cookbook + tutorial work that landed after 0.1.2. No breaking changes.

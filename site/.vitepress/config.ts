@@ -77,7 +77,7 @@ export default defineConfig({
         ],
       },
       {
-        text: 'v0.1.3',
+        text: 'v0.1.4',
         items: [
           { text: 'Roadmap', link: '/roadmap' },
           {

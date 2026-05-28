@@ -152,8 +152,45 @@ describe('installCommand — gh: spec', () => {
     existsSyncMock.mockReturnValue(false)
 
     await expect(installCommand({ spec: 'gh:badformat', logger: makeLogger() })).rejects.toThrow(
-      'Format: gh:owner/repo[@ref]',
+      'Format: gh:owner/repo[/subpath][@ref]',
     )
+  })
+
+  it('parses gh:owner/repo/subpath/x as a subpath', async () => {
+    existsSyncMock.mockReturnValueOnce(false).mockReturnValue(true)
+
+    spawnSyncMock.mockReturnValue(spawnSuccess())
+
+    const code = await installCommand({
+      spec: 'gh:jane/monorepo/examples/digest',
+      logger: makeLogger(),
+    })
+
+    expect(code).toBe(0)
+    const args = spawnSyncMock.mock.calls[0]![1] as string[]
+    const urlArg = args.find((a) => a.startsWith('https://'))
+    expect(urlArg).toBe('https://github.com/jane/monorepo.git')
+    // The clone destination should be the LAST path segment so co-installs don't collide.
+    expect(cpSyncMock.mock.calls.length).toBeGreaterThan(0)
+    const dest = cpSyncMock.mock.calls[0]![1] as string
+    expect(dest).toMatch(/digest$/)
+  })
+
+  it('parses gh:owner/repo/subpath@ref combining subpath + ref', async () => {
+    existsSyncMock.mockReturnValueOnce(false).mockReturnValue(true)
+
+    spawnSyncMock.mockReturnValue(spawnSuccess())
+
+    const code = await installCommand({
+      spec: 'gh:jane/monorepo/examples/digest@v0.2.0',
+      logger: makeLogger(),
+    })
+
+    expect(code).toBe(0)
+    const args = spawnSyncMock.mock.calls[0]![1] as string[]
+    expect(args).toContain('v0.2.0')
+    const urlArg = args.find((a) => a.startsWith('https://'))
+    expect(urlArg).toBe('https://github.com/jane/monorepo.git')
   })
 })
 

@@ -20,23 +20,37 @@ interface ResolvedSpec {
 }
 
 function parseSpec(spec: string, overrideRef?: string): ResolvedSpec {
-  // gh:user/repo[@ref]
+  // gh:owner/repo[/subpath/to/experience][@ref]
   if (spec.startsWith('gh:')) {
     const rest = spec.slice(3)
     const atIdx = rest.indexOf('@')
-    let ownerRepo: string, ref: string
+    let ownerRepoPath: string, ref: string
     if (atIdx === -1) {
-      ownerRepo = rest
+      ownerRepoPath = rest
       ref = overrideRef ?? 'main'
     } else {
-      ownerRepo = rest.slice(0, atIdx)
+      ownerRepoPath = rest.slice(0, atIdx)
       ref = overrideRef ?? rest.slice(atIdx + 1)
     }
-    const [owner, repo] = ownerRepo.split('/')
+    const parts = ownerRepoPath.split('/').filter((p) => p.length > 0)
+    const owner = parts[0]
+    const repo = parts[1]
     if (!owner || !repo) {
-      throw new Error(`invalid gh spec "${spec}". Format: gh:owner/repo[@ref].`)
+      throw new Error(
+        `invalid gh spec "${spec}". Format: gh:owner/repo[/subpath][@ref]. Examples: gh:jane/my-flow · gh:jane/repo/examples/digest@v0.2.0`,
+      )
     }
-    return { name: repo, owner, repo, ref }
+    const subpath = parts.slice(2).join('/')
+    // Name defaults to the last meaningful path segment so installs can co-exist:
+    // gh:org/monorepo/examples/x and gh:org/monorepo/examples/y land at different dirs.
+    const name = subpath ? (parts[parts.length - 1] ?? repo) : repo
+    return {
+      name,
+      owner,
+      repo,
+      ref,
+      ...(subpath ? { subpath } : {}),
+    }
   }
   // curated name
   const entry = findByName(spec)

@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 import { parseExperienceYaml, validateExperienceSpec, ValidationError } from '@openexpertise/schema'
 import type { Logger } from 'pino'
@@ -10,6 +10,13 @@ export interface ValidateOpts {
 
 export async function validateCommand(opts: ValidateOpts): Promise<number> {
   const yamlPath = resolveExperienceYaml(opts.path)
+  if (!existsSync(yamlPath)) {
+    opts.logger.error(
+      { path: yamlPath },
+      `experience.yaml not found at ${yamlPath}. Pass a directory containing experience.yaml or the yaml file directly.`,
+    )
+    return 1
+  }
   const source = readFileSync(yamlPath, 'utf8')
   try {
     const spec = parseExperienceYaml(source)
