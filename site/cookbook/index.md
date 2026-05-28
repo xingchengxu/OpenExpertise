@@ -33,11 +33,19 @@ Each recipe is **self-contained** — a complete `experience.yaml` snippet you c
 
 ### Multi-provider & integration
 
-| Recipe                                              | What it covers                                                |
-| --------------------------------------------------- | ------------------------------------------------------------- |
-| [CLI agent with file edits](./cli-agent-with-edits) | `cli-agent` with `allow_file_edits: true`; structured output  |
-| [Hybrid LLM routing](./hybrid-llm-routing)          | Anthropic + OpenAI in one flow via `meta.runtime.providers`   |
-| [oe-mcp as server](./mcp-as-server)                 | Expose OE flows as MCP tools for Claude Code / Codex / Gemini |
+| Recipe                                                     | What it covers                                                    |
+| ---------------------------------------------------------- | ----------------------------------------------------------------- |
+| [CLI agent with file edits](./cli-agent-with-edits)        | `cli-agent` with `allow_file_edits: true`; structured output      |
+| [Hybrid LLM routing](./hybrid-llm-routing)                 | Anthropic + OpenAI in one flow via `meta.runtime.providers`       |
+| [oe-mcp as server](./mcp-as-server)                        | Expose OE flows as MCP tools for Claude Code / Codex / Gemini     |
+| [MCP resource as a dataset source](./mcp-resource-dataset) | `source.type: mcp-resource`; `mcp.json` config; row normalization |
+| [Cross-vendor CLI agent chain](./cross-vendor-chain)       | Claude Code → Codex → Gemini in series; each reads prior output   |
+
+### Registry & publishing
+
+| Recipe                                         | What it covers                                                   |
+| ---------------------------------------------- | ---------------------------------------------------------------- |
+| [Submit to the registry](./submit-to-registry) | `oe submit`; auto-detected GitHub metadata; pre-submit checklist |
 
 ---
 

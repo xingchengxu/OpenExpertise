@@ -310,7 +310,17 @@ export default defineConfig({
                 { text: 'CLI agent with file edits', link: '/cookbook/cli-agent-with-edits' },
                 { text: 'Hybrid LLM routing', link: '/cookbook/hybrid-llm-routing' },
                 { text: 'oe-mcp as server', link: '/cookbook/mcp-as-server' },
+                {
+                  text: 'MCP resource as a dataset source',
+                  link: '/cookbook/mcp-resource-dataset',
+                },
+                { text: 'Cross-vendor CLI agent chain', link: '/cookbook/cross-vendor-chain' },
               ],
+            },
+            {
+              text: 'Registry & publishing',
+              collapsed: false,
+              items: [{ text: 'Submit to the registry', link: '/cookbook/submit-to-registry' }],
             },
           ],
         },
