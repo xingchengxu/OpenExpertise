@@ -7,29 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_Nothing yet — add entries here as features land._
+
+## [0.1.4] — 2026-05-28
+
+Patch release bundling 4 user-facing improvements: 2 DX fixes from the v0.1.3 post-release sweep, the `OE_OPENAI_MODEL` / `OE_ANTHROPIC_MODEL` override unblocking self-hosted users, and a substantial synthesizer-prompt hardening for `oe ultra`. All caught from real-API testing.
+
+### Added
+
+- **`OE_OPENAI_MODEL` and `OE_ANTHROPIC_MODEL` env vars** — `defaultModelFor` now honors these as overrides. Previously `oe ultra` and `oe evolve` hardcoded `gpt-4o-2024-11-20` and threw 404 against any self-hosted OpenAI-compatible endpoint (vLLM / Ollama / LM Studio / etc.). Per-node YAML `model:` overrides still take precedence; the env vars apply when no per-node model is set.
+
 ### Changed
 
-- **`oe ultra` synthesizer prompt hardening.** Caught by a live-API test against a self-hosted MiniMax-2.7-w8a8 endpoint where the first synthesis produced a YAML with 3+ validation errors (unquoted colons, missing `dataset.source`, extra `description:` on edges). Six rules added to `packages/authoring/src/prompts/synthesizer.md`:
-  1. Top-level shape — `nodes:` + `edges:` MUST nest under `graph:`, not at root
-  2. YAML escaping — always quote strings containing `:`, `#`, `{}`, `[]`, etc.
-  3. Per-kind required fields cheatsheet (one block per node kind, dataset/cli-agent fully spelled out)
-  4. Edges have ONLY `from`/`to`/`when` — no `description:`
-  5. `state.schema` type values restricted to `string|number|boolean|object|array|null` (no `integer`, no `int`)
-  6. Dataset semantics — for non-tabular single-file loads, use `kind: tool` with `readFileSync`; dataset is for JSON/JSONL/CSV/Parquet/SQLite tabular rows only; `writes:` MUST be exactly one field
-  7. Defensive tool stubs — `oe run` MUST succeed before any user wiring; every state field reference uses `?? fallback`; the first node populates everything downstream needs from a fixture
+- **`oe ultra` synthesizer prompt — substantial hardening.** Live-tested against a self-hosted MiniMax-2.7-w8a8 endpoint; the first synthesis attempt produced YAML with 3+ validation errors. Six iterations of prompt improvements landed:
+  1. Top-level shape rule — `nodes:` and `edges:` MUST nest under `graph:`, not at root
+  2. YAML escaping rule — always quote strings containing `:`, `#`, `{}`, `[]`, etc.
+  3. Per-kind required-field cheatsheet (one block per node kind, dataset/cli-agent fully spelled out)
+  4. Edges have ONLY `from`/`to`/`when` — no `description:`, no `label:`
+  5. `state.schema` `type` values restricted to `string | number | boolean | object | array | null` (no `integer`, no `int`)
+  6. Dataset semantics — `kind: dataset` is for tabular rows (JSON/JSONL/CSV/Parquet/SQLite) only; for single-file loads use `kind: tool` with `readFileSync`; `writes:` MUST be exactly one field
+  7. Defensive tool stubs — `oe run` MUST succeed before any user wiring; every state read uses `?? fallback`; the first node populates everything downstream needs from a fixture
   8. Explicit 11-item self-check before returning
 
-  Reduced the failure rate from "100% need manual YAML fixes" to "schema-clean and runtime-mostly-clean on first try" against the test endpoint. Cross-field consistency (e.g., `writes:` matching `state.schema`) is the remaining hard case — best solved by auto-retry on validation failure, planned for next.
+  Reduced failure rate from "100% need manual YAML fixes on MiniMax-2.7-w8a8" to "schema-clean and runtime-mostly-clean on first try". The remaining hard case is cross-field consistency (`writes:` matching `state.schema` names) — best solved by auto-retry on validation failure, planned for the next release.
+
+- The clone destination for subpath-based `gh:` installs uses the last meaningful path segment as the name, so `gh:org/monorepo/examples/x` and `gh:org/monorepo/examples/y` co-exist in `.openexpertise/experiences/x/` and `…/y/` instead of colliding.
 
 ### Fixed
 
-- **`oe validate <non-existent-path>`** now prints a structured "experience.yaml not found" message instead of a bare `ENOENT` propagating from the file-system read. Matches the error style of every other command. (Reported by the v0.1.3 patch sweep — sweep finding #1.)
-- **`oe ultra` / `oe evolve` model override** — `defaultModelFor` now honors `OE_OPENAI_MODEL` and `OE_ANTHROPIC_MODEL` env vars. Previously the OpenAI model was hardcoded to `gpt-4o-2024-11-20`, breaking against any self-hosted OpenAI-compatible endpoint. Per-node YAML `model:` overrides still take precedence; the env vars apply only when no per-node model is set (which is always the case for `ultra` and `evolve`).
-- **`oe install gh:owner/repo/subpath/path`** now parses the trailing path components as a subpath instead of silently dropping them. `gh:jane/monorepo/examples/digest@v0.2.0` clones `jane/monorepo` at `v0.2.0` and installs only `examples/digest/` into `.openexpertise/experiences/digest/`. Previously this errored with "experience.yaml not found at the source" with no hint. (Sweep finding #2.)
+- **`oe validate <non-existent-path>`** now prints a structured `experience.yaml not found at <path>` message instead of a bare `ENOENT` propagating from the file-system read. Matches the error style of every other command. (Reported by the v0.1.3 patch sweep.)
+- **`oe install gh:owner/repo/subpath/path`** now parses the trailing path components as a subpath instead of silently dropping them. `gh:jane/monorepo/examples/digest@v0.2.0` clones `jane/monorepo` at `v0.2.0` and installs only `examples/digest/` into `.openexpertise/experiences/digest/`. (Sweep finding #2.)
 
-### Changed
-
-- The clone destination for subpath-based gh installs uses the last meaningful path segment as the name, so `gh:org/monorepo/examples/x` and `gh:org/monorepo/examples/y` co-exist in `.openexpertise/experiences/x/` and `…/y/` instead of colliding.
+[0.1.4]: https://github.com/xingchengxu/OpenExpertise/releases/tag/v0.1.4
 
 ## [0.1.3] — 2026-05-28
 

@@ -78,7 +78,7 @@ Each `kind` has specific required fields. Mixing them up (e.g., putting `reads:`
   prompt: ./prompts/<id>.md
   schema:
     type: object
-    properties: {...}
+    properties: { ... }
   phase: <phase-id> # optional
   reads: [<state-field>] # optional
   writes: [<state-field>] # optional
@@ -92,12 +92,12 @@ Each `kind` has specific required fields. Mixing them up (e.g., putting `reads:`
 - id: <slug>
   kind: cli-agent
   provider: claude-code # REQUIRED — one of: claude-code | codex | gemini
-  prompt: "<INLINE prompt — file paths NOT supported for cli-agent in V1>"
+  prompt: '<INLINE prompt — file paths NOT supported for cli-agent in V1>'
   phase: <phase-id> # optional
   reads: [<state-field>] # optional
   writes: [<state-field>] # optional
   output_format: text # optional — text (default) or json
-  schema: {...} # REQUIRED if output_format: json
+  schema: { ... } # REQUIRED if output_format: json
   timeout_ms: 600000 # optional — default 600000 ms
   for_each: { source: $.<state-field> } # optional
 ```

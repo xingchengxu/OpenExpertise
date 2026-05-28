@@ -1,6 +1,6 @@
 {
   "name": "@openexpertise/evolution",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Advisor that reads a run's events+state and proposes graph upgrades as git-apply-ready diffs.",
   "keywords": [
     "openexpertise",
