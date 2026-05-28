@@ -1,6 +1,6 @@
 {
   "name": "@openexpertise/mcp-server",
-  "version": "0.1.4",
+  "version": "0.1.3",
   "description": "`oe-mcp` MCP server — exposes 6 OpenExpertise tools so external MCP-aware agents can run experiences.",
   "keywords": [
     "openexpertise",
