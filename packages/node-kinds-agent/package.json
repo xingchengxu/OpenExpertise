@@ -1,6 +1,6 @@
 {
   "name": "@openexpertise/node-kinds-agent",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Dispatcher for `agent` nodes — calls an LLM with structured-output schema, writes validated keys to state.",
   "keywords": [
     "openexpertise",

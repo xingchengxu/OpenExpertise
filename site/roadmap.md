@@ -7,21 +7,30 @@ description: What's in v0.1, what's coming in v0.2 + v0.3, and what's deliberate
 
 What's shipped, what's coming, and what's deliberately not coming. Updated whenever direction changes — date-stamped on every entry.
 
-## Where we are (v0.1.0, 2026-05-26)
+## Where we are (v0.1.1, 2026-05-28)
 
-Shipped:
+Shipped in 0.1.1 (patch over 0.1.0):
+
+- **`oe demo`** — preview 4 bundled examples without an API key. The `review-branch` demo ships with a built-in advisor evolution proposal that demonstrates the author → run → evolve loop in 60 seconds.
+- **`oe init --template <name>`** — 4 starter shapes (`tool-only` / `agent` / `cli-agent` / `full-pipeline`) instead of hello-world only.
+- **`oe submit`** — zero-friction registry submission. Detects your GH remote, generates the registry entry, opens a pre-filled issue.
+- **`mcp-resource` dataset source** — actually wired to a runtime (was declared in schema but threw at runtime in 0.1.0). Spawns MCP servers via stdio per `mcp.json` config.
+- **Ecosystem positioning page** at `/ecosystem` covering MCP / Skills / /workflows / autonomous agents.
+- **Cookbook** with 10 self-contained recipes.
+
+Shipped in 0.1.0 (foundation):
 
 - **Six node kinds** — `tool` / `agent` / `skill` / `dataset` / `experience` / `cli-agent`
 - **Two schedulers** — Sequential (default), Parallel (`runtime.concurrency: N`)
 - **State store** — better-sqlite3 blackboard, 3 merge strategies (`set_once` / `last_wins` / `array_append`)
 - **Event log** — JSONL append-only, EventBus pub-sub, crash-safe `appendFileSync`
-- **CLI** — `init`, `validate`, `run`, `resume`, `inspect`, `state`, `reset-state`, `evolve`, `diff`, `ultra`, `doctor`, `install`, `registry`, `installed`
+- **CLI** — `init`, `validate`, `run`, `resume`, `inspect`, `state`, `reset-state`, `evolve`, `diff`, `ultra`, `doctor`, `install`, `registry`, `installed`, `submit` (new in 0.1.1), `demo` (new in 0.1.1)
 - **Evolution advisor** — `oe evolve <run-id>` proposes `add-node` / `tune-param` / `add-dataset-case` operations as `git apply`-ready diffs
 - **`oe ultra` LLM authoring** — single-keyword YAML synthesis with tool stubs + prompt files
 - **MCP server** — `oe-mcp` exposes 6 tools for Claude Desktop / Cursor / other MCP clients
 - **TUI dashboard** — htop-grade live render with per-node activity, tokens, status glyphs
 - **12 examples** — all with mocked-LLM e2e tests
-- **265 tests passing across 64 test files**
+- **292 tests passing across 65 test files** (0.1.1 figure; 0.1.0 shipped with 265)
 - **Multi-LLM providers** — Anthropic + OpenAI SDKs; OpenAI-protocol redirect for vLLM/Ollama/LM Studio
 - **cli-agent providers** — Claude Code, Codex, Gemini subprocess integration with `--skip-trust` Gemini handling
 - **VitePress docs site** with examples gallery and GitHub Pages auto-deploy

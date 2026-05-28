@@ -14,7 +14,7 @@ Thanks for the interest. This is the short-form contributor guide.
 ```bash
 pnpm install
 pnpm -r build
-pnpm test            # 265 tests; expect green on main
+pnpm test            # 292 tests; expect green on main
 ```
 
 Node 20.x or newer (Node 20 / 22 / 24 are tested in CI). `better-sqlite3` requires a working native build toolchain on first install.

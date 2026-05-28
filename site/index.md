@@ -59,7 +59,7 @@ features:
 </style>
 
 <div class="tag-row">
-  <span class="pill pill-ok">265 tests</span>
+  <span class="pill pill-ok">292 tests</span>
   <span class="pill pill-ok">15 packages</span>
   <span class="pill pill-ok">12 examples</span>
   <span class="pill pill-ok">MIT licensed</span>
