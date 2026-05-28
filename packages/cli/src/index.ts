@@ -11,6 +11,7 @@ import { ultraCommand } from './commands/ultra.js'
 import { doctorCommand } from './commands/doctor.js'
 import { installCommand } from './commands/install.js'
 import { registryCommand, installedCommand } from './commands/registry.js'
+import { submitCommand } from './commands/submit.js'
 import { demoCommand } from './commands/demo.js'
 import { makeLogger } from './logger.js'
 
@@ -260,6 +261,49 @@ export function buildProgram(): Command {
       const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
       process.exit(await installedCommand({ json: cmdOpts.json ?? false, logger }))
     })
+
+  program
+    .command('submit [path]')
+    .description(
+      'Submit an experience to the OpenExpertise registry (opens pre-filled GitHub issue)',
+    )
+    .option('--tags <list>', 'comma-separated tags')
+    .option('--name <name>', 'override the experience name')
+    .option('--ref <ref>', 'override the git ref to pin')
+    .option('--subpath <subpath>', 'override the subpath')
+    .option('--description <text>', 'override the description')
+    .option('--dry-run', 'print the entry; do not open the browser')
+    .option('--output <file>', 'write the entry to a file')
+    .action(
+      async (
+        path: string | undefined,
+        cmdOpts: {
+          tags?: string
+          name?: string
+          ref?: string
+          subpath?: string
+          description?: string
+          dryRun?: boolean
+          output?: string
+        },
+        cmd: Command,
+      ) => {
+        const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+        const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+        const opts = {
+          ...(path !== undefined ? { path } : {}),
+          ...(cmdOpts.tags !== undefined ? { tags: cmdOpts.tags } : {}),
+          ...(cmdOpts.name !== undefined ? { name: cmdOpts.name } : {}),
+          ...(cmdOpts.ref !== undefined ? { ref: cmdOpts.ref } : {}),
+          ...(cmdOpts.subpath !== undefined ? { subpath: cmdOpts.subpath } : {}),
+          ...(cmdOpts.description !== undefined ? { description: cmdOpts.description } : {}),
+          ...(cmdOpts.dryRun ? { dryRun: true } : {}),
+          ...(cmdOpts.output !== undefined ? { output: cmdOpts.output } : {}),
+          logger,
+        }
+        process.exit(await submitCommand(opts))
+      },
+    )
 
   program
     .command('demo [name]')

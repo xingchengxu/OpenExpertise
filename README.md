@@ -57,7 +57,10 @@ Pull any public GitHub repo with an `experience.yaml`:
 ```bash
 oe install gh:owner/repo               # latest commit
 oe install gh:owner/repo@v1.2.3        # pin to tag/SHA
+oe submit --tags x,y                   # submit YOUR experience to the curated registry
 ```
+
+Want yours discoverable via `oe install <name>`? Run `oe submit` inside your experience directory — opens a pre-filled GitHub issue with the registry entry generated for you.
 
 📖 **Full docs: https://xingchengxu.github.io/OpenExpertise/** — guide, all 12 examples, 10-recipe cookbook, API reference, comparison vs LangGraph/CrewAI/Mastra/Inngest, operations playbook.
 

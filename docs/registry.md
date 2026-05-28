@@ -20,7 +20,24 @@ oe install gh:owner/repo --ref abc123
 
 The repo must contain an `experience.yaml` at the root (or use `subpath` if it's a monorepo).
 
-## Submit your experience to the registry
+## Submit via `oe submit` (recommended)
+
+Inside your experience directory:
+
+```bash
+oe submit --tags <comma,separated>
+```
+
+This:
+
+1. Validates your `experience.yaml`.
+2. Detects your GitHub remote and the ref to pin (prefers a tag at HEAD; falls back to the current branch).
+3. Generates the canonical registry entry JSON.
+4. Opens a pre-filled GitHub issue on `xingchengxu/OpenExpertise` with the entry + the standard checklist. You only need to fill in the use-case description.
+
+Flags: `--dry-run` prints the entry without opening the browser; `--output entry.json` writes the entry to a file; `--name` / `--ref` / `--subpath` / `--description` override the auto-detected values.
+
+## Submit your experience to the registry (manual path)
 
 1. Push your experience to a public GitHub repo with `experience.yaml` at the root (or in a subpath).
 2. Open a PR against `registry.json` in [xingchengxu/OpenExpertise](https://github.com/xingchengxu/OpenExpertise) adding an entry:
