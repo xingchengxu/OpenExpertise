@@ -1,0 +1,22 @@
+{
+  "name": "deep-research",
+  "one_liner": "Multi-vendor research: Claude Code WebSearch + Gemini Google Search → cited synthesis",
+  "category": "multi-vendor",
+  "run": {
+    "command": "oe run examples/deep-research --concurrency 4",
+    "duration": "4m 12s",
+    "status": "success",
+    "final_state_preview": {
+      "question": "What's the state of the art in caching strategies for HTTP APIs in 2026?",
+      "clarified_question": "Compare cache-aside, write-through, and CDN-edge caching for read-heavy HTTP APIs in 2026, with emphasis on operational complexity and freshness tradeoffs.",
+      "claude_subqs": "4 sub-questions covering: cache-aside semantics, write-through invalidation, stale-while-revalidate patterns, CDN edge cache freshness",
+      "gemini_subqs": "4 sub-questions on current-events / vendor news: Cloudflare cache reserve updates, Fastly compute cache, Vercel data cache, AWS CloudFront Functions",
+      "raw_findings": "[24 findings across 8 sub-questions; sample: 'Cache-aside is dominant for read-heavy APIs because writes are bounded — stale-while-revalidate fills the freshness gap (source: https://...)']",
+      "citations": "[18 unique URLs across academic papers, vendor docs, and engineering blogs]",
+      "cross_referenced": "{ executive_summary: 'Cache-aside + SWR is the 2026 baseline. Edge caches augment but rarely replace.', key_findings: [...3 cross-referenced claims...], open_questions: [...2 unresolved tensions...] }"
+    },
+    "event_count": 47,
+    "node_count": 7
+  },
+  "tip": "The for_each fan-out (concurrency: 2) on `search_claude` and `search_gemini` is what gives this its parallel-multi-vendor character. Inspect a real run with `oe inspect <run-id>` to see the wave-by-wave execution."
+}

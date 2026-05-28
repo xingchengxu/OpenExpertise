@@ -47,6 +47,8 @@ npm install -g @openexpertise/cli      # the `oe` command — Node 20+
 oe doctor                              # verify env (CLI agents, API keys, write perms)
 oe init my-first                       # scaffold a minimal no-LLM flow
 oe registry                            # see 5 curated experiences (need API key to run)
+oe demo                                # see pre-recorded runs of bundled examples (zero API key)
+oe demo review-branch                  # preview the PR review flow + advisor's evolution proposal
 ```
 
 Pull any public GitHub repo with an `experience.yaml`:

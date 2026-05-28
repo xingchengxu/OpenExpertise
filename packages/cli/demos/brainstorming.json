@@ -1,0 +1,20 @@
+{
+  "name": "brainstorming",
+  "one_liner": "Diverge across 3 angles → cluster → critique → synthesize top 3",
+  "category": "ideation",
+  "run": {
+    "command": "oe run examples/brainstorming",
+    "duration": "3m 21s",
+    "status": "success",
+    "final_state_preview": {
+      "topic": "How should an open-source developer-tools project reduce time-to-first-successful-run for new users?",
+      "raw_ideas": "15 ideas total (5 per angle): practitioner angle leaned operational (default-zero-config, error-message scrubbing); contrarian leaned 'less docs, not more'; analogist borrowed from Stripe onboarding + videogame tutorials",
+      "clusters": "[3 clusters: 'Zero-config first run' (5 ideas), 'Failure-mode pedagogy' (6 ideas), 'Borrowed onboarding patterns' (4 ideas)]",
+      "critiques": "[Per cluster: biggest_weakness, best_idea_in_cluster, what_we_dont_know]",
+      "picks": "{ top_3: [3 ideas with why_strongest], reasoning: '2-3 sentence narrative', next_actions: ['add `oe doctor` early', 'land an animated 60-sec terminal cast', 'curate registry of working flows to install in one command'] }"
+    },
+    "event_count": 31,
+    "node_count": 5
+  },
+  "tip": "The for_each on diverge (concurrency: 3) runs three angles in parallel via Claude Code — that's why the duration stays under 4 minutes even with 15 LLM calls."
+}

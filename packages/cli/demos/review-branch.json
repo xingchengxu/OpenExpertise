@@ -1,0 +1,24 @@
+{
+  "name": "review-branch",
+  "one_liner": "Multi-dim PR review (bugs / perf / tests) + verifier + score + advisor evolution",
+  "category": "fan-out",
+  "run": {
+    "command": "oe run examples/review-branch --tui",
+    "duration": "52s",
+    "status": "success",
+    "final_state_preview": {
+      "diff": "Python diff for `/api/users/<id>` — 38 lines added, 12 removed",
+      "findings": "3 findings: missing null-check on `user_id`, missing test for the empty-result branch, an unclosed cursor in finally{}",
+      "verified_findings": "3 of 3 verified by the verifier agent (no false positives)",
+      "risk_score": "0.30 (medium-low)"
+    },
+    "event_count": 23,
+    "node_count": 6
+  },
+  "evolution_proposal": {
+    "rationale": "Three runs over similar payments-API diffs consistently produced low risk scores (0.25-0.35) but every diff had injection patterns the reviewers didn't flag. The bugs / perf / tests dimensions don't include security framing. Adding a `security` reviewer would change findings and lift the risk score for genuine issues.",
+    "operation": "add-node",
+    "diff": "--- experience.yaml\n+++ experience.yaml\n@@ -34,6 +34,16 @@\n       prompt: ./prompts/review.md\n       reads: [diff]\n       writes: [findings]\n+    - id: security\n+      kind: agent\n+      phase: review\n+      prompt: ./prompts/review.md\n+      reads: [diff]\n+      args:\n+        dimension: 'security'\n+        focus: 'injection, XSS, auth bypass, secret leak'\n+      writes: [findings]\n     - id: verify\n       kind: agent\n       phase: verify\n"
+  },
+  "tip": "This is the loop that no other workflow framework closes: author → run → evolve → re-author. Run the same flow against a real PR with a SQL injection and you'll see the missed finding; apply this proposal and the score lifts."
+}

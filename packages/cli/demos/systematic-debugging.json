@@ -1,0 +1,21 @@
+{
+  "name": "systematic-debugging",
+  "one_liner": "Translation of the superpowers `systematic-debugging` skill — hypothesize → verify (fan-out) → fix via Claude Code → re-test",
+  "category": "skill-translation",
+  "run": {
+    "command": "oe run examples/systematic-debugging",
+    "duration": "1m 47s",
+    "status": "success",
+    "final_state_preview": {
+      "symptoms": "{ exit_code: 1, stderr: '...test failed: validateUserId(1000) returned invalid...', cmd: 'node --test test.mjs' }",
+      "hypotheses": "2 hypotheses: (h1) Off-by-one in upper bound check of validateUserId. (h2) MAX_USER_ID is exported as wrong constant value.",
+      "check_results": "[h1: supported — evidence: index.mjs:11 uses < instead of >; h2: refuted — MAX_USER_ID is 1000 as expected.]",
+      "diagnosis": "{ root_cause: 'validateUserId uses `id < MAX_USER_ID` where `id > MAX_USER_ID` was intended, rejecting the boundary.', location: 'fixtures/buggy_repo/index.mjs:11', supported_hypothesis_id: 'h1' }",
+      "fix_proposal": "Changed `id < MAX_USER_ID` to `id > MAX_USER_ID` on line 11 of index.mjs. Tests now pass.",
+      "verification_status": "passed"
+    },
+    "event_count": 19,
+    "node_count": 6
+  },
+  "tip": "The cli-agent fan-out at `verify_hypothesis` runs each hypothesis check in parallel against Claude Code with concurrency: 2 — that's the speedup vs running them sequentially."
+}

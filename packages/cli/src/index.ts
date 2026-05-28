@@ -11,6 +11,7 @@ import { ultraCommand } from './commands/ultra.js'
 import { doctorCommand } from './commands/doctor.js'
 import { installCommand } from './commands/install.js'
 import { registryCommand, installedCommand } from './commands/registry.js'
+import { demoCommand } from './commands/demo.js'
 import { makeLogger } from './logger.js'
 
 export function buildProgram(): Command {
@@ -236,6 +237,20 @@ export function buildProgram(): Command {
       const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
       const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
       process.exit(await installedCommand({ json: cmdOpts.json ?? false, logger }))
+    })
+
+  program
+    .command('demo [name]')
+    .description('Preview a pre-recorded run of a bundled example (zero API key needed)')
+    .option('--json', 'output as JSON')
+    .action(async (name: string | undefined, cmdOpts: { json?: boolean }) => {
+      process.exit(
+        await demoCommand({
+          ...(name !== undefined ? { name } : {}),
+          json: cmdOpts.json ?? false,
+          logger: makeLogger(),
+        }),
+      )
     })
 
   return program
