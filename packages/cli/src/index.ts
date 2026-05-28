@@ -110,12 +110,34 @@ export function buildProgram(): Command {
   program
     .command('init')
     .description('Scaffold a new experience directory')
-    .argument('<name>', 'directory name to create')
-    .action(async (name: string, _opts: unknown, cmd: Command) => {
-      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
-      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
-      process.exit(await initCommand({ name, logger }))
-    })
+    .argument('[name]', 'directory name to create')
+    .option(
+      '--template <name>',
+      'starter template: tool-only | agent | cli-agent | full-pipeline',
+      'tool-only',
+    )
+    .option('--list-templates', 'list available templates and exit')
+    .action(
+      async (
+        name: string | undefined,
+        cmdOpts: { template?: string; listTemplates?: boolean },
+        cmd: Command,
+      ) => {
+        const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+        const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+        if (!name && !cmdOpts.listTemplates) {
+          logger.error('missing required argument: name')
+          process.exit(1)
+        }
+        const opts = {
+          name: name ?? '',
+          ...(cmdOpts.template !== undefined ? { template: cmdOpts.template as never } : {}),
+          ...(cmdOpts.listTemplates ? { listTemplates: true } : {}),
+          logger,
+        }
+        process.exit(await initCommand(opts))
+      },
+    )
 
   program
     .command('state')

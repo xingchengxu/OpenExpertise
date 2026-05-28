@@ -42,7 +42,8 @@
     "dist",
     "README.md",
     "registry.json",
-    "demos"
+    "demos",
+    "templates"
   ],
   "publishConfig": {
     "access": "public"

@@ -1,0 +1,72 @@
+name: {{NAME}}
+description: A new OpenExpertise experience scaffolded from the full-pipeline template — tool → agent → cli-agent → tool, with state passing between every kind.
+version: 0.1.0
+
+state:
+  schema:
+    input_text: { type: string }
+    summary: { type: object }
+    deep_dive: { type: string }
+    output_path: { type: string }
+
+phases:
+  - { id: load }
+  - { id: summarize }
+  - { id: expand }
+  - { id: save }
+
+graph:
+  nodes:
+    - id: load_input
+      kind: tool
+      phase: load
+      impl: ./tools/load_input.mjs
+      writes: [input_text]
+
+    - id: summarize
+      kind: agent
+      phase: summarize
+      prompt: ./prompts/classify.md
+      reads: [input_text]
+      schema:
+        type: object
+        required: [summary]
+        properties:
+          summary:
+            type: object
+            required: [tldr, key_points, category]
+            properties:
+              tldr: { type: string }
+              key_points: { type: array, items: { type: string } }
+              category: { type: string }
+      writes: [summary]
+
+    - id: expand_with_claude_code
+      kind: cli-agent
+      provider: claude-code
+      phase: expand
+      prompt: |
+        You are expanding a structured summary into a richer narrative.
+
+        TL;DR: {{summary.tldr}}
+        Category: {{summary.category}}
+        Key points: {{summary.key_points}}
+
+        Write a 3-paragraph deep-dive that elaborates each key point with concrete examples and tradeoffs.
+        Plain prose, no markdown headers.
+      reads: [summary]
+      output_format: text
+      writes: [deep_dive]
+      timeout_ms: 180000
+
+    - id: save_output
+      kind: tool
+      phase: save
+      impl: ./tools/save_output.mjs
+      reads: [summary, deep_dive]
+      writes: [output_path]
+
+  edges:
+    - { from: load_input, to: summarize }
+    - { from: summarize, to: expand_with_claude_code }
+    - { from: expand_with_claude_code, to: save_output }

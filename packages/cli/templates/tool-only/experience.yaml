@@ -1,0 +1,15 @@
+name: {{NAME}}
+description: A new OpenExpertise experience scaffolded from the tool-only template.
+version: 0.1.0
+
+state:
+  schema:
+    greeting: { type: string }
+
+graph:
+  nodes:
+    - id: hello
+      kind: tool
+      impl: ./tools/hello.mjs
+      writes: [greeting]
+  edges: []

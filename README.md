@@ -46,6 +46,7 @@ It's NOT an autonomous agent. It's the **orchestration layer** that lets you wir
 npm install -g @openexpertise/cli      # the `oe` command — Node 20+
 oe doctor                              # verify env (CLI agents, API keys, write perms)
 oe init my-first                       # scaffold a minimal no-LLM flow
+oe init my-flow --template full-pipeline   # 4 templates: tool-only | agent | cli-agent | full-pipeline
 oe registry                            # see 5 curated experiences (need API key to run)
 oe demo                                # see pre-recorded runs of bundled examples (zero API key)
 oe demo review-branch                  # preview the PR review flow + advisor's evolution proposal

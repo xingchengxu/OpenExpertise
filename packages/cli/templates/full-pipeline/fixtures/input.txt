@@ -1,0 +1,13 @@
+Cache-aside is the dominant pattern for read-heavy HTTP APIs because writes are bounded — the
+application updates the database and invalidates (or omits) the cache. Reads check the cache first;
+on miss, the application loads from the database and populates the cache.
+
+The biggest operational tradeoff is stale-while-revalidate. When the cache holds an old value, the
+question is whether to return it immediately (lower latency, possible staleness) or block on the
+fresh fetch (higher latency, perfect freshness). Most APIs choose the former for read-heavy paths.
+
+Write-through is simpler reasoning (writes go through the cache to the database) but adds latency
+to every write. Useful when reads vastly outnumber writes AND the workload tolerates write latency.
+
+CDN edge caches change the calculus — they shift the cache closer to the user. The tradeoff moves
+from "stale value vs slow read" to "stale value vs cold-start latency in a far-from-origin region".

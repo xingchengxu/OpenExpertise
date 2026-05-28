@@ -1,0 +1,30 @@
+name: {{NAME}}
+description: A new OpenExpertise experience scaffolded from the agent template — one LLM call with structured output.
+version: 0.1.0
+
+state:
+  schema:
+    topic: { type: string }
+    classification: { type: object }
+
+graph:
+  nodes:
+    - id: classify
+      kind: agent
+      prompt: ./prompts/classify.md
+      reads: [topic]
+      args:
+        topic: 'Caching strategies for HTTP APIs in 2026'
+      schema:
+        type: object
+        required: [classification]
+        properties:
+          classification:
+            type: object
+            required: [category, confidence, reasoning]
+            properties:
+              category: { type: string, enum: [technical, business, philosophical, other] }
+              confidence: { type: string, enum: [high, medium, low] }
+              reasoning: { type: string }
+      writes: [classification]
+  edges: []

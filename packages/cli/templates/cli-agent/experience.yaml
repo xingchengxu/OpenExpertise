@@ -1,0 +1,25 @@
+name: {{NAME}}
+description: A new OpenExpertise experience scaffolded from the cli-agent template — one Claude Code subprocess invocation.
+version: 0.1.0
+
+state:
+  schema:
+    question: { type: string }
+    answer: { type: string }
+
+graph:
+  nodes:
+    - id: ask_claude_code
+      kind: cli-agent
+      provider: claude-code
+      prompt: |
+        You are a senior engineer. Answer this question in 3-5 sentences, with concrete examples.
+
+        Question: {{question}}
+      args:
+        question: 'What is the operational difference between cache-aside and write-through caching?'
+      reads: [question]
+      output_format: text
+      writes: [answer]
+      timeout_ms: 120000
+  edges: []
