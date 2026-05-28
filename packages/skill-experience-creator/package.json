@@ -1,6 +1,6 @@
 {
   "name": "@openexpertise/skill-experience-creator",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Anthropic SKILL.md package that teaches an LLM how to author OpenExpertise experiences.",
   "keywords": [
     "openexpertise",

@@ -1,6 +1,6 @@
 {
   "name": "@openexpertise/node-kinds-experience",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Dispatcher for `experience` nodes — nests one OpenExpertise experience inside another.",
   "keywords": [
     "openexpertise",

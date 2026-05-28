@@ -1,6 +1,6 @@
 {
   "name": "@openexpertise/llm-openai",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "OpenAI-compatible LLMClient implementation for OpenExpertise — wraps any OpenAI-API endpoint (OpenAI, Azure, self-hosted).",
   "keywords": [
     "openexpertise",

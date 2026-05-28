@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _Nothing yet — add entries here as features land._
 
+## [0.1.2] — 2026-05-28
+
+Tiny patch over 0.1.1 — the kind of bug only noticed after a fresh `npm install`.
+
+### Fixed
+
+- **`oe --version`** now prints the actual installed version. Was hardcoded to `0.1.0` in `packages/cli/src/index.ts:23`; rewired to read from the bundled `package.json` at runtime so it never drifts again.
+
+[0.1.2]: https://github.com/xingchengxu/OpenExpertise/releases/tag/v0.1.2
+
 ## [0.1.1] — 2026-05-28
 
 First patch release. Closes the most-visible Day-1 gaps: a zero-token onboarding demo, real starter templates, frictionless registry submission, and the mcp-resource dispatcher that the schema already accepted.

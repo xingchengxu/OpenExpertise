@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { validateCommand } from './commands/validate.js'
 import { runCommand } from './commands/run.js'
@@ -15,12 +18,22 @@ import { submitCommand } from './commands/submit.js'
 import { demoCommand } from './commands/demo.js'
 import { makeLogger } from './logger.js'
 
+const HERE = dirname(fileURLToPath(import.meta.url))
+// dist/index.js → ../package.json
+const PKG_VERSION = (() => {
+  try {
+    return JSON.parse(readFileSync(resolve(HERE, '..', 'package.json'), 'utf8')).version as string
+  } catch {
+    return '0.0.0'
+  }
+})()
+
 export function buildProgram(): Command {
   const program = new Command()
   program
     .name('oe')
     .description('OpenExpertise CLI — execute and inspect experience flows')
-    .version('0.1.0')
+    .version(PKG_VERSION)
     .option('--log-format <fmt>', 'log format: json | pretty', 'pretty')
     .option('--log-level <level>', 'log level', 'info')
 
