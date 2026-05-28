@@ -9,6 +9,7 @@ import type { NodeSpec, DatasetNodeSpec } from '@openexpertise/schema'
 import { loadFileSource } from './sources/file.js'
 import { loadSqliteSource } from './sources/sqlite.js'
 import { loadHttpSource } from './sources/http.js'
+import { loadMcpResourceSource } from './sources/mcp-resource.js'
 
 interface DatasetImpl extends ResolvedImpl {
   spec: DatasetNodeSpec
@@ -60,7 +61,13 @@ export class DatasetDispatcher implements NodeDispatcher {
         })
         break
       case 'mcp-resource':
-        throw new Error(`mcp-resource dataset source is not implemented in V1`)
+        rows = await loadMcpResourceSource({
+          server: src.server,
+          uri: src.uri,
+          experienceDir: ctx.experienceDir,
+          nodeId: di.spec.id,
+        })
+        break
       default: {
         const _exhaustive: never = src
         throw new Error(`Unknown dataset source: ${JSON.stringify(_exhaustive)}`)

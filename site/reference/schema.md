@@ -468,9 +468,25 @@ source:
 | `server` | `string` | ✓        | The MCP server identifier to read from.         |
 | `uri`    | `string` | ✓        | Resource URI as understood by the named server. |
 
-::: warning Not implemented in V1
-`mcp-resource` sources are defined in the schema but not yet wired to a dispatcher. Declaring one validates clean (`oe validate` passes), but running a flow that contains one will throw at runtime. Planned for a later 0.x release.
+::: tip Implemented in 0.1.1
+`mcp-resource` sources spawn an MCP server (stdio transport only in 0.1.1) per the `mcp.json` config in the experience directory. The server's spawn command is looked up by name, then a `resources/read` RPC fetches the URI. Results are normalized to rows: JSON arrays are spread, JSON objects wrap as 1-element arrays, plain text wraps as `{ text }`. HTTP transport coming in 0.2.x.
 :::
+
+### `mcp.json` config
+
+```json
+{
+  "servers": {
+    "runbooks": {
+      "command": "node",
+      "args": ["./mcp-servers/runbooks.mjs"],
+      "env": { "RUNBOOKS_DIR": "./data" }
+    }
+  }
+}
+```
+
+Same shape as Claude Desktop / Cursor / etc — copy your existing config.
 
 ---
 

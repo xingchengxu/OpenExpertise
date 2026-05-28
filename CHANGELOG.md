@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_Nothing yet — add entries here as features land._
+### Added
+
+- **`mcp-resource` dataset source** now actually works. Spawns an MCP server (stdio) per `mcp.json` config and reads resources via `resources/read`. Previously the schema accepted the shape but the dispatcher threw at runtime. Requires `@modelcontextprotocol/sdk` (new dependency on `@openexpertise/node-kinds-dataset`).
 
 ## [0.1.0] — 2026-05-27
 
