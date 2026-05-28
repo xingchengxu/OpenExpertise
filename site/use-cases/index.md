@@ -5,6 +5,20 @@ description: Concrete scenarios where OpenExpertise pays off — engineering, se
 
 # Use cases
 
+## 5 case-study deep dives
+
+Each of these is a 400-600 word walkthrough of a specific high-leverage shape — the problem, the YAML, what you'd see after 5 real runs, and how it integrates with the tools your team already uses.
+
+- [Multi-dimensional PR review](/use-cases/pr-review-multi-dim) — fan-out reviewers + advisor evolution
+- [Executable on-call runbook](/use-cases/incident-triage-runbook) — replace wiki rot with versioned, replayable triage
+- [Multi-vendor compliance scan](/use-cases/compliance-scan-multi-vendor) — Claude + Codex cross-check before release
+- [Reproducible LLM evaluation suite](/use-cases/standardized-eval-suite) — eval checkpoints with full trace
+- [Tier-1 support routing](/use-cases/support-routing) — classify → KB search → auto-reply or escalate
+
+The role-organized index below lists every scenario; deep dives expand the most-built ones.
+
+---
+
 OpenExpertise isn't general-purpose AI infrastructure. It's specifically the right tool when:
 
 1. **The same multi-step process runs over and over** (every Monday, every PR, every incident).

@@ -319,7 +319,26 @@ export default defineConfig({
         {
           text: 'Use cases',
           collapsed: false,
-          items: [{ text: 'By role / scenario', link: '/use-cases/' }],
+          items: [
+            { text: 'By role / scenario', link: '/use-cases/' },
+            {
+              text: 'Deep dives',
+              collapsed: false,
+              items: [
+                { text: 'Multi-dimensional PR review', link: '/use-cases/pr-review-multi-dim' },
+                { text: 'Executable on-call runbook', link: '/use-cases/incident-triage-runbook' },
+                {
+                  text: 'Multi-vendor compliance scan',
+                  link: '/use-cases/compliance-scan-multi-vendor',
+                },
+                {
+                  text: 'Reproducible LLM eval suite',
+                  link: '/use-cases/standardized-eval-suite',
+                },
+                { text: 'Tier-1 support routing', link: '/use-cases/support-routing' },
+              ],
+            },
+          ],
         },
       ],
       '/roadmap': [
