@@ -87,6 +87,8 @@ importers:
 
   examples/tri-cli-orchestration: {}
 
+  examples/your-first-experience: {}
+
   packages/authoring:
     dependencies:
       '@openexpertise/core':

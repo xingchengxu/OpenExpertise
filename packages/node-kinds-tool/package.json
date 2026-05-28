@@ -1,6 +1,6 @@
 {
   "name": "@openexpertise/node-kinds-tool",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Dispatcher for `tool` nodes — runs deterministic JavaScript/TypeScript impl files.",
   "keywords": [
     "openexpertise",

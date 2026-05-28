@@ -8,7 +8,7 @@
 
 ### Your team's best workflows — version-controlled, reproducible, self-improving.
 
-[![npm](https://img.shields.io/npm/v/%40openexpertise%2Fcli?label=%40openexpertise%2Fcli&color=cb3837)](https://www.npmjs.com/package/@openexpertise/cli) [![CI](https://github.com/xingchengxu/OpenExpertise/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/xingchengxu/OpenExpertise/actions/workflows/ci.yml) [![docs](https://img.shields.io/badge/docs-xingchengxu.github.io%2FOpenExpertise-3b82f6)](https://xingchengxu.github.io/OpenExpertise/) [![tests](https://img.shields.io/badge/tests-292%20passing-brightgreen)](#) [![packages](https://img.shields.io/badge/packages-15-blueviolet)](#) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![npm](https://img.shields.io/npm/v/%40openexpertise%2Fcli?label=%40openexpertise%2Fcli&color=cb3837)](https://www.npmjs.com/package/@openexpertise/cli) [![CI](https://github.com/xingchengxu/OpenExpertise/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/xingchengxu/OpenExpertise/actions/workflows/ci.yml) [![docs](https://img.shields.io/badge/docs-xingchengxu.github.io%2FOpenExpertise-3b82f6)](https://xingchengxu.github.io/OpenExpertise/) [![tests](https://img.shields.io/badge/tests-310%20passing-brightgreen)](#) [![packages](https://img.shields.io/badge/packages-15-blueviolet)](#) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 [**Install**](#install) · [**60-second demo**](#60-second-demo) · [**Why**](#why-openexpertise) · [**Examples**](#built-in-examples) · [**Compare**](#vs-the-alternatives) · [**Docs site →**](https://xingchengxu.github.io/OpenExpertise/)
 
@@ -51,6 +51,8 @@ oe registry                            # see 5 curated experiences (need API key
 oe demo                                # see pre-recorded runs of bundled examples (zero API key)
 oe demo review-branch                  # preview the PR review flow + advisor's evolution proposal
 ```
+
+> **Don't want to write YAML by hand?** Run `oe ultra "describe your task in one sentence"` and the LLM scaffolds the whole experience — graph, prompts, tool stubs with `// TODO:` markers, and validation. See the [30-min `oe ultra` tutorial](https://xingchengxu.github.io/OpenExpertise/guide/authoring-ultra).
 
 > **New to OpenExpertise?** Walk through the [30-minute "Your first experience" tutorial](https://xingchengxu.github.io/OpenExpertise/guide/first-experience) — by the end you'll have a tested, registry-submittable flow you built yourself.
 

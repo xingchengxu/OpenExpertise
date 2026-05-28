@@ -1,6 +1,6 @@
 {
   "name": "@openexpertise/node-kinds-dataset",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Dispatcher for `dataset` nodes — loads file/sqlite/http/MCP-resource data into state.",
   "keywords": [
     "openexpertise",

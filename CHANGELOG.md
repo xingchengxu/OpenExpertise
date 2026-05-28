@@ -9,6 +9,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _Nothing yet — add entries here as features land._
 
+## [0.1.3] — 2026-05-28
+
+Same-day patch — UX polish on the unique features (`oe ultra`) + cookbook + tutorial work that landed after 0.1.2. No breaking changes.
+
+### Added
+
+- **`oe ultra` two-phase progress indicator** — replaces the silent 30-90s wait with per-phase spinner + ✓ + timing, so users know whether the LLM is alive between analyze and synthesize.
+- **`oe ultra --dry-run`** flag — runs Phase 1 (analyze) only, prints the detected shape (nodes, phases, open questions), exits 0 without spawning the heavier Phase 2 synthesis. Halves the time + tokens for iterating the task description.
+- **Numbered next-steps output** on `oe ultra` completion — replaces the pino JSON dump with a human-readable checklist + reference link to the docs tutorial.
+- **`UltraExpertise.author()` opts** gain optional `onPhase` callback (typed `PhaseEvent` union) and `stopAfterAnalyze` flag. Backwards-compatible — passing neither preserves prior behavior.
+- **3 new cookbook recipes** for v0.1.1 capabilities:
+  - [`mcp-resource-dataset`](https://xingchengxu.github.io/OpenExpertise/cookbook/mcp-resource-dataset) — reading from an MCP server via the dataset source. Covers `mcp.json` config, row normalization contract, and the 5 actionable error paths.
+  - [`submit-to-registry`](https://xingchengxu.github.io/OpenExpertise/cookbook/submit-to-registry) — happy path for `oe submit` with the pre-submit checklist + field auto-detection table + dry-run.
+  - [`cross-vendor-chain`](https://xingchengxu.github.io/OpenExpertise/cookbook/cross-vendor-chain) — Claude → Codex → Gemini serial pattern extracted as a reusable recipe.
+
+### Docs
+
+- **"Your first experience" tutorial** at `/guide/first-experience` — full 30-min walkthrough from `oe init` through tested + registry-submittable flow. Companion `examples/your-first-experience/` reference implementation (weekly engineering digest).
+- **"Authoring with oe ultra" tutorial** at `/guide/authoring-ultra` — parallel 30-min walkthrough for the ultra-driven authoring path. Different domain (PR welcome bot) to avoid overlap.
+- **5 case-study deep dives** at `/use-cases/`:
+  - Multi-dimensional PR review (engineering)
+  - Executable on-call runbook (SRE)
+  - Multi-vendor compliance scan (security)
+  - Reproducible LLM evaluation suite (ML platform)
+  - Tier-1 support routing (customer ops)
+
+### Changed
+
+- README install section adds a callout for `oe ultra` — pointing first-time users at the LLM-authored path.
+- Site nav version dropdown bumped 0.1.0 → 0.1.2 → 0.1.3.
+- Test count: 293 → 310 (+17 in `packages/cli/tests/ultra.test.ts`).
+
+[0.1.3]: https://github.com/xingchengxu/OpenExpertise/releases/tag/v0.1.3
+
 ## [0.1.2] — 2026-05-28
 
 Tiny patch over 0.1.1 — the kind of bug only noticed after a fresh `npm install`.

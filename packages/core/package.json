@@ -1,6 +1,6 @@
 {
   "name": "@openexpertise/core",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Scheduler, dispatcher registry, event bus, and SQLite-backed state store — the OpenExpertise runtime.",
   "keywords": [
     "openexpertise",
