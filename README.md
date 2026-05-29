@@ -56,6 +56,39 @@ oe demo review-branch                  # preview the PR review flow + advisor's 
 
 > **New to OpenExpertise?** Walk through the [30-minute "Your first experience" tutorial](https://xingchengxu.github.io/OpenExpertise/guide/first-experience) — by the end you'll have a tested, registry-submittable flow you built yourself.
 
+### See any experience as a diagram
+
+`oe graph` turns any experience into a Mermaid diagram — paste it straight into a GitHub README (or `--html` for a standalone page).
+
+```bash
+oe graph examples/review-branch
+```
+
+```mermaid
+flowchart TD
+  subgraph phase_collect["collect"]
+    fetch_diff["fetch_diff"]:::tool
+    seed_dimensions["seed_dimensions"]:::tool
+  end
+  subgraph phase_review["review"]
+    bug_review("bug_review
+⟳ for each $.dimensions"):::agent
+  end
+  subgraph phase_verify["verify"]
+    verify_finding("verify_finding
+⟳ for each $.findings"):::agent
+  end
+  subgraph phase_score["score"]
+    score("score"):::agent
+  end
+  fetch_diff --> seed_dimensions
+  seed_dimensions --> bug_review
+  bug_review --> verify_finding
+  verify_finding -->|"length($.findings) &gt; 0"| score
+  classDef tool fill:#e3f2fd,stroke:#1565c0
+  classDef agent fill:#ede7f6,stroke:#5e35b1
+```
+
 Pull any public GitHub repo with an `experience.yaml`:
 
 ```bash
@@ -443,6 +476,7 @@ Seven MCP tools are exposed: `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, 
 | `oe diff`                      | List pending evolution proposals                                                          |
 | `oe ultra "<task>"`            | LLM authors a new experience from natural language                                        |
 | `oe ultra-revise <dir> "<fb>"` | Apply natural-language feedback to an existing draft (critique→revise)                    |
+| `oe graph [path]`              | Render an experience as a Mermaid diagram (`--html`, `-o <file>`, `--lr`)                 |
 
 ### `--tui` dashboard
 
