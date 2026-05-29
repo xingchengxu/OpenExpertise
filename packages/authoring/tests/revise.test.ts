@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import type { LLMClient, LLMCompleteOpts } from '@openexpertise/core'
 import { UltraExpertise } from '../src/ultra.js'
 import { writeDraft, readDraft, PathTraversalError } from '../src/writer.js'
-import type { AnalysisOutput, SynthesisOutput } from '../src/schemas.js'
+import type { AnalysisOutput, SynthesisOutput, CritiqueOutput } from '../src/schemas.js'
 
 class ScriptedLLM implements LLMClient {
   public calls: LLMCompleteOpts[] = []
@@ -140,6 +140,172 @@ describe('readDraft', () => {
     expect(paths).toContain('tools/sub/x.mjs')
     expect(r.synthesis.files.find((f) => f.path === 'tools/sub/x.mjs')?.content).toBe(
       'export default async () => ({ state_delta: {} })\n',
+    )
+  })
+})
+
+// Plan A's QueuedScriptedLLM convention: per-role response arrays + index.
+class QueuedScriptedLLM implements LLMClient {
+  public calls: LLMCompleteOpts[] = []
+  private idx: Record<string, number> = { architect: 0, synthesizer: 0, critic: 0, reviser: 0 }
+  constructor(
+    private q: {
+      analysis: AnalysisOutput[]
+      synthesis: SynthesisOutput[]
+      critique: Array<CritiqueOutput | null>
+      revise: SynthesisOutput[]
+    },
+  ) {}
+  private next<T>(role: string, arr: T[]): T {
+    const i = Math.min(this.idx[role]!, arr.length - 1)
+    this.idx[role]!++
+    return arr[i]!
+  }
+  async complete(opts: LLMCompleteOpts) {
+    this.calls.push(opts)
+    const s = opts.system ?? ''
+    if (s.includes('SOP architect'))
+      return { text: '', tool_calls: [{ name: 'structured_output', input: this.next('architect', this.q.analysis) }] }
+    if (s.includes('SOP critic')) {
+      const c = this.next('critic', this.q.critique)
+      if (c === null) return { text: 'no tool call' }
+      return { text: '', tool_calls: [{ name: 'structured_output', input: c }] }
+    }
+    if (s.includes('SOP reviser'))
+      return { text: '', tool_calls: [{ name: 'structured_output', input: this.next('reviser', this.q.revise) }] }
+    return { text: '', tool_calls: [{ name: 'structured_output', input: this.next('synthesizer', this.q.synthesis) }] }
+  }
+}
+
+const HIGH_FINDING: CritiqueOutput = {
+  score: 60,
+  findings: [{ dimension: 'decomposition', severity: 'high', anchor: { node_id: 'greet' }, evidence: 'x', fix: 'split it' }],
+}
+
+// A reviser output that ADDS a second tool file + node (incremental edit on top of SYNTHESIS).
+const REVISED_SYNTH: SynthesisOutput = {
+  experience_yaml: `name: hello-author
+version: 0.1.0
+state:
+  schema:
+    greeting: { type: string }
+graph:
+  nodes:
+    - id: greet
+      kind: tool
+      phase: main
+      impl: ./tools/greet.mjs
+      writes: [greeting]
+    - id: greet2
+      kind: tool
+      phase: main
+      impl: ./tools/greet2.mjs
+      writes: [greeting]
+  edges: []
+phases:
+  - { id: main }
+`,
+  files: [
+    { path: 'tools/greet.mjs', content: SYNTHESIS.files[0]!.content },
+    { path: 'tools/greet2.mjs', content: 'export default async function () { return { state_delta: {} } }\n' },
+    { path: 'README.md', content: '# hello-author\n' },
+  ],
+  next_steps: [],
+}
+
+describe('UltraExpertise.reviseDraft', () => {
+  let tmp: string
+  afterEach(() => {
+    if (tmp) rmSync(tmp, { recursive: true, force: true })
+  })
+
+  async function seedDraft(): Promise<string> {
+    tmp = mkdtempSync(join(tmpdir(), 'oe-revisedraft-'))
+    const seedLlm = new ScriptedLLM(ANALYSIS, SYNTHESIS)
+    const ultra = new UltraExpertise({ client: seedLlm })
+    const r = (await ultra.author({ taskDescription: 'say hi', rootDir: tmp, maxRounds: 0 })) as {
+      draftDir: string
+    }
+    return r.draftDir
+  }
+
+  it('applies feedback as an incremental edit and returns the success-only shape', async () => {
+    const draftDir = await seedDraft()
+    const llm = new QueuedScriptedLLM({
+      analysis: [ANALYSIS],
+      synthesis: [SYNTHESIS],
+      critique: [HIGH_FINDING],
+      revise: [REVISED_SYNTH],
+    })
+    const ultra = new UltraExpertise({ client: llm })
+    const result = await ultra.reviseDraft({ draftDir, feedback: 'add a second greet node', maxRounds: 1 })
+    expect('stopped' in result).toBe(false) // success-only, never the stopped arm
+    expect(result.validation.valid).toBe(true)
+    expect(result.loop.rounds_run).toBeGreaterThanOrEqual(1)
+    // incremental: untouched README.md is byte-identical
+    const readme = readFileSync(join(draftDir, 'README.md'), 'utf8')
+    expect(readme).toBe('# hello-author\n')
+    // the targeted edit landed
+    const written = readFileSync(join(draftDir, 'experience.yaml'), 'utf8')
+    expect(written).toContain('greet2')
+  })
+
+  it('the user feedback reaches the reviser as a high-priority directive finding', async () => {
+    const draftDir = await seedDraft()
+    const llm = new QueuedScriptedLLM({
+      analysis: [ANALYSIS],
+      synthesis: [SYNTHESIS],
+      critique: [{ score: 80, findings: [] }], // critic adds nothing; feedback must still steer
+      revise: [REVISED_SYNTH],
+    })
+    const ultra = new UltraExpertise({ client: llm })
+    await ultra.reviseDraft({ draftDir, feedback: 'add a second greet node', maxRounds: 1 })
+    const reviseCall = llm.calls.find((c) => c.system?.includes('SOP reviser'))
+    expect(reviseCall).toBeDefined()
+    expect(reviseCall!.messages[0]!.content).toContain('add a second greet node')
+  })
+
+  it('prunes a tool file absent from the new files[] but never analysis.json', async () => {
+    const draftDir = await seedDraft()
+    // start with a draft that has tools/greet.mjs; reviser drops the tool, replacing
+    // the greet node with an inline-prompt agent node (no impl file). A coherent draft:
+    // the YAML no longer references the dropped tool, so it still preflights/validates
+    // clean and wins keep-best — which is what lets the prune actually run.
+    const DROPPED: SynthesisOutput = {
+      experience_yaml: `name: hello-author
+version: 0.1.0
+state:
+  schema:
+    greeting: { type: string }
+graph:
+  nodes:
+    - id: greet
+      kind: agent
+      phase: main
+      prompt: Say hello and write the greeting.
+      writes: [greeting]
+  edges: []
+phases:
+  - { id: main }
+`,
+      files: [{ path: 'README.md', content: '# hello-author\n' }], // tools/greet.mjs removed
+    }
+    const llm = new QueuedScriptedLLM({
+      analysis: [ANALYSIS],
+      synthesis: [SYNTHESIS],
+      critique: [HIGH_FINDING],
+      revise: [DROPPED],
+    })
+    const ultra = new UltraExpertise({ client: llm })
+    await ultra.reviseDraft({ draftDir, feedback: 'remove the greet tool', maxRounds: 1 })
+    expect(existsSync(join(draftDir, 'tools/greet.mjs'))).toBe(false) // pruned
+    expect(existsSync(join(draftDir, 'analysis.json'))).toBe(true) // never pruned
+  })
+
+  it('rejects a draftDir escaping via .. with PathTraversalError', async () => {
+    const ultra = new UltraExpertise({ client: new ScriptedLLM(ANALYSIS, SYNTHESIS) })
+    await expect(ultra.reviseDraft({ draftDir: '../../etc', feedback: 'x' })).rejects.toThrow(
+      PathTraversalError,
     )
   })
 })

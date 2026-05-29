@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync, readdirSync, existsSync, statSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { readFileSync, writeFileSync, unlinkSync, readdirSync, existsSync, statSync } from 'node:fs'
+import { dirname, join, resolve, relative, isAbsolute } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import Ajv from 'ajv'
 import type { LLMClient, LLMTool, LLMUsage } from '@openexpertise/core'
@@ -15,7 +15,7 @@ import {
 } from './schemas.js'
 import { preflightDraft, type PreflightResult } from './preflight.js'
 import { pickExemplars, type Exemplar } from './grounding.js'
-import { writeDraft, type WriteDraftResult } from './writer.js'
+import { writeDraft, readDraft, type WriteDraftResult } from './writer.js'
 import { slugify } from './slug.js'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -429,6 +429,170 @@ export class UltraExpertise {
       tokens,
     }
     return { analysis, synthesis: best.synthesis, ...writeResult, validation, loop }
+  }
+
+  // Apply natural-language feedback to an existing on-disk draft. Reads the draft
+  // back into a SynthesisOutput, injects the feedback as a high-priority "user
+  // directive" finding, and runs a steered critique→revise pass with the SAME
+  // keep-best/monotonicity guarantees as author()'s loop. Unlike author(), this
+  // ALWAYS runs at least one revise (the user gave explicit feedback) and returns
+  // the SUCCESS-ONLY arm (never the { stopped } discriminant — there is no
+  // analyze/dry-run arm here).
+  async reviseDraft(opts: {
+    draftDir: string
+    feedback: string
+    maxRounds?: number
+    onPhase?: (event: PhaseEvent) => void
+  }): Promise<
+    UltraResult &
+      WriteDraftResult & { validation: { valid: boolean; errors?: string[] } } & { loop: LoopMeta }
+  > {
+    const { onPhase } = opts
+    const maxRounds = opts.maxRounds ?? 1
+    const scoreBar = Number(process.env['OE_ULTRA_SCORE_BAR'] ?? 80)
+
+    // Read the existing draft back into a SynthesisOutput + analysis (throws
+    // PathTraversalError on a .. escape; loads analysis.json or re-derives it).
+    // NOTE: pass opts.draftDir straight through — readDraft owns the resolve()
+    // + traversal guard, so the '../../etc' test relies on NOT resolving first.
+    const { draftDir: absRoot, synthesis, analysis } = readDraft(opts.draftDir)
+    const task = analysis.description
+
+    type Round = {
+      synthesis: SynthesisOutput
+      preflight: PreflightResult
+      validation: { valid: boolean; errors?: string[] }
+      critique: CritiqueOutput | null
+      composite: number
+    }
+    const evaluate = (s: SynthesisOutput, critique: CritiqueOutput | null): Round => {
+      const preflight = preflightDraft(s)
+      const validation = this.validateGeneratedYaml(s.experience_yaml)
+      let composite = 0
+      if (validation.valid && preflight.ok && critique) {
+        const high = critique.findings.filter((f) => f.severity === 'high').length
+        const med = critique.findings.filter((f) => f.severity === 'medium').length
+        composite = Math.max(0, Math.min(100, critique.score - 25 * high - 5 * med))
+      }
+      return { synthesis: s, preflight, validation, critique, composite }
+    }
+    const isBetter = (a: Round, b: Round): boolean => {
+      if (a.validation.valid !== b.validation.valid) return a.validation.valid
+      return a.composite > b.composite // ties keep the earlier (b stays best)
+    }
+
+    // The user's feedback becomes a high-priority synthetic "user directive"
+    // finding, prepended ahead of the critic's own findings so the reviser sees
+    // it first. Injected AFTER critique() — straight into the `steered` list — so
+    // it bypasses critique()'s anchor post-filter (anchor: {} is unverifiable).
+    const directive: CritiqueFinding = {
+      dimension: 'decomposition',
+      severity: 'high',
+      anchor: {},
+      evidence: 'user directive',
+      fix: opts.feedback,
+    }
+
+    let current = evaluate(synthesis, null)
+    let best = current
+    const critiques: CritiqueOutput[] = []
+    let roundsRun = 0
+    const tokens = { input: 0, output: 0 }
+    const addUsage = (usage?: LLMUsage): void => {
+      tokens.input += usage?.input_tokens ?? 0
+      tokens.output += usage?.output_tokens ?? 0
+    }
+
+    for (let round = 1; round <= maxRounds; round++) {
+      onPhase?.({ phase: 'critique', status: 'start', round })
+      const tc = Date.now()
+      const { critique, usage: critiqueUsage } = await this.critique(
+        task,
+        analysis,
+        current.synthesis,
+        current.preflight,
+        current.validation,
+      )
+      addUsage(critiqueUsage)
+      onPhase?.({
+        phase: 'critique',
+        status: 'done',
+        round,
+        duration_ms: Date.now() - tc,
+        result: critique ?? { score: 0, findings: [] },
+      })
+      roundsRun = round
+      if (critique) critiques.push(critique)
+      current = evaluate(current.synthesis, critique)
+      if (isBetter(current, best)) best = current
+
+      // Steered findings: the user directive ALWAYS leads; the critic's findings follow.
+      const steered: CritiqueFinding[] = [directive, ...(critique?.findings ?? [])]
+
+      onPhase?.({ phase: 'revise', status: 'start', round })
+      const tr = Date.now()
+      let revised: SynthesisOutput
+      try {
+        const reviseResult = await this.revise(
+          task,
+          analysis,
+          current.synthesis,
+          steered,
+          current.validation.errors ?? [],
+        )
+        revised = reviseResult.synthesis
+        addUsage(reviseResult.usage)
+      } catch {
+        break // reviser error → keep best, stop
+      }
+      onPhase?.({ phase: 'revise', status: 'done', round, duration_ms: Date.now() - tr, result: revised })
+
+      // The reviser targeted the steered findings (the user directive + the
+      // critic's own); treat them as resolved and score the revised draft by the
+      // critic's subjective `score` (composite = clamp(score), no finding penalty)
+      // — exactly as author()'s loop does. When the critic soft-failed (critique
+      // === null) there is no score to inherit, so fall back to the score bar so a
+      // valid directive-applied revise is preferred over the (composite-0) baseline.
+      const revisedScore = critique?.score ?? scoreBar
+      const revisedRound = evaluate(revised, { score: revisedScore, findings: [] })
+      // Monotonicity gate: reject a revise that regresses validity.
+      if (best.validation.valid && !revisedRound.validation.valid) {
+        break // diverging → keep prior best, stop
+      }
+      current = revisedRound
+      if (isBetter(current, best)) best = current
+    }
+
+    // Prune: remove draft files absent from the new files[] (never analysis.json,
+    // never experience.yaml, never paths outside the dir).
+    const keep = new Set(best.synthesis.files.map((f) => f.path.replace(/^\.\//, '')))
+    keep.add('experience.yaml')
+    keep.add('analysis.json')
+    const priorFiles = new Set(synthesis.files.map((f) => f.path.replace(/^\.\//, '')))
+    for (const rel of priorFiles) {
+      if (!keep.has(rel)) {
+        const abs = resolve(absRoot, rel)
+        const relCheck = relative(absRoot, abs)
+        if (!relCheck.startsWith('..') && !isAbsolute(relCheck) && existsSync(abs)) {
+          unlinkSync(abs)
+        }
+      }
+    }
+
+    const writeResult = await writeDraft({
+      draftDir: absRoot,
+      experienceYaml: best.synthesis.experience_yaml,
+      files: best.synthesis.files,
+    })
+    writeFileSync(join(writeResult.draftDir, 'analysis.json'), JSON.stringify(analysis, null, 2))
+
+    const loop: LoopMeta = {
+      rounds_run: roundsRun,
+      final_score: best.critique ? best.composite : null,
+      critiques,
+      tokens,
+    }
+    return { analysis, synthesis: best.synthesis, ...writeResult, validation: best.validation, loop }
   }
 
   // Scan a corpus dir of authored experiences into Exemplar[]. Each immediate
