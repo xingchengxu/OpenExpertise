@@ -234,7 +234,9 @@ export function buildProgram(): Command {
         if (cmdOpts.maxRounds !== undefined) {
           const n = Number(cmdOpts.maxRounds)
           if (!Number.isInteger(n) || n < 0) {
-            console.error(`oe ultra: --max-rounds must be a non-negative integer (got "${cmdOpts.maxRounds}")`)
+            console.error(
+              `oe ultra: --max-rounds must be a non-negative integer (got "${cmdOpts.maxRounds}")`,
+            )
             process.exit(1)
           }
         }

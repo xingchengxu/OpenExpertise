@@ -19,7 +19,9 @@ graph:
       writes: [greeting]
   edges: []
 `,
-  files: [{ path: 'tools/greet.mjs', content: 'export default async () => ({ state_delta: {} })\n' }],
+  files: [
+    { path: 'tools/greet.mjs', content: 'export default async () => ({ state_delta: {} })\n' },
+  ],
 }
 
 describe('preflightDraft', () => {
@@ -39,7 +41,10 @@ describe('preflightDraft', () => {
   it('flags an undeclared writes field via validateExperienceSpec', () => {
     const bad = {
       ...CLEAN,
-      experience_yaml: CLEAN.experience_yaml.replace('writes: [greeting]', 'writes: [missing_field]'),
+      experience_yaml: CLEAN.experience_yaml.replace(
+        'writes: [greeting]',
+        'writes: [missing_field]',
+      ),
     }
     const r = preflightDraft(bad)
     expect(r.ok).toBe(false)
@@ -49,7 +54,10 @@ describe('preflightDraft', () => {
   it('flags a dangling edge via buildDag', () => {
     const bad = {
       ...CLEAN,
-      experience_yaml: CLEAN.experience_yaml.replace('  edges: []', '  edges:\n    - { from: greet, to: ghost }'),
+      experience_yaml: CLEAN.experience_yaml.replace(
+        '  edges: []',
+        '  edges:\n    - { from: greet, to: ghost }',
+      ),
     }
     const r = preflightDraft(bad)
     expect(r.ok).toBe(false)

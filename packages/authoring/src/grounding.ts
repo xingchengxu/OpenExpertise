@@ -49,11 +49,7 @@ const W1 = 0.3
 const W2 = 0.6
 const W3 = 0.1
 
-export function pickExemplars(
-  analysis: AnalysisOutput,
-  corpus: Exemplar[],
-  n = 2,
-): Exemplar[] {
+export function pickExemplars(analysis: AnalysisOutput, corpus: Exemplar[], n = 2): Exemplar[] {
   if (corpus.length === 0 || n <= 0) return []
 
   const aHist = kindHistogram(analysis.node_sketches.map((s) => s.kind))

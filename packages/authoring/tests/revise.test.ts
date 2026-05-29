@@ -133,7 +133,9 @@ describe('readDraft', () => {
     const written = await writeDraft({
       draftDir: join(tmp, 'd'),
       experienceYaml: SYNTHESIS.experience_yaml,
-      files: [{ path: 'tools/sub/x.mjs', content: 'export default async () => ({ state_delta: {} })\n' }],
+      files: [
+        { path: 'tools/sub/x.mjs', content: 'export default async () => ({ state_delta: {} })\n' },
+      ],
     })
     const r = readDraft(written.draftDir)
     const paths = r.synthesis.files.map((f) => f.path)
@@ -165,21 +167,40 @@ class QueuedScriptedLLM implements LLMClient {
     this.calls.push(opts)
     const s = opts.system ?? ''
     if (s.includes('SOP architect'))
-      return { text: '', tool_calls: [{ name: 'structured_output', input: this.next('architect', this.q.analysis) }] }
+      return {
+        text: '',
+        tool_calls: [{ name: 'structured_output', input: this.next('architect', this.q.analysis) }],
+      }
     if (s.includes('SOP critic')) {
       const c = this.next('critic', this.q.critique)
       if (c === null) return { text: 'no tool call' }
       return { text: '', tool_calls: [{ name: 'structured_output', input: c }] }
     }
     if (s.includes('SOP reviser'))
-      return { text: '', tool_calls: [{ name: 'structured_output', input: this.next('reviser', this.q.revise) }] }
-    return { text: '', tool_calls: [{ name: 'structured_output', input: this.next('synthesizer', this.q.synthesis) }] }
+      return {
+        text: '',
+        tool_calls: [{ name: 'structured_output', input: this.next('reviser', this.q.revise) }],
+      }
+    return {
+      text: '',
+      tool_calls: [
+        { name: 'structured_output', input: this.next('synthesizer', this.q.synthesis) },
+      ],
+    }
   }
 }
 
 const HIGH_FINDING: CritiqueOutput = {
   score: 60,
-  findings: [{ dimension: 'decomposition', severity: 'high', anchor: { node_id: 'greet' }, evidence: 'x', fix: 'split it' }],
+  findings: [
+    {
+      dimension: 'decomposition',
+      severity: 'high',
+      anchor: { node_id: 'greet' },
+      evidence: 'x',
+      fix: 'split it',
+    },
+  ],
 }
 
 // A reviser output that ADDS a second tool file + node (incremental edit on top of SYNTHESIS).
@@ -207,7 +228,10 @@ phases:
 `,
   files: [
     { path: 'tools/greet.mjs', content: SYNTHESIS.files[0]!.content },
-    { path: 'tools/greet2.mjs', content: 'export default async function () { return { state_delta: {} } }\n' },
+    {
+      path: 'tools/greet2.mjs',
+      content: 'export default async function () { return { state_delta: {} } }\n',
+    },
     { path: 'README.md', content: '# hello-author\n' },
   ],
   next_steps: [],
@@ -246,7 +270,10 @@ phases:
 `,
   files: [
     { path: 'tools/greet.mjs', content: SYNTHESIS.files[0]!.content },
-    { path: 'tools/greet2.mjs', content: 'export default async function () { return { state_delta: {} } }\n' },
+    {
+      path: 'tools/greet2.mjs',
+      content: 'export default async function () { return { state_delta: {} } }\n',
+    },
     { path: 'README.md', content: '# hello-author\n' },
   ],
   next_steps: [],
@@ -277,7 +304,11 @@ describe('UltraExpertise.reviseDraft', () => {
       revise: [REVISED_SYNTH],
     })
     const ultra = new UltraExpertise({ client: llm })
-    const result = await ultra.reviseDraft({ draftDir, feedback: 'add a second greet node', maxRounds: 1 })
+    const result = await ultra.reviseDraft({
+      draftDir,
+      feedback: 'add a second greet node',
+      maxRounds: 1,
+    })
     expect('stopped' in result).toBe(false) // success-only, never the stopped arm
     expect(result.validation.valid).toBe(true)
     expect(result.loop.rounds_run).toBeGreaterThanOrEqual(1)
@@ -354,10 +385,14 @@ phases:
       analysis: [ANALYSIS],
       synthesis: [SYNTHESIS],
       critique: [{ score: 85, findings: [] }], // critic finds NOTHING wrong with the original
-      revise: [REVISED_SYNTH],                  // but the user's directive still produces an edit
+      revise: [REVISED_SYNTH], // but the user's directive still produces an edit
     })
     const ultra = new UltraExpertise({ client: llm })
-    const result = await ultra.reviseDraft({ draftDir, feedback: 'add a second greet node', maxRounds: 1 })
+    const result = await ultra.reviseDraft({
+      draftDir,
+      feedback: 'add a second greet node',
+      maxRounds: 1,
+    })
     expect(result.validation.valid).toBe(true)
     // the user's edit MUST land even though round-0 scored equally well:
     const written = readFileSync(join(draftDir, 'experience.yaml'), 'utf8')
@@ -373,7 +408,11 @@ phases:
       revise: [REVISED_SYNTH, REVISED_SYNTH_2], // round1 → greet2, round2 → greet3
     })
     const ultra = new UltraExpertise({ client: llm })
-    const result = await ultra.reviseDraft({ draftDir, feedback: 'keep adding greet nodes', maxRounds: 2 })
+    const result = await ultra.reviseDraft({
+      draftDir,
+      feedback: 'keep adding greet nodes',
+      maxRounds: 2,
+    })
     expect(result.loop.rounds_run).toBe(2)
     expect(result.validation.valid).toBe(true)
     const written = readFileSync(join(draftDir, 'experience.yaml'), 'utf8')
@@ -385,8 +424,10 @@ phases:
     const before = readFileSync(join(draftDir, 'experience.yaml'), 'utf8')
     const llm: LLMClient = {
       async complete(opts: LLMCompleteOpts) {
-        if (opts.system?.includes('SOP architect')) return { text: '', tool_calls: [{ name: 'structured_output', input: ANALYSIS }] }
-        if (opts.system?.includes('SOP critic')) return { text: '', tool_calls: [{ name: 'structured_output', input: HIGH_FINDING }] }
+        if (opts.system?.includes('SOP architect'))
+          return { text: '', tool_calls: [{ name: 'structured_output', input: ANALYSIS }] }
+        if (opts.system?.includes('SOP critic'))
+          return { text: '', tool_calls: [{ name: 'structured_output', input: HIGH_FINDING }] }
         if (opts.system?.includes('SOP reviser')) return { text: 'no tool call' } // → revise() throws
         return { text: '', tool_calls: [{ name: 'structured_output', input: SYNTHESIS }] }
       },
@@ -401,7 +442,10 @@ phases:
     const draftDir = await seedDraft()
     // corrupt the on-disk draft so round-0 is invalid
     const yamlPath = join(draftDir, 'experience.yaml')
-    writeFileSync(yamlPath, readFileSync(yamlPath, 'utf8').replace('writes: [greeting]', 'writes: [undeclared_field]'))
+    writeFileSync(
+      yamlPath,
+      readFileSync(yamlPath, 'utf8').replace('writes: [greeting]', 'writes: [undeclared_field]'),
+    )
     const llm = new QueuedScriptedLLM({
       analysis: [ANALYSIS],
       synthesis: [SYNTHESIS],

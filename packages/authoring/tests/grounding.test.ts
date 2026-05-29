@@ -19,12 +19,14 @@ const CORPUS: Exemplar[] = [
   {
     name: 'soc2-review',
     description: 'review compliance code',
-    experience_yaml_excerpt: 'graph:\n  nodes:\n    - { id: x, kind: agent }\n    - { id: y, kind: agent }\n    - { id: z, kind: tool }\n',
+    experience_yaml_excerpt:
+      'graph:\n  nodes:\n    - { id: x, kind: agent }\n    - { id: y, kind: agent }\n    - { id: z, kind: tool }\n',
   },
   {
     name: 'data-pipeline',
     description: 'load and transform datasets',
-    experience_yaml_excerpt: 'graph:\n  nodes:\n    - { id: l, kind: dataset }\n    - { id: t, kind: tool }\n',
+    experience_yaml_excerpt:
+      'graph:\n  nodes:\n    - { id: l, kind: dataset }\n    - { id: t, kind: tool }\n',
   },
 ]
 

@@ -50,7 +50,10 @@ class QueuedScriptedLLM implements LLMClient {
     this.calls.push(opts)
     const s = opts.system ?? ''
     if (s.includes('SOP architect')) {
-      return { text: '', tool_calls: [{ name: 'structured_output', input: this.next('architect', this.q.analysis) }] }
+      return {
+        text: '',
+        tool_calls: [{ name: 'structured_output', input: this.next('architect', this.q.analysis) }],
+      }
     }
     if (s.includes('SOP critic')) {
       const c = this.next('critic', this.q.critique)
@@ -58,10 +61,18 @@ class QueuedScriptedLLM implements LLMClient {
       return { text: '', tool_calls: [{ name: 'structured_output', input: c }] }
     }
     if (s.includes('SOP reviser')) {
-      return { text: '', tool_calls: [{ name: 'structured_output', input: this.next('reviser', this.q.revise) }] }
+      return {
+        text: '',
+        tool_calls: [{ name: 'structured_output', input: this.next('reviser', this.q.revise) }],
+      }
     }
     // SOP synthesizer
-    return { text: '', tool_calls: [{ name: 'structured_output', input: this.next('synthesizer', this.q.synthesis) }] }
+    return {
+      text: '',
+      tool_calls: [
+        { name: 'structured_output', input: this.next('synthesizer', this.q.synthesis) },
+      ],
+    }
   }
 }
 
@@ -109,13 +120,22 @@ phases:
 // critique above the score bar → early-stop.
 const INVALID_SYNTH: SynthesisOutput = {
   ...SYNTHESIS,
-  experience_yaml: SYNTHESIS.experience_yaml.replace('writes: [greeting]', 'writes: [undeclared_field]'),
+  experience_yaml: SYNTHESIS.experience_yaml.replace(
+    'writes: [greeting]',
+    'writes: [undeclared_field]',
+  ),
 }
 const FIXED_SYNTH: SynthesisOutput = { ...SYNTHESIS }
 const HIGH_FINDING: CritiqueOutput = {
   score: 40,
   findings: [
-    { dimension: 'decomposition', severity: 'high', anchor: { node_id: 'greet' }, evidence: 'x', fix: 'declare the field' },
+    {
+      dimension: 'decomposition',
+      severity: 'high',
+      anchor: { node_id: 'greet' },
+      evidence: 'x',
+      fix: 'declare the field',
+    },
   ],
 }
 const PASSING_CRITIQUE: CritiqueOutput = { score: 95, findings: [] }
@@ -206,7 +226,13 @@ describe('UltraExpertise.critique', () => {
       },
     }
     const ultra = new UltraExpertise({ client: llm })
-    const { critique: c, usage } = await ultra.critique('say hi', ANALYSIS, SYNTHESIS, { ok: true, issues: [] }, { valid: true })
+    const { critique: c, usage } = await ultra.critique(
+      'say hi',
+      ANALYSIS,
+      SYNTHESIS,
+      { ok: true, issues: [] },
+      { valid: true },
+    )
     expect(c).not.toBeNull()
     expect(c!.findings).toHaveLength(1)
     expect(usage).toEqual({ input_tokens: 11, output_tokens: 22 })
@@ -223,7 +249,13 @@ describe('UltraExpertise.critique', () => {
               input: {
                 score: 60,
                 findings: [
-                  { dimension: 'decomposition', severity: 'high', anchor: { node_id: 'ghost-node' }, evidence: 'x', fix: 'y' },
+                  {
+                    dimension: 'decomposition',
+                    severity: 'high',
+                    anchor: { node_id: 'ghost-node' },
+                    evidence: 'x',
+                    fix: 'y',
+                  },
                 ],
               },
             },
@@ -232,7 +264,13 @@ describe('UltraExpertise.critique', () => {
       },
     }
     const ultra = new UltraExpertise({ client: llm })
-    const { critique: c } = await ultra.critique('say hi', ANALYSIS, SYNTHESIS, { ok: true, issues: [] }, { valid: true })
+    const { critique: c } = await ultra.critique(
+      'say hi',
+      ANALYSIS,
+      SYNTHESIS,
+      { ok: true, issues: [] },
+      { valid: true },
+    )
     expect(c!.findings).toHaveLength(0)
   })
 
@@ -247,7 +285,13 @@ describe('UltraExpertise.critique', () => {
               input: {
                 score: 60,
                 findings: [
-                  { dimension: 'decomposition', severity: 'high', anchor: {}, evidence: 'x', fix: 'y' },
+                  {
+                    dimension: 'decomposition',
+                    severity: 'high',
+                    anchor: {},
+                    evidence: 'x',
+                    fix: 'y',
+                  },
                 ],
               },
             },
@@ -256,7 +300,13 @@ describe('UltraExpertise.critique', () => {
       },
     }
     const ultra = new UltraExpertise({ client: llm })
-    const { critique: c } = await ultra.critique('say hi', ANALYSIS, SYNTHESIS, { ok: true, issues: [] }, { valid: true })
+    const { critique: c } = await ultra.critique(
+      'say hi',
+      ANALYSIS,
+      SYNTHESIS,
+      { ok: true, issues: [] },
+      { valid: true },
+    )
     expect(c!.findings).toHaveLength(0)
   })
 
@@ -267,7 +317,13 @@ describe('UltraExpertise.critique', () => {
       },
     }
     const ultra = new UltraExpertise({ client: llm })
-    const { critique: c } = await ultra.critique('say hi', ANALYSIS, SYNTHESIS, { ok: true, issues: [] }, { valid: true })
+    const { critique: c } = await ultra.critique(
+      'say hi',
+      ANALYSIS,
+      SYNTHESIS,
+      { ok: true, issues: [] },
+      { valid: true },
+    )
     expect(c).toBeNull()
   })
 
@@ -276,10 +332,17 @@ describe('UltraExpertise.critique', () => {
     const llm: LLMClient = {
       async complete(opts) {
         seenModel = opts.model
-        return { text: '', tool_calls: [{ name: 'structured_output', input: { score: 90, findings: [] } }] }
+        return {
+          text: '',
+          tool_calls: [{ name: 'structured_output', input: { score: 90, findings: [] } }],
+        }
       },
     }
-    const ultra = new UltraExpertise({ client: llm, model: 'base-model', criticModel: 'critic-model' })
+    const ultra = new UltraExpertise({
+      client: llm,
+      model: 'base-model',
+      criticModel: 'critic-model',
+    })
     await ultra.critique('say hi', ANALYSIS, SYNTHESIS, { ok: true, issues: [] }, { valid: true })
     expect(seenModel).toBe('critic-model')
   })
@@ -358,7 +421,9 @@ describe('UltraExpertise.author quality loop', () => {
     // The legacy fakes only route architect/synthesizer; assert critique() was never invoked.
     expect(llm.calls.some((c) => c.system?.includes('SOP critic'))).toBe(false)
     // Characterization: the round-0 draft is written UNCHANGED on the no-loop path.
-    expect((result as { synthesis: { experience_yaml: string } }).synthesis.experience_yaml).toBe(SYNTHESIS.experience_yaml)
+    expect((result as { synthesis: { experience_yaml: string } }).synthesis.experience_yaml).toBe(
+      SYNTHESIS.experience_yaml,
+    )
   })
 
   it('(7a) auto-fixes an injected schema error: writes the corrected draft AND reports a non-null final_score', async () => {
@@ -441,13 +506,17 @@ describe('UltraExpertise.author quality loop', () => {
     tmp2 = mkdtempSync(join(tmpdir(), 'oe-author-mono-'))
     const llm = new QueuedScriptedLLM({
       analysis: [ANALYSIS],
-      synthesis: [SYNTHESIS],        // round-0 valid
+      synthesis: [SYNTHESIS], // round-0 valid
       critique: [HIGH_FINDING, HIGH_FINDING], // would critique again in round 2 if not stopped
       revise: [INVALID_SYNTH, INVALID_SYNTH], // round-1 revise regresses validity
     })
     const ultra = new UltraExpertise({ client: llm })
     const result = await ultra.author({ taskDescription: 'say hi', rootDir: tmp2, maxRounds: 2 })
-    const r = result as { validation: { valid: boolean }; loop: { rounds_run: number }; draftDir: string }
+    const r = result as {
+      validation: { valid: boolean }
+      loop: { rounds_run: number }
+      draftDir: string
+    }
     // gate must stop the loop after the diverging round-1 revise:
     expect(r.loop.rounds_run).toBe(1)
     const reviserCalls = llm.calls.filter((c) => c.system?.includes('SOP reviser')).length
@@ -469,7 +538,11 @@ describe('UltraExpertise.author quality loop', () => {
     })
     const ultra = new UltraExpertise({ client: llm })
     const result = await ultra.author({ taskDescription: 'say hi', rootDir: tmp2, maxRounds: 1 })
-    const r = result as { validation: { valid: boolean }; loop: { rounds_run: number }; draftDir: string }
+    const r = result as {
+      validation: { valid: boolean }
+      loop: { rounds_run: number }
+      draftDir: string
+    }
     expect(r.validation.valid).toBe(true)
     expect(llm.calls.some((c) => c.system?.includes('SOP reviser'))).toBe(false)
     const written = readFileSync(join(r.draftDir, 'experience.yaml'), 'utf8')

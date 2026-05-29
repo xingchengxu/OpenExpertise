@@ -60,7 +60,10 @@ export function preflightDraft(synthesis: SynthesisOutput): PreflightResult {
   // in case validateExperienceSpec already threw — these checks run independently.)
   const declared = new Set(Object.keys(spec.state?.schema ?? {}))
   for (const node of nodes) {
-    for (const field of [...((node.writes ?? []) as string[]), ...((node.reads ?? []) as string[])]) {
+    for (const field of [
+      ...((node.writes ?? []) as string[]),
+      ...((node.reads ?? []) as string[]),
+    ]) {
       if (!declared.has(field)) {
         issues.push(`node "${node.id}" uses undeclared state field "${field}"`)
       }

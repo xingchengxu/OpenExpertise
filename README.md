@@ -429,20 +429,20 @@ Seven MCP tools are exposed: `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, 
 
 > First time? Run `oe doctor` to verify your environment.
 
-| Command                | Purpose                                                                                   |
-| ---------------------- | ----------------------------------------------------------------------------------------- |
-| `oe doctor`            | Check environment readiness (Node, pnpm, CLIs, API keys, writable dirs)                   |
-| `oe init <name>`       | Scaffold a new experience directory                                                       |
-| `oe validate [path]`   | Validate `experience.yaml`                                                                |
-| `oe run [path]`        | Execute an experience (`--tui`, `--evolve`, `--concurrency N`, `--llm anthropic\|openai`) |
-| `oe resume <run-id>`   | Re-run with cache replay                                                                  |
-| `oe inspect <run-id>`  | Replay a run's event log (sorted by ts)                                                   |
-| `oe state [field]`     | Inspect blackboard                                                                        |
-| `oe reset-state --yes` | Wipe blackboard                                                                           |
-| `oe evolve <run-id>`   | Generate evolution proposals                                                              |
-| `oe diff`              | List pending evolution proposals                                                          |
-| `oe ultra "<task>"`    | LLM authors a new experience from natural language                                        |
-| `oe ultra-revise <dir> "<fb>"` | Apply natural-language feedback to an existing draft (critique→revise)          |
+| Command                        | Purpose                                                                                   |
+| ------------------------------ | ----------------------------------------------------------------------------------------- |
+| `oe doctor`                    | Check environment readiness (Node, pnpm, CLIs, API keys, writable dirs)                   |
+| `oe init <name>`               | Scaffold a new experience directory                                                       |
+| `oe validate [path]`           | Validate `experience.yaml`                                                                |
+| `oe run [path]`                | Execute an experience (`--tui`, `--evolve`, `--concurrency N`, `--llm anthropic\|openai`) |
+| `oe resume <run-id>`           | Re-run with cache replay                                                                  |
+| `oe inspect <run-id>`          | Replay a run's event log (sorted by ts)                                                   |
+| `oe state [field]`             | Inspect blackboard                                                                        |
+| `oe reset-state --yes`         | Wipe blackboard                                                                           |
+| `oe evolve <run-id>`           | Generate evolution proposals                                                              |
+| `oe diff`                      | List pending evolution proposals                                                          |
+| `oe ultra "<task>"`            | LLM authors a new experience from natural language                                        |
+| `oe ultra-revise <dir> "<fb>"` | Apply natural-language feedback to an existing draft (critique→revise)                    |
 
 ### `--tui` dashboard
 

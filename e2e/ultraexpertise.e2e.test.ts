@@ -153,18 +153,31 @@ graph:
     // round-0 bad: writes an undeclared field so validation fails
     const INVALID_SYNTH = {
       ...FIXED_SYNTH,
-      experience_yaml: FIXED_SYNTH.experience_yaml.replace('writes: [greeting]', 'writes: [missing_field]'),
+      experience_yaml: FIXED_SYNTH.experience_yaml.replace(
+        'writes: [greeting]',
+        'writes: [missing_field]',
+      ),
     }
     const CRITIQUE = {
       score: 40,
       findings: [
-        { dimension: 'decomposition', severity: 'high', anchor: { node_id: 'greet' }, evidence: 'x', fix: 'declare the field' },
+        {
+          dimension: 'decomposition',
+          severity: 'high',
+          anchor: { node_id: 'greet' },
+          evidence: 'x',
+          fix: 'declare the field',
+        },
       ],
     }
 
     const llm = new QueuedCannedLLM(ANALYSIS, [INVALID_SYNTH, FIXED_SYNTH], CRITIQUE) // synthesizer→idx0 (bad), reviser→idx1 (fixed)
     const ultra = new UltraExpertise({ client: llm })
-    const result = (await ultra.author({ taskDescription: 'say hi', rootDir: dir, maxRounds: 1 })) as {
+    const result = (await ultra.author({
+      taskDescription: 'say hi',
+      rootDir: dir,
+      maxRounds: 1,
+    })) as {
       draftDir: string
       validation: { valid: boolean }
     }

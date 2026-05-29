@@ -44,7 +44,13 @@ export type PhaseEvent =
   | { phase: 'synthesize'; status: 'start' }
   | { phase: 'synthesize'; status: 'done'; duration_ms: number; result: SynthesisOutput }
   | { phase: 'critique'; status: 'start'; round: number }
-  | { phase: 'critique'; status: 'done'; round: number; duration_ms: number; result: CritiqueOutput }
+  | {
+      phase: 'critique'
+      status: 'done'
+      round: number
+      duration_ms: number
+      result: CritiqueOutput
+    }
   | { phase: 'revise'; status: 'start'; round: number }
   | { phase: 'revise'; status: 'done'; round: number; duration_ms: number; result: SynthesisOutput }
 
@@ -253,7 +259,9 @@ export class UltraExpertise {
     onPhase?: (event: PhaseEvent) => void
   }): Promise<
     | (UltraResult &
-        WriteDraftResult & { validation: { valid: boolean; errors?: string[] } } & { loop?: LoopMeta })
+        WriteDraftResult & { validation: { valid: boolean; errors?: string[] } } & {
+          loop?: LoopMeta
+        })
     | { analysis: AnalysisOutput; stopped: true }
   > {
     const { onPhase } = opts
@@ -388,7 +396,13 @@ export class UltraExpertise {
       } catch {
         break // reviser error → keep best, stop
       }
-      onPhase?.({ phase: 'revise', status: 'done', round, duration_ms: Date.now() - tr, result: revised })
+      onPhase?.({
+        phase: 'revise',
+        status: 'done',
+        round,
+        duration_ms: Date.now() - tr,
+        result: revised,
+      })
 
       // The reviser targeted this round's findings; treat them as resolved and
       // score the revised draft by the critic's subjective `score` (composite =
@@ -545,7 +559,13 @@ export class UltraExpertise {
       } catch {
         break // reviser error → keep best, stop
       }
-      onPhase?.({ phase: 'revise', status: 'done', round, duration_ms: Date.now() - tr, result: revised })
+      onPhase?.({
+        phase: 'revise',
+        status: 'done',
+        round,
+        duration_ms: Date.now() - tr,
+        result: revised,
+      })
 
       // The reviser targeted the steered findings (the user directive + the
       // critic's own); treat them as resolved and score the revised draft by the
@@ -597,7 +617,13 @@ export class UltraExpertise {
       critiques,
       tokens,
     }
-    return { analysis, synthesis: best.synthesis, ...writeResult, validation: best.validation, loop }
+    return {
+      analysis,
+      synthesis: best.synthesis,
+      ...writeResult,
+      validation: best.validation,
+      loop,
+    }
   }
 
   // Scan a corpus dir of authored experiences into Exemplar[]. Each immediate

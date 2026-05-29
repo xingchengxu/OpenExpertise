@@ -134,7 +134,13 @@ describe('ultraCommand — full run', () => {
           result: { score: 84, findings: [] },
         })
         opts.onPhase?.({ phase: 'revise', status: 'start', round: 1 })
-        opts.onPhase?.({ phase: 'revise', status: 'done', round: 1, duration_ms: 3400, result: SYNTHESIS })
+        opts.onPhase?.({
+          phase: 'revise',
+          status: 'done',
+          round: 1,
+          duration_ms: 3400,
+          result: SYNTHESIS,
+        })
         return {
           analysis: ANALYSIS,
           synthesis: SYNTHESIS,
@@ -255,7 +261,9 @@ describe('ultraCommand — full run', () => {
       cap.restore()
       // The beforeEach already installs a recording UltraExpertise mock; inspect
       // the constructor opts for the env-var-derived criticModel.
-      expect(vi.mocked(UltraExpertise).mock.calls[0]![0]).toMatchObject({ criticModel: 'claude-opus-critic' })
+      expect(vi.mocked(UltraExpertise).mock.calls[0]![0]).toMatchObject({
+        criticModel: 'claude-opus-critic',
+      })
     } finally {
       if (saved === undefined) delete process.env.OE_ULTRA_CRITIC_MODEL
       else process.env.OE_ULTRA_CRITIC_MODEL = saved
@@ -544,7 +552,13 @@ describe('ultraReviseCommand', () => {
         result: { score: 84, findings: [] },
       })
       opts.onPhase?.({ phase: 'revise', status: 'start', round: 1 })
-      opts.onPhase?.({ phase: 'revise', status: 'done', round: 1, duration_ms: 3400, result: SYNTHESIS })
+      opts.onPhase?.({
+        phase: 'revise',
+        status: 'done',
+        round: 1,
+        duration_ms: 3400,
+        result: SYNTHESIS,
+      })
       return {
         analysis: ANALYSIS,
         synthesis: SYNTHESIS,

@@ -32,7 +32,13 @@ describe('CRITIQUE_SCHEMA', () => {
       validate({
         score: 50,
         findings: [
-          { dimension: 'writes-consistency', severity: 'high', anchor: {}, evidence: 'x', fix: 'y' },
+          {
+            dimension: 'writes-consistency',
+            severity: 'high',
+            anchor: {},
+            evidence: 'x',
+            fix: 'y',
+          },
         ],
       }),
     ).toBe(false)

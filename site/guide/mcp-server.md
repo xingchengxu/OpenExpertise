@@ -29,14 +29,14 @@ Claude Code calls `oe_validate`, then `oe_run`, then reads the `final_state` fro
 
 The MCP server (`packages/mcp-server/src/server.ts`) is a stdio MCP server built on `@modelcontextprotocol/sdk`. It exposes **7 tools**:
 
-| Tool              | Input                               | Output                                                |
-| ----------------- | ----------------------------------- | ----------------------------------------------------- |
-| `oe_validate`     | `{ experience_path }`               | `{ valid: bool, errors?: string[] }`                  |
-| `oe_state`        | `{ experience_path, field? }`       | `{ field, value }` or `{ snapshot }`                  |
-| `oe_inspect`      | `{ experience_path, run_id }`       | `{ events: object[] }`                                |
-| `oe_run`          | `{ experience_path, args?, llm? }`  | `{ run_id, status, final_state }`                     |
-| `oe_evolve`       | `{ experience_path, run_id, llm? }` | `{ proposal_md, proposal_count }`                     |
-| `oe_ultra`        | `{ task, draft_root? }`             | `{ slug, draft_dir, validation, files_written, ... }` |
+| Tool              | Input                                  | Output                                                                |
+| ----------------- | -------------------------------------- | --------------------------------------------------------------------- |
+| `oe_validate`     | `{ experience_path }`                  | `{ valid: bool, errors?: string[] }`                                  |
+| `oe_state`        | `{ experience_path, field? }`          | `{ field, value }` or `{ snapshot }`                                  |
+| `oe_inspect`      | `{ experience_path, run_id }`          | `{ events: object[] }`                                                |
+| `oe_run`          | `{ experience_path, args?, llm? }`     | `{ run_id, status, final_state }`                                     |
+| `oe_evolve`       | `{ experience_path, run_id, llm? }`    | `{ proposal_md, proposal_count }`                                     |
+| `oe_ultra`        | `{ task, draft_root? }`                | `{ slug, draft_dir, validation, files_written, ... }`                 |
 | `oe_ultra_revise` | `{ draft_dir, feedback, max_rounds? }` | `{ draft_dir, analysis, synthesis, validation, files_written, loop }` |
 
 All tools run in the user's process (stdio MCP, no network surface). Tools that write to disk (`oe_run`, `oe_evolve`) write to the experience's `.openexpertise/` directory. `oe_run` may spawn subprocesses if the experience uses `cli-agent` nodes.
