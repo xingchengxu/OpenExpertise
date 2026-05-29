@@ -46,7 +46,15 @@ export const ultraTool: ToolHandler = {
     // MCP defaults max_rounds to 1 (loop ON), mirroring the CLI; only the bare
     // author() opt defaults to 0 for back-compat of programmatic/test callers.
     const maxRounds = typeof args['max_rounds'] === 'number' ? (args['max_rounds'] as number) : 1
-    const ultra = new UltraExpertise({ client: llm, model })
+    // Honor OE_ULTRA_CRITIC_MODEL here too, mirroring the CLI (`oe ultra`),
+    // `oe ultra-revise`, and the `oe_ultra_revise` MCP tool — otherwise the critic
+    // role silently falls back to the base model on this surface only.
+    const criticModel = process.env['OE_ULTRA_CRITIC_MODEL']
+    const ultra = new UltraExpertise({
+      client: llm,
+      model,
+      ...(criticModel ? { criticModel } : {}),
+    })
     const rawResult = await ultra.author({
       taskDescription: task,
       rootDir: resolve(draftRoot),
