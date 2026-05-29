@@ -5,7 +5,7 @@ import type { AnalysisOutput, SynthesisOutput } from './schemas.js'
 
 export class PathTraversalError extends Error {
   constructor(public readonly attemptedPath: string) {
-    super(`writeDraft rejected unsafe path: "${attemptedPath}"`)
+    super(`rejected unsafe path: "${attemptedPath}"`)
     this.name = 'PathTraversalError'
   }
 }
@@ -69,9 +69,7 @@ export function readDraft(draftDir: string): ReadDraftResult {
   // including the plan's own round-trip/fallback fixtures. We instead reject on a
   // literal `..` segment in the input path: this throws on `../../etc` (the plan's
   // PathTraversalError test) while allowing an absolute temp/project draft dir, which
-  // is what every production caller passes (CLI/MCP `resolve(draftPath)` first). The
-  // per-entry walk below re-checks each collected path for `..`/absolute leakage as a
-  // second layer, mirroring writeDraft's two-layer guard.
+  // is what every production caller passes (CLI/MCP `resolve(draftPath)` first).
   if (draftDir.split(/[\\/]/).includes('..')) {
     throw new PathTraversalError(draftDir)
   }
@@ -84,6 +82,11 @@ export function readDraft(draftDir: string): ReadDraftResult {
     for (const entry of readdirSync(dir)) {
       const abs = join(dir, entry)
       const rel = relative(absRoot, abs).split(sep).join('/')
+      // Defensive invariant: readdirSync always returns bare basenames, so
+      // join(dir, entry) can never produce a path outside absRoot. This check
+      // therefore cannot fire under normal OS behaviour — it is belt-and-suspenders
+      // only. NOTE: it is NOT a symlink-escape guard — a symlink whose name looks
+      // benign will still be followed by readFileSync.
       if (rel.startsWith('..') || isAbsolute(rel)) {
         throw new PathTraversalError(rel)
       }

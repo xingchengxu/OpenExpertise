@@ -108,6 +108,8 @@ describe('readDraft', () => {
     expect(paths).toEqual(['README.md', 'tools/greet.mjs'])
     expect(paths).not.toContain('analysis.json') // sidecar excluded from files[]
     expect(r.analysis.name).toBe('hello-author') // analysis.json loaded as the analysis
+    // supporting-file content round-trips
+    expect(r.synthesis.files.find((f) => f.path === 'README.md')?.content).toBe('# hello-author\n')
   })
 
   it('falls back to a re-derived minimal analysis when analysis.json is absent', async () => {
@@ -124,5 +126,20 @@ describe('readDraft', () => {
 
   it('rejects a draftDir escaping via .. with PathTraversalError', () => {
     expect(() => readDraft('../../etc')).toThrow(PathTraversalError)
+  })
+
+  it('round-trips a deeply nested file (depth > 1) with forward-slash normalization', async () => {
+    tmp = mkdtempSync(join(tmpdir(), 'oe-readdraft-deep-'))
+    const written = await writeDraft({
+      draftDir: join(tmp, 'd'),
+      experienceYaml: SYNTHESIS.experience_yaml,
+      files: [{ path: 'tools/sub/x.mjs', content: 'export default async () => ({ state_delta: {} })\n' }],
+    })
+    const r = readDraft(written.draftDir)
+    const paths = r.synthesis.files.map((f) => f.path)
+    expect(paths).toContain('tools/sub/x.mjs')
+    expect(r.synthesis.files.find((f) => f.path === 'tools/sub/x.mjs')?.content).toBe(
+      'export default async () => ({ state_delta: {} })\n',
+    )
   })
 })
