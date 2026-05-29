@@ -222,10 +222,11 @@ export function buildProgram(): Command {
       '--dry-run',
       'run Phase 1 (analyze) only and print the detected shape; no files written',
     )
+    .option('--max-rounds <n>', 'critique→revise rounds (0 disables the loop)', '1')
     .action(
       async (
         task: string,
-        cmdOpts: { draftRoot: string; llm?: string; dryRun?: boolean },
+        cmdOpts: { draftRoot: string; llm?: string; dryRun?: boolean; maxRounds?: string },
         cmd: Command,
       ) => {
         const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
@@ -237,6 +238,7 @@ export function buildProgram(): Command {
             logger,
             ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
             ...(cmdOpts.dryRun ? { dryRun: true } : {}),
+            ...(cmdOpts.maxRounds !== undefined ? { maxRounds: Number(cmdOpts.maxRounds) } : {}),
           }),
         )
       },

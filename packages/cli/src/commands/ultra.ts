@@ -1,4 +1,5 @@
-import { resolve } from 'node:path'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import type { Logger } from 'pino'
 import type { LLMClient } from '@openexpertise/core'
 import { UltraExpertise } from '@openexpertise/authoring'
@@ -51,6 +52,7 @@ export interface UltraOpts {
   logger: Logger
   llm?: string
   dryRun?: boolean
+  maxRounds?: number
 }
 
 export async function ultraCommand(opts: UltraOpts): Promise<number> {
@@ -64,8 +66,27 @@ export async function ultraCommand(opts: UltraOpts): Promise<number> {
     },
   }
 
-  const ultra = new UltraExpertise({ client: llm, model })
+  const criticModel = process.env['OE_ULTRA_CRITIC_MODEL']
+  const ultra = new UltraExpertise({
+    client: llm,
+    model,
+    ...(criticModel ? { criticModel } : {}),
+  })
   const rootDir = resolve(opts.draftRoot)
+
+  const HERE = dirname(fileURLToPath(import.meta.url))
+  // The repo's examples/ corpus for grounding. From the COMPILED module
+  // (packages/cli/dist/commands/ultra.js) the repo-root examples/ is four levels up
+  // (commands → dist → cli → packages → repo-root). A published @openexpertise/cli
+  // tarball ships only "dist" (see package.json "files"), so it won't include
+  // examples/ — author() no-ops grounding via an existsSync guard when the dir is
+  // absent, so a stripped install simply skips exemplars rather than throwing.
+  const corpusDir = resolve(HERE, '../../../../examples')
+
+  // Label for the critique/revise sub-lines: matches the spec sample `↳ round 1/1`.
+  // The CLI --max-rounds option defaults to '1', so opts.maxRounds is 1 in the
+  // common case; the `?? 1` covers programmatic callers that omit it.
+  const maxRoundsLabel = opts.maxRounds ?? 1
 
   // Track current spinner line so we can replace it on completion
   let currentSpinnerText = ''
@@ -96,7 +117,9 @@ export async function ultraCommand(opts: UltraOpts): Promise<number> {
   const result = await ultra.author({
     taskDescription: opts.taskDescription,
     rootDir,
+    corpusDir, // bundled examples/ corpus for grounding (Step 3); author() no-ops if absent
     stopAfterAnalyze: opts.dryRun ?? false,
+    ...(opts.maxRounds !== undefined ? { maxRounds: opts.maxRounds } : {}),
     onPhase(event) {
       if (event.phase === 'analyze' && event.status === 'start') {
         // Already shown above — no-op
@@ -108,6 +131,18 @@ export async function ultraCommand(opts: UltraOpts): Promise<number> {
         startPhase('Phase 2/2: Synthesizing files… (this is the heavy LLM call)')
       } else if (event.phase === 'synthesize' && event.status === 'done') {
         completePhase('Phase 2/2: Synthesizing files', event.duration_ms)
+      } else if (event.phase === 'critique' && event.status === 'start') {
+        startPhase(`  ↳ critique round ${event.round}/${maxRoundsLabel}…`)
+      } else if (event.phase === 'critique' && event.status === 'done') {
+        const high = event.result.findings.filter((f) => f.severity === 'high').length
+        completePhase(
+          `  ↳ critique round ${event.round}/${maxRoundsLabel} — score ${event.result.score}, ${event.result.findings.length} findings (${high} high)`,
+          event.duration_ms,
+        )
+      } else if (event.phase === 'revise' && event.status === 'start') {
+        startPhase(`  ↳ revise round ${event.round}/${maxRoundsLabel}…`)
+      } else if (event.phase === 'revise' && event.status === 'done') {
+        completePhase(`  ↳ revise round ${event.round}/${maxRoundsLabel}`, event.duration_ms)
       }
     },
   })
@@ -201,6 +236,21 @@ export async function ultraCommand(opts: UltraOpts): Promise<number> {
   out('')
   out(`  Validation: ${GREEN}✓ experience valid${RESET}`)
   out('')
+
+  if ('loop' in fullResult && fullResult.loop && fullResult.loop.rounds_run > 0) {
+    const loop = fullResult.loop
+    const lastCritique = loop.critiques[loop.critiques.length - 1]
+    const high = lastCritique
+      ? lastCritique.findings.filter((f) => f.severity === 'high').length
+      : 0
+    const score = loop.final_score ?? 0
+    const scoreBar = Number(process.env['OE_ULTRA_SCORE_BAR'] ?? 80)
+    out(
+      `  Quality loop: ${loop.rounds_run} round${loop.rounds_run === 1 ? '' : 's'}, final score ${score}/100 (bar ${scoreBar}), ${high} high-severity findings remaining`,
+    )
+    out('')
+  }
+
   out('  Next steps:')
 
   // Prefer synthesis.next_steps if available, else fall back to static checklist
