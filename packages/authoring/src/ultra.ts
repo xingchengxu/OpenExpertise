@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs'
+import { readFileSync, writeFileSync, readdirSync, existsSync, statSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import Ajv from 'ajv'
@@ -411,6 +411,12 @@ export class UltraExpertise {
       experienceYaml: best.synthesis.experience_yaml,
       files: best.synthesis.files,
     })
+
+    // Persist the analysis as a sidecar so `oe ultra-revise` can reload it later.
+    // This is written OUTSIDE writeDraft (a dedicated writeFileSync) so it never
+    // appears in WriteDraftResult.files_written — keeping that array byte-for-byte.
+    writeFileSync(join(writeResult.draftDir, 'analysis.json'), JSON.stringify(analysis, null, 2))
+
     const validation = best.validation
 
     if (maxRounds <= 0) {
