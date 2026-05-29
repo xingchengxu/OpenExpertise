@@ -437,6 +437,28 @@ describe('UltraExpertise.author quality loop', () => {
     expect(written).not.toContain('undeclared_field')
   })
 
+  it('monotonicity gate stops early when a revise regresses validity (reviser called once)', async () => {
+    tmp2 = mkdtempSync(join(tmpdir(), 'oe-author-mono-'))
+    const llm = new QueuedScriptedLLM({
+      analysis: [ANALYSIS],
+      synthesis: [SYNTHESIS],        // round-0 valid
+      critique: [HIGH_FINDING, HIGH_FINDING], // would critique again in round 2 if not stopped
+      revise: [INVALID_SYNTH, INVALID_SYNTH], // round-1 revise regresses validity
+    })
+    const ultra = new UltraExpertise({ client: llm })
+    const result = await ultra.author({ taskDescription: 'say hi', rootDir: tmp2, maxRounds: 2 })
+    const r = result as { validation: { valid: boolean }; loop: { rounds_run: number }; draftDir: string }
+    // gate must stop the loop after the diverging round-1 revise:
+    expect(r.loop.rounds_run).toBe(1)
+    const reviserCalls = llm.calls.filter((c) => c.system?.includes('SOP reviser')).length
+    expect(reviserCalls).toBe(1)
+    // and keep-best still wrote the valid round-0 draft:
+    expect(r.validation.valid).toBe(true)
+    const written = readFileSync(join(r.draftDir, 'experience.yaml'), 'utf8')
+    expect(written).toContain('writes: [greeting]')
+    expect(written).not.toContain('undeclared_field')
+  })
+
   it('critic soft-fail: a missing tool call stops the loop and writes the synthesized draft', async () => {
     tmp2 = mkdtempSync(join(tmpdir(), 'oe-author-soft-'))
     const llm = new QueuedScriptedLLM({
