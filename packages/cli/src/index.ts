@@ -10,7 +10,7 @@ import { initCommand } from './commands/init.js'
 import { stateCommand, resetStateCommand } from './commands/state.js'
 import { diffCommand } from './commands/diff.js'
 import { evolveCommand } from './commands/evolve.js'
-import { ultraCommand } from './commands/ultra.js'
+import { ultraCommand, ultraReviseCommand } from './commands/ultra.js'
 import { doctorCommand } from './commands/doctor.js'
 import { installCommand } from './commands/install.js'
 import { registryCommand, installedCommand } from './commands/registry.js'
@@ -245,6 +245,45 @@ export function buildProgram(): Command {
             logger,
             ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
             ...(cmdOpts.dryRun ? { dryRun: true } : {}),
+            ...(cmdOpts.maxRounds !== undefined ? { maxRounds: Number(cmdOpts.maxRounds) } : {}),
+          }),
+        )
+      },
+    )
+
+  program
+    .command('ultra-revise')
+    .description(
+      'Apply natural-language feedback to an existing draft (reuses the critique→revise loop)',
+    )
+    .argument('<draftPath>', 'path to the existing draft directory')
+    .argument('<feedback>', 'natural-language directive for the revision')
+    .option('--max-rounds <n>', 'critique→revise rounds (default 1)', '1')
+    .option('--llm <provider>', 'LLM provider: anthropic | openai (auto-detected from env)')
+    .action(
+      async (
+        draftPath: string,
+        feedback: string,
+        cmdOpts: { llm?: string; maxRounds?: string },
+        cmd: Command,
+      ) => {
+        const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+        const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+        if (cmdOpts.maxRounds !== undefined) {
+          const n = Number(cmdOpts.maxRounds)
+          if (!Number.isInteger(n) || n < 0) {
+            console.error(
+              `oe ultra-revise: --max-rounds must be a non-negative integer (got "${cmdOpts.maxRounds}")`,
+            )
+            process.exit(1)
+          }
+        }
+        process.exit(
+          await ultraReviseCommand({
+            draftPath,
+            feedback,
+            logger,
+            ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
             ...(cmdOpts.maxRounds !== undefined ? { maxRounds: Number(cmdOpts.maxRounds) } : {}),
           }),
         )

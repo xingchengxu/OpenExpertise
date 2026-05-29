@@ -273,6 +273,126 @@ export async function ultraCommand(opts: UltraOpts): Promise<number> {
   return 0
 }
 
+export interface UltraReviseOpts {
+  draftPath: string
+  feedback: string
+  logger: Logger
+  llm?: string
+  maxRounds?: number
+}
+
+export async function ultraReviseCommand(opts: UltraReviseOpts): Promise<number> {
+  const provider = resolveLLMProvider(opts.llm !== undefined ? { flag: opts.llm } : {})
+  const model = defaultModelFor(provider)
+  let cached: LLMClient | null = null
+  const llm: LLMClient = {
+    async complete(completeOpts) {
+      if (!cached) cached = await makeLLMClient(provider)
+      return cached.complete(completeOpts)
+    },
+  }
+
+  const criticModel = process.env['OE_ULTRA_CRITIC_MODEL']
+  const ultra = new UltraExpertise({
+    client: llm,
+    model,
+    ...(criticModel ? { criticModel } : {}),
+  })
+  const draftDir = resolve(opts.draftPath)
+
+  // Track current spinner line so we can replace it on completion (mirrors ultraCommand)
+  let currentSpinnerText = ''
+  function startPhase(label: string): void {
+    currentSpinnerText = label
+    process.stdout.write('\r' + spinnerLine(label))
+  }
+  function completePhase(label: string, durationMs: number): void {
+    const checkText = `${label} (${formatDuration(durationMs)})`
+    process.stdout.write(
+      '\r' +
+        ' '.repeat(spinnerLine(currentSpinnerText).replace(/\x1b\[[^m]*m/g, '').length + 4) +
+        '\r',
+    )
+    out(checkLine(checkText))
+  }
+
+  opts.logger.info({ draftDir, feedback: opts.feedback }, 'ultraexpertise: starting revise')
+  startPhase(`Revising draft… (using ${provider} ${model})`)
+
+  let result: Awaited<ReturnType<UltraExpertise['reviseDraft']>>
+  try {
+    result = await ultra.reviseDraft({
+      draftDir,
+      feedback: opts.feedback,
+      ...(opts.maxRounds !== undefined ? { maxRounds: opts.maxRounds } : {}),
+      onPhase(event) {
+        if (event.phase === 'critique' && event.status === 'start') {
+          startPhase(`  ↳ critique round ${event.round}…`)
+        } else if (event.phase === 'critique' && event.status === 'done') {
+          const high = event.result.findings.filter((f) => f.severity === 'high').length
+          completePhase(
+            `  ↳ critique round ${event.round} — score ${event.result.score}, ${event.result.findings.length} findings (${high} high)`,
+            event.duration_ms,
+          )
+        } else if (event.phase === 'revise' && event.status === 'start') {
+          startPhase(`  ↳ revise round ${event.round}…`)
+        } else if (event.phase === 'revise' && event.status === 'done') {
+          completePhase(`  ↳ revise round ${event.round}`, event.duration_ms)
+        }
+      },
+    })
+  } catch (err) {
+    out(`${RED}✗ ultra-revise failed: ${(err as Error).message}${RESET}`)
+    opts.logger.error({ err: (err as Error).message }, 'ultra-revise failed')
+    return 2
+  }
+
+  opts.logger.info(
+    {
+      slug: result.analysis.name,
+      draftDir: result.draftDir,
+      files_written: result.files_written,
+      valid: result.validation.valid,
+      validation_errors: result.validation.errors ?? [],
+      rounds_run: result.loop.rounds_run,
+      final_score: result.loop.final_score,
+    },
+    'ultraexpertise: draft revised',
+  )
+
+  const filesCount = result.files_written.length
+  out(
+    `  Files written: ${filesCount} (${result.files_written.slice(0, 3).join(', ')}${filesCount > 3 ? `×${filesCount - 3}` : ''})`,
+  )
+  out('')
+
+  if (result.loop.rounds_run > 0) {
+    const score = result.loop.final_score ?? 0
+    const scoreBar = Number(process.env['OE_ULTRA_SCORE_BAR'] ?? 80)
+    out(
+      `  Quality loop: ${result.loop.rounds_run} round${result.loop.rounds_run === 1 ? '' : 's'}, final score ${score}/100 (bar ${scoreBar})`,
+    )
+    out('')
+  }
+
+  if (!result.validation.valid) {
+    out(`${RED}✗ Revised draft has validation errors:${RESET}`)
+    for (const e of result.validation.errors ?? []) {
+      out(`    - ${e}`)
+    }
+    out('')
+    out(`  The draft is still in ${result.draftDir} — fix manually, or re-run oe ultra-revise.`)
+    opts.logger.warn({ errors: result.validation.errors }, 'revised draft did not pass oe validate')
+    return 2
+  }
+
+  out(`${GREEN}✓ Draft revised at ${result.draftDir}/${RESET}`)
+  out('')
+  out(`  Validation: ${GREEN}✓ experience valid${RESET}`)
+  opts.logger.info({ run: `oe run ${result.draftDir}` }, 'next: run the revised draft')
+  return 0
+}
+
 function buildDefaultNextSteps(draftDir: string, name: string): string[] {
   return [
     `cd ${draftDir}`,
