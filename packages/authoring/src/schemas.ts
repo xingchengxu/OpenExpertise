@@ -99,3 +99,47 @@ export interface SynthesisOutput {
   files: Array<{ path: string; content: string }>
   next_steps?: string[]
 }
+
+export const CRITIQUE_SCHEMA = {
+  type: 'object',
+  required: ['score', 'findings'],
+  properties: {
+    score: { type: 'number', minimum: 0, maximum: 100 },
+    summary: { type: 'string' },
+    findings: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['dimension', 'severity', 'anchor', 'evidence', 'fix'],
+        properties: {
+          dimension: { type: 'string', enum: ['decomposition', 'prompt-quality'] },
+          severity: { type: 'string', enum: ['high', 'medium', 'low'] },
+          anchor: {
+            type: 'object',
+            properties: {
+              node_id: { type: 'string' },
+              state_field: { type: 'string' },
+              file_path: { type: 'string' },
+            },
+          },
+          evidence: { type: 'string' },
+          fix: { type: 'string' },
+        },
+      },
+    },
+  },
+} as const
+
+export interface CritiqueFinding {
+  dimension: 'decomposition' | 'prompt-quality'
+  severity: 'high' | 'medium' | 'low'
+  anchor: { node_id?: string; state_field?: string; file_path?: string }
+  evidence: string
+  fix: string
+}
+
+export interface CritiqueOutput {
+  score: number
+  summary?: string
+  findings: CritiqueFinding[]
+}

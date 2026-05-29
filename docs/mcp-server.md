@@ -1,6 +1,6 @@
 # `@openexpertise/mcp-server`
 
-A stdio MCP server that exposes OpenExpertise as 6 tools, callable from any MCP-aware CLI (Claude Code, Codex, Gemini, or other MCP clients).
+A stdio MCP server that exposes OpenExpertise as 7 tools, callable from any MCP-aware CLI (Claude Code, Codex, Gemini, or other MCP clients).
 
 ## Tools
 
@@ -12,6 +12,7 @@ A stdio MCP server that exposes OpenExpertise as 6 tools, callable from any MCP-
 | `oe_run` | `{ experience_path, args?, llm? }` | `{ run_id, status, final_state }` |
 | `oe_evolve` | `{ experience_path, run_id, llm? }` | `{ proposal_md, proposal_count }` |
 | `oe_ultra` | `{ task, draft_root? }` | `{ slug, draft_dir, validation, files_written, ... }` |
+| `oe_ultra_revise` | `{ draft_dir, feedback, max_rounds? }` | `{ draft_dir, analysis, synthesis, validation, files_written, loop }` |
 
 `oe_run` and `oe_evolve` use the same LLM provider resolution as `oe run` / `oe evolve` (env var auto-detect + optional `llm` flag).
 
@@ -66,7 +67,7 @@ The server uses `@modelcontextprotocol/sdk`'s `InMemoryTransport` for in-process
 
 ## V1 limitations
 
-- **No `oe_init` / `oe_resume` / `oe_diff` / `oe_reset-state` yet.** Could be added in a follow-up; the 6 shipped tools cover most agentic flows.
+- **No `oe_init` / `oe_resume` / `oe_diff` / `oe_reset-state` yet.** Could be added in a follow-up; the 7 shipped tools cover most agentic flows.
 - **No streaming output.** `oe_run` blocks until the experience finishes, then returns the final state. Long runs may stress the MCP client's tool-call timeout.
 - **No progress events.** MCP supports server-initiated notifications; not used yet. Future work could stream per-node `node.completed` events to the client.
 - **No auth.** Trust model = the CLI session.

@@ -52,7 +52,7 @@ oe demo                                # see pre-recorded runs of bundled exampl
 oe demo review-branch                  # preview the PR review flow + advisor's evolution proposal
 ```
 
-> **Don't want to write YAML by hand?** Run `oe ultra "describe your task in one sentence"` and the LLM scaffolds the whole experience — graph, prompts, tool stubs with `// TODO:` markers, and validation. See the [30-min `oe ultra` tutorial](https://xingchengxu.github.io/OpenExpertise/guide/authoring-ultra).
+> **Don't want to write YAML by hand?** Run `oe ultra "describe your task in one sentence"` and the LLM scaffolds the whole experience — graph, prompts, tool stubs with `// TODO:` markers, and validation. `oe ultra` runs a built-in critique→revise quality loop (`--max-rounds`, default 1; `--max-rounds 0` for the legacy one-shot) that feeds deterministic validation/preflight errors back to an incremental reviser and keeps the best-scoring draft. See the [30-min `oe ultra` tutorial](https://xingchengxu.github.io/OpenExpertise/guide/authoring-ultra).
 
 > **New to OpenExpertise?** Walk through the [30-minute "Your first experience" tutorial](https://xingchengxu.github.io/OpenExpertise/guide/first-experience) — by the end you'll have a tested, registry-submittable flow you built yourself.
 
@@ -119,7 +119,7 @@ Apply the one-line YAML patch from the proposal and re-run:
 | **6 node kinds in one graph**       | `tool` (deterministic code) · `agent` (LLM + structured output) · `skill` (SKILL.md packages) · `dataset` (file / SQLite / HTTP) · `experience` (nested) · `cli-agent` (delegate to Claude Code / Codex / Gemini) |
 | **Persistent SQLite state**         | Every node's writes land in a typed blackboard. `oe state findings` works hours later. Resume with `oe resume <run-id>` and replay cached steps.                                                                  |
 | **Self-improving**                  | `oe evolve <run-id>` reads the events + state diff and proposes graph upgrades as `git apply`-ready diffs. The author → run → evolve loop closes.                                                                 |
-| **Two-way agentic-CLI integration** | **Outbound:** delegate a node to Claude Code / Codex / Gemini. **Inbound:** `oe-mcp` exposes 6 OE tools so the same CLIs can run experiences from inside their own sessions.                                      |
+| **Two-way agentic-CLI integration** | **Outbound:** delegate a node to Claude Code / Codex / Gemini. **Inbound:** `oe-mcp` exposes 7 OE tools so the same CLIs can run experiences from inside their own sessions.                                      |
 
 ---
 
@@ -175,7 +175,7 @@ OE is **not** a protocol (that's MCP), **not** a reusable LLM unit (that's a Ski
 MCP is a protocol for exposing tools, data, and prompts to LLMs. OpenExpertise rides on top:
 
 - **Consumes MCP** — a `dataset` node with `source.type: mcp-resource` reads from any MCP server (declared in schema today; dispatcher wiring planned for a later 0.x).
-- **Exposes MCP** — [`@openexpertise/mcp-server`](https://www.npmjs.com/package/@openexpertise/mcp-server) (binary `oe-mcp`) ships 6 tools (`oe_run`, `oe_validate`, `oe_state`, `oe_inspect`, `oe_evolve`, `oe_ultra`) so any MCP client — Claude Code, Codex, Gemini, or anything else — can run OpenExpertise experiences from inside its own session.
+- **Exposes MCP** — [`@openexpertise/mcp-server`](https://www.npmjs.com/package/@openexpertise/mcp-server) (binary `oe-mcp`) ships 7 tools (`oe_run`, `oe_validate`, `oe_state`, `oe_inspect`, `oe_evolve`, `oe_ultra`, `oe_ultra_revise`) so any MCP client — Claude Code, Codex, Gemini, or anything else — can run OpenExpertise experiences from inside its own session.
 
 MCP is the wire format; OE is the workflow on top of the wire, AND offered ON the wire.
 
@@ -421,7 +421,7 @@ Then inside any Claude Code session:
 > _"Use oe_run on examples/review-branch"_
 > _"Use oe_evolve on the last run id"_
 
-Six MCP tools are exposed: `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `oe_evolve`, `oe_ultra`. Reference: [`docs/mcp-server.md`](docs/mcp-server.md).
+Seven MCP tools are exposed: `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `oe_evolve`, `oe_ultra`, `oe_ultra_revise`. Reference: [`docs/mcp-server.md`](docs/mcp-server.md).
 
 ---
 
@@ -429,19 +429,20 @@ Six MCP tools are exposed: `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `o
 
 > First time? Run `oe doctor` to verify your environment.
 
-| Command                | Purpose                                                                                   |
-| ---------------------- | ----------------------------------------------------------------------------------------- |
-| `oe doctor`            | Check environment readiness (Node, pnpm, CLIs, API keys, writable dirs)                   |
-| `oe init <name>`       | Scaffold a new experience directory                                                       |
-| `oe validate [path]`   | Validate `experience.yaml`                                                                |
-| `oe run [path]`        | Execute an experience (`--tui`, `--evolve`, `--concurrency N`, `--llm anthropic\|openai`) |
-| `oe resume <run-id>`   | Re-run with cache replay                                                                  |
-| `oe inspect <run-id>`  | Replay a run's event log (sorted by ts)                                                   |
-| `oe state [field]`     | Inspect blackboard                                                                        |
-| `oe reset-state --yes` | Wipe blackboard                                                                           |
-| `oe evolve <run-id>`   | Generate evolution proposals                                                              |
-| `oe diff`              | List pending evolution proposals                                                          |
-| `oe ultra "<task>"`    | LLM authors a new experience from natural language                                        |
+| Command                        | Purpose                                                                                   |
+| ------------------------------ | ----------------------------------------------------------------------------------------- |
+| `oe doctor`                    | Check environment readiness (Node, pnpm, CLIs, API keys, writable dirs)                   |
+| `oe init <name>`               | Scaffold a new experience directory                                                       |
+| `oe validate [path]`           | Validate `experience.yaml`                                                                |
+| `oe run [path]`                | Execute an experience (`--tui`, `--evolve`, `--concurrency N`, `--llm anthropic\|openai`) |
+| `oe resume <run-id>`           | Re-run with cache replay                                                                  |
+| `oe inspect <run-id>`          | Replay a run's event log (sorted by ts)                                                   |
+| `oe state [field]`             | Inspect blackboard                                                                        |
+| `oe reset-state --yes`         | Wipe blackboard                                                                           |
+| `oe evolve <run-id>`           | Generate evolution proposals                                                              |
+| `oe diff`                      | List pending evolution proposals                                                          |
+| `oe ultra "<task>"`            | LLM authors a new experience from natural language                                        |
+| `oe ultra-revise <dir> "<fb>"` | Apply natural-language feedback to an existing draft (critique→revise)                    |
 
 ### `--tui` dashboard
 

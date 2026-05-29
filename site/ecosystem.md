@@ -67,16 +67,17 @@ The schema declares `mcp-resource` and `oe validate` passes — but the dispatch
 
 ### Inbound — OE exposes MCP
 
-The `@openexpertise/mcp-server` package ships a binary `oe-mcp` (a stdio MCP server) with six tools:
+The `@openexpertise/mcp-server` package ships a binary `oe-mcp` (a stdio MCP server) with seven tools:
 
-| Tool          | Purpose                                                                |
-| ------------- | ---------------------------------------------------------------------- |
-| `oe_validate` | Validate an `experience.yaml`                                          |
-| `oe_state`    | Read a field (or the snapshot) from a run's persistent state           |
-| `oe_inspect`  | Reconstruct an event-ordered trace of a prior run                      |
-| `oe_run`      | Execute an experience and return its `run_id`, status, and final state |
-| `oe_evolve`   | Generate evolution proposals for a prior run                           |
-| `oe_ultra`    | LLM-author a new experience from a natural-language task description   |
+| Tool              | Purpose                                                                |
+| ----------------- | ---------------------------------------------------------------------- |
+| `oe_validate`     | Validate an `experience.yaml`                                          |
+| `oe_state`        | Read a field (or the snapshot) from a run's persistent state           |
+| `oe_inspect`      | Reconstruct an event-ordered trace of a prior run                      |
+| `oe_run`          | Execute an experience and return its `run_id`, status, and final state |
+| `oe_evolve`       | Generate evolution proposals for a prior run                           |
+| `oe_ultra`        | LLM-author a new experience from a natural-language task description   |
+| `oe_ultra_revise` | Apply natural-language feedback to an existing draft                   |
 
 Any MCP-aware client can register `oe-mcp` and call these tools. For instance, in a Claude Code session:
 

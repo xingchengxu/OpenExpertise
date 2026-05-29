@@ -7,6 +7,7 @@ import { inspectTool } from './tools/inspect.js'
 import { runTool } from './tools/run.js'
 import { evolveTool } from './tools/evolve.js'
 import { ultraTool } from './tools/ultra.js'
+import { ultraReviseTool } from './tools/ultra-revise.js'
 
 const ALL_TOOLS: ToolHandler[] = [
   validateTool,
@@ -15,6 +16,7 @@ const ALL_TOOLS: ToolHandler[] = [
   runTool,
   evolveTool,
   ultraTool,
+  ultraReviseTool,
 ]
 
 export interface CreateServerOpts {

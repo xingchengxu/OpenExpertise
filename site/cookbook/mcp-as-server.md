@@ -31,14 +31,15 @@ npx @openexpertise/mcp --experience ./experience.yaml --port 3100
 
 Once registered, the following tools appear in your Claude Code session:
 
-| Tool          | Description                                                 |
-| ------------- | ----------------------------------------------------------- |
-| `oe_validate` | Parse and validate `experience.yaml`; returns errors        |
-| `oe_run`      | Start a run; returns `run_id`                               |
-| `oe_state`    | Read one or all state fields from a run                     |
-| `oe_inspect`  | Return the event timeline for a run                         |
-| `oe_evolve`   | Trigger the evolution advisor on a completed run            |
-| `oe_ultra`    | Author a new experience from a natural-language description |
+| Tool              | Description                                                 |
+| ----------------- | ----------------------------------------------------------- |
+| `oe_validate`     | Parse and validate `experience.yaml`; returns errors        |
+| `oe_run`          | Start a run; returns `run_id`                               |
+| `oe_state`        | Read one or all state fields from a run                     |
+| `oe_inspect`      | Return the event timeline for a run                         |
+| `oe_evolve`       | Trigger the evolution advisor on a completed run            |
+| `oe_ultra`        | Author a new experience from a natural-language description |
+| `oe_ultra_revise` | Apply natural-language feedback to an existing draft        |
 
 Example MCP session from inside Claude Code:
 

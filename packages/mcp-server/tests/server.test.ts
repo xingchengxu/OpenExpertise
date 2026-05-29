@@ -29,6 +29,7 @@ describe('mcp-server', () => {
       'oe_run',
       'oe_state',
       'oe_ultra',
+      'oe_ultra_revise',
       'oe_validate',
     ])
   })
@@ -204,6 +205,24 @@ graph: { nodes: [{ id: a, kind: tool, impl: ./x.mjs, writes: [x] }], edges: [] }
     } finally {
       if (prevA !== undefined) process.env.ANTHROPIC_API_KEY = prevA
       if (prevO !== undefined) process.env.OPENAI_API_KEY = prevO
+    }
+  })
+
+  it('oe_ultra_revise surfaces an LLM-config error when no provider is set', async () => {
+    const savedA = process.env.ANTHROPIC_API_KEY
+    const savedO = process.env.OPENAI_API_KEY
+    delete process.env.ANTHROPIC_API_KEY
+    delete process.env.OPENAI_API_KEY
+    try {
+      const { client } = await connectClient()
+      const result = await client.callTool({
+        name: 'oe_ultra_revise',
+        arguments: { draft_dir: '/tmp/oe-nonexistent-draft', feedback: 'tweak it' },
+      })
+      expect(result.isError).toBe(true)
+    } finally {
+      if (savedA !== undefined) process.env.ANTHROPIC_API_KEY = savedA
+      if (savedO !== undefined) process.env.OPENAI_API_KEY = savedO
     }
   })
 })

@@ -20,6 +20,10 @@ export const ultraTool: ToolHandler = {
         description: 'Directory for the draft (default: .openexpertise/drafts in CWD)',
       },
       llm: { type: 'string', enum: ['anthropic', 'openai'] },
+      max_rounds: {
+        type: 'number',
+        description: 'critique→revise rounds (default 1; 0 disables the loop)',
+      },
     },
   },
   async call(args) {
@@ -39,8 +43,23 @@ export const ultraTool: ToolHandler = {
       },
     }
 
-    const ultra = new UltraExpertise({ client: llm, model })
-    const rawResult = await ultra.author({ taskDescription: task, rootDir: resolve(draftRoot) })
+    // MCP defaults max_rounds to 1 (loop ON), mirroring the CLI; only the bare
+    // author() opt defaults to 0 for back-compat of programmatic/test callers.
+    const maxRounds = typeof args['max_rounds'] === 'number' ? (args['max_rounds'] as number) : 1
+    // Honor OE_ULTRA_CRITIC_MODEL here too, mirroring the CLI (`oe ultra`),
+    // `oe ultra-revise`, and the `oe_ultra_revise` MCP tool — otherwise the critic
+    // role silently falls back to the base model on this surface only.
+    const criticModel = process.env['OE_ULTRA_CRITIC_MODEL']
+    const ultra = new UltraExpertise({
+      client: llm,
+      model,
+      ...(criticModel ? { criticModel } : {}),
+    })
+    const rawResult = await ultra.author({
+      taskDescription: task,
+      rootDir: resolve(draftRoot),
+      maxRounds,
+    })
     // stopAfterAnalyze is not set, so result is always the full type.
     if ('stopped' in rawResult) throw new Error('unexpected dry-run result from mcp ultra tool')
     const result = rawResult
@@ -55,6 +74,7 @@ export const ultraTool: ToolHandler = {
       },
       validation: result.validation,
       files_written: result.files_written,
+      ...('loop' in result && result.loop ? { loop: result.loop } : {}),
     }
   },
 }

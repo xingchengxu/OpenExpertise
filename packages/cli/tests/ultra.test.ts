@@ -124,12 +124,35 @@ describe('ultraCommand — full run', () => {
           duration_ms: 4567,
           result: SYNTHESIS,
         })
+        // Quality loop events (Task 9): one critique + one revise round.
+        opts.onPhase?.({ phase: 'critique', status: 'start', round: 1 })
+        opts.onPhase?.({
+          phase: 'critique',
+          status: 'done',
+          round: 1,
+          duration_ms: 1200,
+          result: { score: 84, findings: [] },
+        })
+        opts.onPhase?.({ phase: 'revise', status: 'start', round: 1 })
+        opts.onPhase?.({
+          phase: 'revise',
+          status: 'done',
+          round: 1,
+          duration_ms: 3400,
+          result: SYNTHESIS,
+        })
         return {
           analysis: ANALYSIS,
           synthesis: SYNTHESIS,
           draftDir: join(tmp, 'weekly-digest'),
           files_written: ['experience.yaml', ...SYNTHESIS.files.map((f) => f.path)],
           validation: { valid: true },
+          loop: {
+            rounds_run: 1,
+            final_score: 84,
+            critiques: [{ score: 84, findings: [] }],
+            tokens: { input: 0, output: 0 },
+          },
         }
       },
     )
@@ -147,6 +170,20 @@ describe('ultraCommand — full run', () => {
     cap.restore()
 
     const all = cap.lines.join('')
+    expect(all).toContain('Phase 1/2')
+    expect(all).toContain('Phase 2/2')
+  })
+
+  it('prints the ↳ critique sub-line and a Quality loop summary while preserving Phase literals', async () => {
+    const { ultraCommand } = await import('../src/commands/ultra.js')
+    const cap = captureStdout()
+    await ultraCommand({ taskDescription: 'weekly digest', draftRoot: tmp, logger: makeLogger() })
+    cap.restore()
+
+    const all = cap.lines.join('')
+    expect(all).toContain('↳ critique round 1')
+    expect(all).toContain('Quality loop:')
+    // Phase literals preserved (no renumbering by the loop sub-lines):
     expect(all).toContain('Phase 1/2')
     expect(all).toContain('Phase 2/2')
   })
@@ -211,6 +248,26 @@ describe('ultraCommand — full run', () => {
     })
     cap.restore()
     expect(code).toBe(0)
+  })
+
+  it('threads OE_ULTRA_CRITIC_MODEL into the UltraExpertise constructor', async () => {
+    const saved = process.env.OE_ULTRA_CRITIC_MODEL
+    process.env.OE_ULTRA_CRITIC_MODEL = 'claude-opus-critic'
+    try {
+      const { UltraExpertise } = await import('@openexpertise/authoring')
+      const { ultraCommand } = await import('../src/commands/ultra.js')
+      const cap = captureStdout()
+      await ultraCommand({ taskDescription: 'say hi', draftRoot: tmp, logger: makeLogger() })
+      cap.restore()
+      // The beforeEach already installs a recording UltraExpertise mock; inspect
+      // the constructor opts for the env-var-derived criticModel.
+      expect(vi.mocked(UltraExpertise).mock.calls[0]![0]).toMatchObject({
+        criticModel: 'claude-opus-critic',
+      })
+    } finally {
+      if (saved === undefined) delete process.env.OE_ULTRA_CRITIC_MODEL
+      else process.env.OE_ULTRA_CRITIC_MODEL = saved
+    }
   })
 })
 
@@ -471,5 +528,84 @@ describe('ultraCommand — default next-steps fallback', () => {
     // Numbered format
     expect(all).toContain('1.')
     expect(all).toContain('2.')
+  })
+})
+
+describe('ultraReviseCommand', () => {
+  let tmp: string
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'oe-ultra-revise-'))
+    vi.clearAllMocks()
+  })
+  afterEach(() => {
+    if (tmp) rmSync(tmp, { recursive: true, force: true })
+  })
+
+  function mockReviseImpl(validation: { valid: boolean; errors?: string[] }) {
+    return vi.fn(async (opts: { onPhase?: (e: unknown) => void }) => {
+      opts.onPhase?.({ phase: 'critique', status: 'start', round: 1 })
+      opts.onPhase?.({
+        phase: 'critique',
+        status: 'done',
+        round: 1,
+        duration_ms: 1200,
+        result: { score: 84, findings: [] },
+      })
+      opts.onPhase?.({ phase: 'revise', status: 'start', round: 1 })
+      opts.onPhase?.({
+        phase: 'revise',
+        status: 'done',
+        round: 1,
+        duration_ms: 3400,
+        result: SYNTHESIS,
+      })
+      return {
+        analysis: ANALYSIS,
+        synthesis: SYNTHESIS,
+        draftDir: join(tmp, 'weekly-digest'),
+        files_written: ['experience.yaml', ...SYNTHESIS.files.map((f) => f.path)],
+        validation,
+        loop: { rounds_run: 1, final_score: 84, critiques: [{ score: 84, findings: [] }] },
+      }
+    })
+  }
+
+  it('parses the flat command, renders sub-lines + quality summary, exits 0 on valid', async () => {
+    const { UltraExpertise } = await import('@openexpertise/authoring')
+    const mockRevise = mockReviseImpl({ valid: true })
+    vi.mocked(UltraExpertise).mockImplementation(() => ({ reviseDraft: mockRevise }) as never)
+
+    const cap = captureStdout()
+    const { ultraReviseCommand } = await import('../src/commands/ultra.js')
+    const code = await ultraReviseCommand({
+      draftPath: join(tmp, 'weekly-digest'),
+      feedback: 'split the bugs node',
+      logger: makeLogger(),
+      maxRounds: 1,
+    })
+    cap.restore()
+    const output = cap.lines.join('')
+    expect(code).toBe(0)
+    expect(mockRevise).toHaveBeenCalled()
+    expect(output).toContain('↳ critique round 1')
+    expect(output).toContain('Quality loop:')
+    expect(output).toContain('✓ Draft revised at')
+  })
+
+  it('exits 2 when the revised draft is still invalid', async () => {
+    const { UltraExpertise } = await import('@openexpertise/authoring')
+    const mockRevise = mockReviseImpl({ valid: false, errors: ['still broken'] })
+    vi.mocked(UltraExpertise).mockImplementation(() => ({ reviseDraft: mockRevise }) as never)
+
+    const cap = captureStdout()
+    const { ultraReviseCommand } = await import('../src/commands/ultra.js')
+    const code = await ultraReviseCommand({
+      draftPath: join(tmp, 'weekly-digest'),
+      feedback: 'x',
+      logger: makeLogger(),
+    })
+    cap.restore()
+    expect(code).toBe(2)
+    expect(cap.lines.join('')).toContain('still broken')
   })
 })

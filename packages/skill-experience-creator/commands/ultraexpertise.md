@@ -20,6 +20,7 @@ $ARGUMENTS
    - `oe run <draft path>` to try it.
    - `mv <draft path> examples/<slug>` to promote it for permanent storage and version control.
    - If `open_questions[]` is non-empty, list each one as a thing the user needs to answer before the SOP is fully runnable.
+   - If the user wants to refine the draft with natural-language feedback (e.g. "split the bugs node into security + logic"), run `oe ultra-revise <draft path> "<their feedback>"` — this re-reads the draft, applies one steered critique→revise pass, and writes the incremental edit back in place.
 5. If validation failed, read the generated `experience.yaml` and explain WHAT the schema rejected, in plain English. Offer to fix it.
 
 ## Boundaries
@@ -27,5 +28,6 @@ $ARGUMENTS
 - Do not run `oe ultra` without `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` set. Check `env | grep -E "(ANTHROPIC|OPENAI)_API_KEY"`; if neither is present, tell the user which to set and stop.
 - Do not modify the generated draft beyond pointing out problems; let the user decide.
 - Do not promote (mv) the draft on the user's behalf.
+- For `oe ultra-revise`, pass the EXISTING draft directory path as the first argument and the user's verbatim feedback as the second — never re-derive the path from the slug.
 
 Reply concisely. The user wants the draft + a clear next action, not a wall of text.

@@ -28,7 +28,7 @@ For a TypeScript team building a new AI product — customer support bots, inter
 | Evolution loop     | `oe evolve` proposes graph patches from runtime traces                  | No equivalent                                                 |
 | CLI integration    | `cli-agent` node calls Claude Code / Codex / Gemini subprocesses        | No native CLI delegation                                      |
 | Self-improvement   | First-class: author → run → evolve is a closed loop                     | Not present                                                   |
-| MCP server         | Exposes OE as 6 MCP tools; can be called from Claude Code               | Supports MCP as a consumer                                    |
+| MCP server         | Exposes OE as 7 MCP tools; can be called from Claude Code               | Supports MCP as a consumer                                    |
 | Authoring          | `oe ultra "<task>"` auto-generates YAML                                 | Code-first; no LLM authoring of the workflow graph            |
 | Node heterogeneity | 6 kinds: `tool`, `agent`, `skill`, `dataset`, `experience`, `cli-agent` | Steps are TypeScript functions; heterogeneity modeled in code |
 
