@@ -390,7 +390,12 @@ export class UltraExpertise {
       }
       onPhase?.({ phase: 'revise', status: 'done', round, duration_ms: Date.now() - tr, result: revised })
 
-      const revisedRound = evaluate(revised, null)
+      // The reviser targeted this round's findings; treat them as resolved and
+      // score the revised draft by the critic's subjective `score` (composite =
+      // clamp(score), no finding penalty) so loop.final_score reports post-fix
+      // quality instead of null/0 on the auto-fix success path. If a later round
+      // critiques this draft for real, that re-scores it.
+      const revisedRound = evaluate(revised, { score: critique.score, findings: [] })
       // Monotonicity gate: reject a revise that regresses validity.
       if (best.validation.valid && !revisedRound.validation.valid) {
         break // diverging → keep prior best, stop

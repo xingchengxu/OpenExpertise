@@ -299,5 +299,38 @@ describe('UltraExpertise.author quality loop', () => {
     expect((result as { validation: { valid: boolean } }).validation.valid).toBe(true)
     // The legacy fakes only route architect/synthesizer; assert critique() was never invoked.
     expect(llm.calls.some((c) => c.system?.includes('SOP critic'))).toBe(false)
+    // Characterization: the round-0 draft is written UNCHANGED on the no-loop path.
+    expect((result as { synthesis: { experience_yaml: string } }).synthesis.experience_yaml).toBe(SYNTHESIS.experience_yaml)
+  })
+
+  it('final_score reports the critic score (not null/0) on the auto-fix success path', async () => {
+    tmp2 = mkdtempSync(join(tmpdir(), 'oe-author-finalscore-'))
+    // round-0 synthesize returns an INVALID draft (undeclared writes field) so
+    // validation fails; critique flags it; reviser returns the corrected draft.
+    const invalidSynth = {
+      ...SYNTHESIS,
+      experience_yaml: SYNTHESIS.experience_yaml.replace('writes: [greeting]', 'writes: [undeclared_field]'),
+    }
+    const highFinding = {
+      score: 40,
+      findings: [{ dimension: 'decomposition', severity: 'high', anchor: { node_id: 'greet' }, evidence: 'x', fix: 'declare the field' }],
+    }
+    const llm: LLMClient = {
+      async complete(opts) {
+        if (opts.system?.includes('SOP architect'))
+          return { text: '', tool_calls: [{ name: 'structured_output', input: ANALYSIS }] }
+        if (opts.system?.includes('SOP critic'))
+          return { text: '', tool_calls: [{ name: 'structured_output', input: highFinding }] }
+        if (opts.system?.includes('SOP reviser'))
+          return { text: '', tool_calls: [{ name: 'structured_output', input: SYNTHESIS }] } // corrected (valid)
+        return { text: '', tool_calls: [{ name: 'structured_output', input: invalidSynth }] } // synthesizer
+      },
+    }
+    const ultra = new UltraExpertise({ client: llm })
+    const result = await ultra.author({ taskDescription: 'say hi', rootDir: tmp2, maxRounds: 1 })
+    const r = result as { validation: { valid: boolean }; loop: { final_score: number | null } }
+    expect(r.validation.valid).toBe(true)             // the corrected draft was written
+    expect(r.loop.final_score).not.toBeNull()         // <-- the bug: this was null before the fix
+    expect(r.loop.final_score).toBeGreaterThan(0)     // reports clamp(critic score) = 40
   })
 })
