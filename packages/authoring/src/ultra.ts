@@ -172,9 +172,11 @@ export class UltraExpertise {
     }
     const draftFiles = new Set(draft.files.map((f) => f.path.replace(/^\.\//, '')))
     const anchored = data.findings.filter((f: CritiqueFinding) => {
+      // check the most-specific anchor present; we do not OR across multiple fields
       if (f.anchor.node_id) return draftNodeIds.has(f.anchor.node_id)
       if (f.anchor.state_field) return draftFields.has(f.anchor.state_field)
       if (f.anchor.file_path) return draftFiles.has(f.anchor.file_path.replace(/^\.\//, ''))
+      // no anchor field set (or all empty) → unverifiable → drop
       return false
     })
     return { critique: { ...data, findings: anchored }, usage }

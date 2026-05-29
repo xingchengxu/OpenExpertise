@@ -178,6 +178,30 @@ describe('UltraExpertise.critique', () => {
     expect(c!.findings).toHaveLength(0)
   })
 
+  it('drops findings whose anchor is empty ({}) — unverifiable → drop', async () => {
+    const llm: LLMClient = {
+      async complete() {
+        return {
+          text: '',
+          tool_calls: [
+            {
+              name: 'structured_output',
+              input: {
+                score: 60,
+                findings: [
+                  { dimension: 'decomposition', severity: 'high', anchor: {}, evidence: 'x', fix: 'y' },
+                ],
+              },
+            },
+          ],
+        }
+      },
+    }
+    const ultra = new UltraExpertise({ client: llm })
+    const { critique: c } = await ultra.critique('say hi', ANALYSIS, SYNTHESIS, { ok: true, issues: [] }, { valid: true })
+    expect(c!.findings).toHaveLength(0)
+  })
+
   it('fails soft (returns null critique) when there is no structured_output tool call', async () => {
     const llm: LLMClient = {
       async complete() {
