@@ -308,4 +308,20 @@ phases:
       PathTraversalError,
     )
   })
+
+  it('applies a valid user edit even when the critic gives a clean assessment (no findings)', async () => {
+    const draftDir = await seedDraft()
+    const llm = new QueuedScriptedLLM({
+      analysis: [ANALYSIS],
+      synthesis: [SYNTHESIS],
+      critique: [{ score: 85, findings: [] }], // critic finds NOTHING wrong with the original
+      revise: [REVISED_SYNTH],                  // but the user's directive still produces an edit
+    })
+    const ultra = new UltraExpertise({ client: llm })
+    const result = await ultra.reviseDraft({ draftDir, feedback: 'add a second greet node', maxRounds: 1 })
+    expect(result.validation.valid).toBe(true)
+    // the user's edit MUST land even though round-0 scored equally well:
+    const written = readFileSync(join(draftDir, 'experience.yaml'), 'utf8')
+    expect(written).toContain('greet2')
+  })
 })

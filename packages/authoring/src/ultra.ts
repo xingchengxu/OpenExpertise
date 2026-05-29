@@ -560,7 +560,12 @@ export class UltraExpertise {
         break // diverging → keep prior best, stop
       }
       current = revisedRound
-      if (isBetter(current, best)) best = current
+      // reviseDraft acceptance (UNLIKE author()'s loop): the user gave an EXPLICIT
+      // directive, so a valid revise that does not regress validity is ACCEPTED even
+      // on a composite tie — the critic's rubric does not capture the user's intent.
+      // (The monotonicity gate above already rejected a revise that broke validity.)
+      if (revisedRound.validation.valid) best = current
+      else if (isBetter(current, best)) best = current
     }
 
     // Prune: remove draft files absent from the new files[] (never analysis.json,
