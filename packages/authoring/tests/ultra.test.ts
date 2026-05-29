@@ -273,3 +273,31 @@ describe('UltraExpertise.author end-to-end', () => {
     expect(result.files_written).toContain('experience.yaml')
   })
 })
+
+describe('UltraExpertise.author quality loop', () => {
+  let tmp2: string
+  afterEach(() => {
+    if (tmp2) rmSync(tmp2, { recursive: true, force: true })
+  })
+
+  it('maxRounds=0 is byte-for-byte back-compat: no loop key', async () => {
+    tmp2 = mkdtempSync(join(tmpdir(), 'oe-author-bc-'))
+    const llm = new ScriptedLLM(ANALYSIS, SYNTHESIS)
+    const ultra = new UltraExpertise({ client: llm })
+    const result = await ultra.author({ taskDescription: 'say hi', rootDir: tmp2, maxRounds: 0 })
+    expect('loop' in result).toBe(false)
+    expect((result as { validation: { valid: boolean } }).validation.valid).toBe(true)
+  })
+
+  it('omitting maxRounds defaults to 0 (legacy back-compat): no loop key, critic never called', async () => {
+    tmp2 = mkdtempSync(join(tmpdir(), 'oe-author-default-'))
+    const llm = new ScriptedLLM(ANALYSIS, SYNTHESIS)
+    const ultra = new UltraExpertise({ client: llm })
+    // No maxRounds arg at all — exercises the `?? 0` default.
+    const result = await ultra.author({ taskDescription: 'say hi', rootDir: tmp2 })
+    expect('loop' in result).toBe(false)
+    expect((result as { validation: { valid: boolean } }).validation.valid).toBe(true)
+    // The legacy fakes only route architect/synthesizer; assert critique() was never invoked.
+    expect(llm.calls.some((c) => c.system?.includes('SOP critic'))).toBe(false)
+  })
+})

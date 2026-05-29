@@ -3,6 +3,7 @@ export {
   type UltraExpertiseOpts,
   type UltraResult,
   type PhaseEvent,
+  type LoopMeta,
 } from './ultra.js'
 export {
   writeDraft,
