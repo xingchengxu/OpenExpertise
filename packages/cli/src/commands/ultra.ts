@@ -239,14 +239,10 @@ export async function ultraCommand(opts: UltraOpts): Promise<number> {
 
   if ('loop' in fullResult && fullResult.loop && fullResult.loop.rounds_run > 0) {
     const loop = fullResult.loop
-    const lastCritique = loop.critiques[loop.critiques.length - 1]
-    const high = lastCritique
-      ? lastCritique.findings.filter((f) => f.severity === 'high').length
-      : 0
     const score = loop.final_score ?? 0
     const scoreBar = Number(process.env['OE_ULTRA_SCORE_BAR'] ?? 80)
     out(
-      `  Quality loop: ${loop.rounds_run} round${loop.rounds_run === 1 ? '' : 's'}, final score ${score}/100 (bar ${scoreBar}), ${high} high-severity findings remaining`,
+      `  Quality loop: ${loop.rounds_run} round${loop.rounds_run === 1 ? '' : 's'}, final score ${score}/100 (bar ${scoreBar})`,
     )
     out('')
   }

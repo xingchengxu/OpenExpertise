@@ -231,6 +231,13 @@ export function buildProgram(): Command {
       ) => {
         const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
         const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+        if (cmdOpts.maxRounds !== undefined) {
+          const n = Number(cmdOpts.maxRounds)
+          if (!Number.isInteger(n) || n < 0) {
+            console.error(`oe ultra: --max-rounds must be a non-negative integer (got "${cmdOpts.maxRounds}")`)
+            process.exit(1)
+          }
+        }
         process.exit(
           await ultraCommand({
             taskDescription: task,
