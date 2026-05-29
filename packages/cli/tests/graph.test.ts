@@ -30,12 +30,10 @@ describe('graphCommand', () => {
     dir = mkdtempSync(join(tmpdir(), 'oe-graph-'))
     writeFileSync(join(dir, 'experience.yaml'), YAML)
     const writes: string[] = []
-    const spy = vi
-      .spyOn(process.stdout, 'write')
-      .mockImplementation(((s: string) => {
-        writes.push(String(s))
-        return true
-      }) as never)
+    const spy = vi.spyOn(process.stdout, 'write').mockImplementation(((s: string) => {
+      writes.push(String(s))
+      return true
+    }) as never)
     const code = await graphCommand({ path: dir, logger: noopLogger })
     spy.mockRestore()
     expect(code).toBe(0)

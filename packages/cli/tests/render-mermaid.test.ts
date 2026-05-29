@@ -6,14 +6,19 @@ const SPEC: ExperienceSpec = {
   name: 'review-branch',
   version: '0.1.0',
   state: { schema: {} } as ExperienceSpec['state'],
-  phases: [
-    { id: 'collect', title: 'Collect' },
-    { id: 'review' },
-  ],
+  phases: [{ id: 'collect', title: 'Collect' }, { id: 'review' }],
   graph: {
     nodes: [
       { id: 'fetch_diff', kind: 'tool', phase: 'collect', impl: './t.mjs', writes: ['diff'] },
-      { id: 'bug_review', kind: 'agent', phase: 'review', prompt: './p.md', reads: ['diff'], for_each: { source: '$.dimensions' }, writes: ['findings'] },
+      {
+        id: 'bug_review',
+        kind: 'agent',
+        phase: 'review',
+        prompt: './p.md',
+        reads: ['diff'],
+        for_each: { source: '$.dimensions' },
+        writes: ['findings'],
+      },
     ],
     edges: [
       { from: 'fetch_diff', to: 'bug_review' },
@@ -48,11 +53,14 @@ describe('renderMermaid', () => {
     const spec = {
       ...SPEC,
       phases: [],
-      graph: { nodes: [{ id: 'a-b.c', kind: 'tool', impl: './t.mjs' }], edges: [{ from: 'a-b.c', to: 'a-b.c' }] },
+      graph: {
+        nodes: [{ id: 'a-b.c', kind: 'tool', impl: './t.mjs' }],
+        edges: [{ from: 'a-b.c', to: 'a-b.c' }],
+      },
     } as unknown as ExperienceSpec
     const out = renderMermaid(spec)
     expect(out).toContain('a_b_c["a-b.c"]:::tool') // safe id in def, original in label
-    expect(out).toContain('a_b_c --> a_b_c')        // edge uses the SAME safe id
+    expect(out).toContain('a_b_c --> a_b_c') // edge uses the SAME safe id
   })
 
   it('renderMermaidHtml wraps the diagram in a self-contained page', () => {

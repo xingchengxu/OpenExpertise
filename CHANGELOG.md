@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`oe ultra` quality loop** — an internal critique→revise pass (`oe ultra` defaults to 1 round; `--max-rounds 0` / the library `maxRounds: 0` disables it for the legacy one-shot) that scores the synthesized draft on decomposition + prompt quality, feeds deterministic validation/preflight errors back to an incremental reviser, and keeps the best-scoring round (keep-best + monotonicity gate — never worse than the one-shot baseline). This delivers the 0.1.4 "auto-retry on validation failure" item, which is now retired.
 - **`oe ultra-revise <draftPath> <feedback>`** (+ `oe_ultra_revise` MCP tool, 6→7 tools, + `/ultraexpertise` slash parity) — apply natural-language feedback to an existing draft, reusing the critique→revise roles from the quality loop. Reads the draft back via a new `analysis.json` sidecar (re-derived-minimal fallback for older drafts), runs one steered critique→revise pass with keep-best + monotonicity, and prunes now-absent files.
+- **`oe graph [path]`** — render any experience's DAG as a Mermaid `flowchart` (phase subgraphs, per-kind node shapes/colors, `for_each` + conditional-`when:` edge labels). Prints to stdout (paste into a GitHub README — Mermaid renders natively), `--html` for a self-contained page, `-o <file>` to write, `--lr` for left-to-right. Pure transform; no API key.
 
 ## [0.1.4] — 2026-05-28
 

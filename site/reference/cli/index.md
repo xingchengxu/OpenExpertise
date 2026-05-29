@@ -39,6 +39,7 @@ All examples on this page use the short `oe` form.
 | [`oe state`](/reference/cli/state)             | Inspect the persistent state blackboard                         |
 | [`oe ultra`](/reference/cli/ultra)             | LLM-author a new experience from a natural-language description |
 | [`oe validate`](/reference/cli/validate)       | Validate an `experience.yaml` file or directory                 |
+| `oe graph`                                     | Render an experience's DAG as a Mermaid diagram                 |
 
 ## Global flags
 
@@ -86,9 +87,10 @@ When both `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` are set, Anthropic takes prec
 
 ### Validate
 
-| Command                                  | When to use                                             |
-| ---------------------------------------- | ------------------------------------------------------- |
-| [`oe validate`](/reference/cli/validate) | Check YAML syntax and schema correctness before running |
+| Command                                  | When to use                                                                                                                                                                                             |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`oe validate`](/reference/cli/validate) | Check YAML syntax and schema correctness before running                                                                                                                                                 |
+| `oe graph [path]`                        | Render the experience's DAG as a Mermaid `flowchart` — stdout (paste into a README), `--html` for a standalone page, `-o <file>` to write, `--lr` for left-to-right layout. Pure transform; no API key. |
 
 ### Run
 

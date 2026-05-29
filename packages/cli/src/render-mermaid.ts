@@ -33,7 +33,10 @@ function esc(s: string): string {
     .replace(/>/g, '&gt;')
 }
 
-function makeSafeIds(nodes: NodeSpec[], edges: { from: string; to: string }[]): Map<string, string> {
+function makeSafeIds(
+  nodes: NodeSpec[],
+  edges: { from: string; to: string }[],
+): Map<string, string> {
   const ids: string[] = []
   const seen = new Set<string>()
   const add = (id: string): void => {
@@ -117,7 +120,8 @@ export function renderMermaid(spec: ExperienceSpec, opts: RenderMermaidOpts = {}
   }
 
   const kindsPresent = new Set(nodes.map((n) => n.kind))
-  for (const k of kindsPresent) lines.push(`  classDef ${k} ${CLASSDEF[k] ?? 'fill:#eee,stroke:#999'}`)
+  for (const k of kindsPresent)
+    lines.push(`  classDef ${k} ${CLASSDEF[k] ?? 'fill:#eee,stroke:#999'}`)
 
   return lines.join('\n') + '\n'
 }
