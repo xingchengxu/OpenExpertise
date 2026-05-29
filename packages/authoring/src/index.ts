@@ -20,3 +20,4 @@ export {
   type CritiqueOutput,
   type CritiqueFinding,
 } from './schemas.js'
+export { preflightDraft, type PreflightResult } from './preflight.js'
