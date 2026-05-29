@@ -132,11 +132,29 @@ export function buildProgram(): Command {
     .description('Render a run trace from .openexpertise/runs/<run-id>.jsonl')
     .argument('<run-id>', 'run id')
     .option('--experience <path>', 'experience path', '.')
-    .action(async (runId: string, cmdOpts: { experience: string }, cmd: Command) => {
-      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
-      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
-      process.exit(await inspectCommand({ experiencePath: cmdOpts.experience, runId, logger }))
-    })
+    .option('--html', 'render a self-contained HTML run report')
+    .option('-o, --out <file>', 'write the report to a file (with --html)')
+    .option('--lr', 'left-to-right layout (with --html)')
+    .action(
+      async (
+        runId: string,
+        cmdOpts: { experience: string; html?: boolean; out?: string; lr?: boolean },
+        cmd: Command,
+      ) => {
+        const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+        const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+        process.exit(
+          await inspectCommand({
+            experiencePath: cmdOpts.experience,
+            runId,
+            logger,
+            ...(cmdOpts.html ? { html: true } : {}),
+            ...(cmdOpts.out !== undefined ? { out: cmdOpts.out } : {}),
+            ...(cmdOpts.lr ? { direction: 'LR' as const } : {}),
+          }),
+        )
+      },
+    )
 
   program
     .command('resume')
