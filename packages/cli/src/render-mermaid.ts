@@ -1,7 +1,10 @@
 import type { ExperienceSpec, NodeSpec, NodeKind } from '@openexpertise/schema'
 
+export type NodeRunStatus = 'success' | 'failed' | 'skipped' | 'running'
+
 export interface RenderMermaidOpts {
   direction?: 'TD' | 'LR'
+  nodeStatus?: Record<string, NodeRunStatus>
 }
 
 const SHAPE: Record<NodeKind, [string, string]> = {
@@ -75,7 +78,9 @@ export function renderMermaid(spec: ExperienceSpec, opts: RenderMermaidOpts = {}
     const [open, close] = SHAPE[n.kind] ?? ['["', '"]']
     const forEach = (n as { for_each?: { source: string } }).for_each
     const label = esc(n.id) + (forEach ? `\n⟳ for each ${esc(forEach.source)}` : '')
-    return `${safe.get(n.id) ?? n.id}${open}${label}${close}:::${n.kind}`
+    const statusClass = opts.nodeStatus?.[n.id]
+    const cls = statusClass !== undefined ? `status_${statusClass}` : n.kind
+    return `${safe.get(n.id) ?? n.id}${open}${label}${close}:::${cls}`
   }
 
   // Group nodes by phase. Phase order + titles come from spec.phases when
@@ -122,6 +127,20 @@ export function renderMermaid(spec: ExperienceSpec, opts: RenderMermaidOpts = {}
   const kindsPresent = new Set(nodes.map((n) => n.kind))
   for (const k of kindsPresent)
     lines.push(`  classDef ${k} ${CLASSDEF[k] ?? 'fill:#eee,stroke:#999'}`)
+
+  if (opts.nodeStatus !== undefined && Object.keys(opts.nodeStatus).length > 0) {
+    const STATUS_CLASSDEF: Record<NodeRunStatus, string> = {
+      success: 'fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px',
+      failed: 'fill:#ffebee,stroke:#c62828,stroke-width:2px',
+      skipped: 'fill:#f5f5f5,stroke:#9e9e9e,stroke-dasharray:4 2',
+      running: 'fill:#fff8e1,stroke:#f9a825,stroke-width:2px',
+    }
+    const statusesUsed = new Set(Object.values(opts.nodeStatus))
+    const statusOrder: NodeRunStatus[] = ['success', 'failed', 'skipped', 'running']
+    for (const s of statusOrder) {
+      if (statusesUsed.has(s)) lines.push(`  classDef status_${s} ${STATUS_CLASSDEF[s]}`)
+    }
+  }
 
   return lines.join('\n') + '\n'
 }

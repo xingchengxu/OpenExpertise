@@ -89,6 +89,8 @@ flowchart TD
   classDef agent fill:#ede7f6,stroke:#5e35b1
 ```
 
+Already ran it? `oe inspect <run-id> --experience <path> --html -o report.html` writes a self-contained run report — the DAG colored by each node's status (success/failed/skipped), an events timeline, and per-node duration + tokens. Pin it to a PR.
+
 Pull any public GitHub repo with an `experience.yaml`:
 
 ```bash
@@ -462,21 +464,21 @@ Seven MCP tools are exposed: `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, 
 
 > First time? Run `oe doctor` to verify your environment.
 
-| Command                        | Purpose                                                                                   |
-| ------------------------------ | ----------------------------------------------------------------------------------------- |
-| `oe doctor`                    | Check environment readiness (Node, pnpm, CLIs, API keys, writable dirs)                   |
-| `oe init <name>`               | Scaffold a new experience directory                                                       |
-| `oe validate [path]`           | Validate `experience.yaml`                                                                |
-| `oe run [path]`                | Execute an experience (`--tui`, `--evolve`, `--concurrency N`, `--llm anthropic\|openai`) |
-| `oe resume <run-id>`           | Re-run with cache replay                                                                  |
-| `oe inspect <run-id>`          | Replay a run's event log (sorted by ts)                                                   |
-| `oe state [field]`             | Inspect blackboard                                                                        |
-| `oe reset-state --yes`         | Wipe blackboard                                                                           |
-| `oe evolve <run-id>`           | Generate evolution proposals                                                              |
-| `oe diff`                      | List pending evolution proposals                                                          |
-| `oe ultra "<task>"`            | LLM authors a new experience from natural language                                        |
-| `oe ultra-revise <dir> "<fb>"` | Apply natural-language feedback to an existing draft (critique→revise)                    |
-| `oe graph [path]`              | Render an experience as a Mermaid diagram (`--html`, `-o <file>`, `--lr`)                 |
+| Command                        | Purpose                                                                                                                                                             |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `oe doctor`                    | Check environment readiness (Node, pnpm, CLIs, API keys, writable dirs)                                                                                             |
+| `oe init <name>`               | Scaffold a new experience directory                                                                                                                                 |
+| `oe validate [path]`           | Validate `experience.yaml`                                                                                                                                          |
+| `oe run [path]`                | Execute an experience (`--tui`, `--evolve`, `--concurrency N`, `--llm anthropic\|openai`)                                                                           |
+| `oe resume <run-id>`           | Re-run with cache replay                                                                                                                                            |
+| `oe inspect <run-id>`          | Replay a run's event log (sorted by ts); `--html -o report.html` writes a self-contained run report (status-colored DAG + events timeline + per-node timing/tokens) |
+| `oe state [field]`             | Inspect blackboard                                                                                                                                                  |
+| `oe reset-state --yes`         | Wipe blackboard                                                                                                                                                     |
+| `oe evolve <run-id>`           | Generate evolution proposals                                                                                                                                        |
+| `oe diff`                      | List pending evolution proposals                                                                                                                                    |
+| `oe ultra "<task>"`            | LLM authors a new experience from natural language                                                                                                                  |
+| `oe ultra-revise <dir> "<fb>"` | Apply natural-language feedback to an existing draft (critique→revise)                                                                                              |
+| `oe graph [path]`              | Render an experience as a Mermaid diagram (`--html`, `-o <file>`, `--lr`)                                                                                           |
 
 ### `--tui` dashboard
 

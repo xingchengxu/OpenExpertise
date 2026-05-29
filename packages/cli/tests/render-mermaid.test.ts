@@ -72,3 +72,25 @@ describe('renderMermaid', () => {
     expect(html).toContain('mermaid') // the script/init
   })
 })
+
+describe('renderMermaid nodeStatus', () => {
+  it('applies status classes instead of kind classes when nodeStatus is given', () => {
+    const out = renderMermaid(SPEC, { nodeStatus: { fetch_diff: 'success', bug_review: 'failed' } })
+    expect(out).toContain('fetch_diff["fetch_diff"]:::status_success')
+    expect(out).toMatch(/bug_review\(".*"\):::status_failed/s)
+    expect(out).toContain('classDef status_success')
+    expect(out).toContain('classDef status_failed')
+    // a node with no status entry falls back to its kind class
+  })
+
+  it('is byte-identical to the no-opts output when nodeStatus is absent (back-compat)', () => {
+    expect(renderMermaid(SPEC, {})).toBe(renderMermaid(SPEC))
+    expect(renderMermaid(SPEC)).not.toContain('status_')
+  })
+
+  it('only emits status classDefs for statuses actually used', () => {
+    const out = renderMermaid(SPEC, { nodeStatus: { fetch_diff: 'success' } })
+    expect(out).toContain('classDef status_success')
+    expect(out).not.toContain('classDef status_failed')
+  })
+})
