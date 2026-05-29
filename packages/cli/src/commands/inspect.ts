@@ -48,7 +48,12 @@ export async function inspectCommand(opts: InspectOpts): Promise<number> {
     }
 
     const summary = summarizeRun(events)
-    const html = renderRunReportHtml(spec, summary, opts.runId)
+    const html = renderRunReportHtml(
+      spec,
+      summary,
+      opts.runId,
+      opts.direction ? { direction: opts.direction } : {},
+    )
 
     if (opts.out) {
       const outPath = resolve(opts.out)

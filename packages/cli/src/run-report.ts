@@ -314,6 +314,7 @@ export function renderRunReportHtml(
   spec: ExperienceSpec,
   summary: RunSummary,
   runId?: string,
+  opts: { direction?: 'TD' | 'LR' } = {},
 ): string {
   const name = esc(spec.name ?? 'experience')
   const rid = escOpt(runId ?? summary.runId)
@@ -321,6 +322,7 @@ export function renderRunReportHtml(
   const badgeColor = STATUS_BADGE[overall]
   const mermaid = renderMermaid(spec, {
     nodeStatus: summary.nodeStatus as Record<string, NodeRunStatus>,
+    ...(opts.direction ? { direction: opts.direction } : {}),
   })
 
   const nodeRows = summary.nodes
