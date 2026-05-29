@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { ExperienceSpec } from '@openexpertise/schema'
 import { renderMermaid, renderMermaidHtml } from '../src/render-mermaid.js'
-import type { NodeRunStatus } from '../src/render-mermaid.js'
 
 const SPEC: ExperienceSpec = {
   name: 'review-branch',
