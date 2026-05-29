@@ -1,9 +1,10 @@
 import { describe, it, expect, afterEach } from 'vitest'
-import { mkdtempSync, rmSync, readFileSync, existsSync } from 'node:fs'
+import { mkdtempSync, rmSync, readFileSync, existsSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { LLMClient, LLMCompleteOpts } from '@openexpertise/core'
 import { UltraExpertise } from '../src/ultra.js'
+import { writeDraft, readDraft, PathTraversalError } from '../src/writer.js'
 import type { AnalysisOutput, SynthesisOutput } from '../src/schemas.js'
 
 class ScriptedLLM implements LLMClient {
@@ -82,5 +83,46 @@ describe('author() persists an analysis.json sidecar without changing files_writ
     // files_written is UNCHANGED — analysis.json is NOT in it (ground truth)
     expect(result.files_written).toEqual(['experience.yaml', 'tools/greet.mjs', 'README.md'])
     expect(result.files_written).not.toContain('analysis.json')
+  })
+})
+
+describe('readDraft', () => {
+  let tmp: string
+  afterEach(() => {
+    if (tmp) rmSync(tmp, { recursive: true, force: true })
+  })
+
+  it('round-trips a writeDraft output, excluding analysis.json from files[]', async () => {
+    tmp = mkdtempSync(join(tmpdir(), 'oe-readdraft-'))
+    const written = await writeDraft({
+      draftDir: join(tmp, 'd'),
+      experienceYaml: SYNTHESIS.experience_yaml,
+      files: SYNTHESIS.files,
+    })
+    // simulate the author()-written sidecar
+    writeFileSync(join(written.draftDir, 'analysis.json'), JSON.stringify(ANALYSIS, null, 2))
+
+    const r = readDraft(written.draftDir)
+    expect(r.synthesis.experience_yaml).toBe(SYNTHESIS.experience_yaml)
+    const paths = r.synthesis.files.map((f) => f.path).sort()
+    expect(paths).toEqual(['README.md', 'tools/greet.mjs'])
+    expect(paths).not.toContain('analysis.json') // sidecar excluded from files[]
+    expect(r.analysis.name).toBe('hello-author') // analysis.json loaded as the analysis
+  })
+
+  it('falls back to a re-derived minimal analysis when analysis.json is absent', async () => {
+    tmp = mkdtempSync(join(tmpdir(), 'oe-readdraft-fb-'))
+    const written = await writeDraft({
+      draftDir: join(tmp, 'd'),
+      experienceYaml: SYNTHESIS.experience_yaml,
+      files: SYNTHESIS.files,
+    })
+    const r = readDraft(written.draftDir) // no analysis.json on disk
+    expect(r.analysis.name).toBe('hello-author') // derived from experience.yaml name
+    expect(r.analysis.node_sketches.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('rejects a draftDir escaping via .. with PathTraversalError', () => {
+    expect(() => readDraft('../../etc')).toThrow(PathTraversalError)
   })
 })

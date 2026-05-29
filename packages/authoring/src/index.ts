@@ -7,8 +7,10 @@ export {
 } from './ultra.js'
 export {
   writeDraft,
+  readDraft,
   type WriteDraftOpts,
   type WriteDraftResult,
+  type ReadDraftResult,
   PathTraversalError,
 } from './writer.js'
 export { slugify } from './slug.js'
