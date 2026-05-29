@@ -21,3 +21,4 @@ export {
   type CritiqueFinding,
 } from './schemas.js'
 export { preflightDraft, type PreflightResult } from './preflight.js'
+export { pickExemplars, type Exemplar } from './grounding.js'
