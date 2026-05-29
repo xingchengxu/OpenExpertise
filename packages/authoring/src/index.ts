@@ -14,6 +14,9 @@ export { slugify } from './slug.js'
 export {
   ANALYSIS_SCHEMA,
   SYNTHESIS_SCHEMA,
+  CRITIQUE_SCHEMA,
   type AnalysisOutput,
   type SynthesisOutput,
+  type CritiqueOutput,
+  type CritiqueFinding,
 } from './schemas.js'
