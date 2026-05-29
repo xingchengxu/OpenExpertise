@@ -27,7 +27,7 @@ Shipped in 0.1.0 (foundation):
 - **CLI** — `init`, `validate`, `run`, `resume`, `inspect`, `state`, `reset-state`, `evolve`, `diff`, `ultra`, `doctor`, `install`, `registry`, `installed`, `submit` (new in 0.1.1), `demo` (new in 0.1.1)
 - **Evolution advisor** — `oe evolve <run-id>` proposes `add-node` / `tune-param` / `add-dataset-case` operations as `git apply`-ready diffs
 - **`oe ultra` LLM authoring** — single-keyword YAML synthesis with tool stubs + prompt files
-- **MCP server** — `oe-mcp` exposes 6 tools for Claude Desktop / Cursor / other MCP clients
+- **MCP server** — `oe-mcp` exposes 7 tools for Claude Desktop / Cursor / other MCP clients
 - **TUI dashboard** — htop-grade live render with per-node activity, tokens, status glyphs
 - **12 examples** — all with mocked-LLM e2e tests
 - **292 tests passing across 65 test files** (0.1.1 figure; 0.1.0 shipped with 265)

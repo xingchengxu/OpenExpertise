@@ -30,7 +30,7 @@ The `/workflows` TUI is notably polished for a preview feature: a htop-style int
 | Multiple LLM providers | Anthropic + OpenAI + any OpenAI-compatible endpoint              | Anthropic only                                           |
 | Availability           | Stable, open-source, npm-installable today                       | Unreleased preview; no public ETA                        |
 | Authoring artifact     | A YAML file you own and evolve over time                         | LLM-generated JS script; may or may not survive 3 days   |
-| MCP server             | Exposes 6 OE tools so Claude Code can orchestrate OE             | Runs inside Claude Code; not callable externally         |
+| MCP server             | Exposes 7 OE tools so Claude Code can orchestrate OE             | Runs inside Claude Code; not callable externally         |
 
 ## When to pick /workflows over OpenExpertise
 

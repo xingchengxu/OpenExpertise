@@ -129,6 +129,12 @@ oe_ultra({ task: "..." })
 
 Returns `{ slug, draft_dir, analysis, synthesis: { file_paths, next_steps }, validation, files_written, loop? }`. The full file contents are NOT in the response — they're on disk at `draft_dir`. The optional `loop` field (`{ rounds_run, final_score, critiques }`) is present when `max_rounds > 0` (the default).
 
+## Revising a draft (`oe ultra-revise`)
+
+`oe ultra-revise <draftPath> "<feedback>"` applies natural-language feedback to an existing on-disk draft. It reads the draft back (using the `analysis.json` sidecar written at author time, or a re-derived analysis for older drafts), injects your feedback as a high-priority directive ahead of the critic's own findings, runs one steered critique→revise pass (`--max-rounds`, default 1) with the same keep-best + monotonicity guarantees as `oe ultra`, prunes any now-absent files, and writes the incremental edit back in place. Exit code `0` when the revised draft validates, `2` otherwise.
+
+The same capability is exposed as the MCP `oe_ultra_revise` tool (`{ draft_dir, feedback, max_rounds? }`) and via the `/ultraexpertise` slash command's revise affordance.
+
 ## Composition with the evolution advisor
 
 The same LLM provider drives both `oe ultra` and `oe evolve`. After you run the authored experience once, the advisor reads the events + state diff and proposes upgrades — additional dimensions, tuned retry policies, missing tools. Author → run → evolve is one continuous loop.

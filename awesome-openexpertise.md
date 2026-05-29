@@ -52,7 +52,7 @@ Submit a PR to add your work. Inclusion criteria: works on `v0.1.0+`, has a READ
 
 ### MCP
 
-- **`oe-mcp` server** — exposes 6 OE tools (`oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `oe_evolve`, `oe_ultra`) to any MCP-aware client. Bidirectional integration with Claude Code / Codex / Gemini sessions.
+- **`oe-mcp` server** — exposes 7 OE tools (`oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `oe_evolve`, `oe_ultra`, `oe_ultra_revise`) to any MCP-aware client. Bidirectional integration with Claude Code / Codex / Gemini sessions.
 
 ### Skills
 

@@ -37,7 +37,7 @@ features:
     details: <code>oe evolve &lt;run-id&gt;</code> reads the events + state diff and proposes graph upgrades as <code>git apply</code>-ready diffs. The author → run → evolve loop closes.
   - icon: 🔗
     title: Two-way agentic-CLI integration
-    details: Outbound — delegate a node to Claude Code / Codex / Gemini. Inbound — <code>oe-mcp</code> exposes 6 OE tools so the same CLIs can run experiences from their own sessions.
+    details: Outbound — delegate a node to Claude Code / Codex / Gemini. Inbound — <code>oe-mcp</code> exposes 7 OE tools so the same CLIs can run experiences from their own sessions.
   - icon: ⚡
     title: Parallel + 429-aware
     details: <code>--concurrency N</code> runs independent nodes (and <code>for_each</code> iterations) in parallel. Both Anthropic and OpenAI clients retry on HTTP 429 with exponential backoff.
