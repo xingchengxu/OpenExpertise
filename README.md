@@ -52,7 +52,7 @@ oe demo                                # see pre-recorded runs of bundled exampl
 oe demo review-branch                  # preview the PR review flow + advisor's evolution proposal
 ```
 
-> **Don't want to write YAML by hand?** Run `oe ultra "describe your task in one sentence"` and the LLM scaffolds the whole experience — graph, prompts, tool stubs with `// TODO:` markers, and validation. See the [30-min `oe ultra` tutorial](https://xingchengxu.github.io/OpenExpertise/guide/authoring-ultra).
+> **Don't want to write YAML by hand?** Run `oe ultra "describe your task in one sentence"` and the LLM scaffolds the whole experience — graph, prompts, tool stubs with `// TODO:` markers, and validation. `oe ultra` runs a built-in critique→revise quality loop (`--max-rounds`, default 1; `--max-rounds 0` for the legacy one-shot) that feeds deterministic validation/preflight errors back to an incremental reviser and keeps the best-scoring draft. See the [30-min `oe ultra` tutorial](https://xingchengxu.github.io/OpenExpertise/guide/authoring-ultra).
 
 > **New to OpenExpertise?** Walk through the [30-minute "Your first experience" tutorial](https://xingchengxu.github.io/OpenExpertise/guide/first-experience) — by the end you'll have a tested, registry-submittable flow you built yourself.
 

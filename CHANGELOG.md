@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_Nothing yet — add entries here as features land._
+### Added
+
+- **`oe ultra` quality loop** — an internal critique→revise pass (`oe ultra` defaults to 1 round; `--max-rounds 0` / the library `maxRounds: 0` disables it for the legacy one-shot) that scores the synthesized draft on decomposition + prompt quality, feeds deterministic validation/preflight errors back to an incremental reviser, and keeps the best-scoring round (keep-best + monotonicity gate — never worse than the one-shot baseline). This delivers the 0.1.4 "auto-retry on validation failure" item, which is now retired.
 
 ## [0.1.4] — 2026-05-28
 
