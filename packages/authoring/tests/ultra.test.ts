@@ -119,6 +119,90 @@ describe('UltraExpertise', () => {
   })
 })
 
+describe('UltraExpertise.critique', () => {
+  it('returns AJV-valid findings, surfaces usage, and routes on the SOP critic marker', async () => {
+    const llm: LLMClient = {
+      async complete(opts) {
+        expect(opts.system).toContain('SOP critic')
+        return {
+          text: '',
+          tool_calls: [
+            {
+              name: 'structured_output',
+              input: {
+                score: 70,
+                findings: [
+                  {
+                    dimension: 'decomposition',
+                    severity: 'high',
+                    anchor: { node_id: 'greet' },
+                    evidence: 'no verifier',
+                    fix: 'add a verifier',
+                  },
+                ],
+              },
+            },
+          ],
+          usage: { input_tokens: 11, output_tokens: 22 },
+        }
+      },
+    }
+    const ultra = new UltraExpertise({ client: llm })
+    const { critique: c, usage } = await ultra.critique('say hi', ANALYSIS, SYNTHESIS, { ok: true, issues: [] }, { valid: true })
+    expect(c).not.toBeNull()
+    expect(c!.findings).toHaveLength(1)
+    expect(usage).toEqual({ input_tokens: 11, output_tokens: 22 })
+  })
+
+  it('drops findings whose anchor is absent from the draft (post-filter)', async () => {
+    const llm: LLMClient = {
+      async complete() {
+        return {
+          text: '',
+          tool_calls: [
+            {
+              name: 'structured_output',
+              input: {
+                score: 60,
+                findings: [
+                  { dimension: 'decomposition', severity: 'high', anchor: { node_id: 'ghost-node' }, evidence: 'x', fix: 'y' },
+                ],
+              },
+            },
+          ],
+        }
+      },
+    }
+    const ultra = new UltraExpertise({ client: llm })
+    const { critique: c } = await ultra.critique('say hi', ANALYSIS, SYNTHESIS, { ok: true, issues: [] }, { valid: true })
+    expect(c!.findings).toHaveLength(0)
+  })
+
+  it('fails soft (returns null critique) when there is no structured_output tool call', async () => {
+    const llm: LLMClient = {
+      async complete() {
+        return { text: 'just prose, no tool call' }
+      },
+    }
+    const ultra = new UltraExpertise({ client: llm })
+    const { critique: c } = await ultra.critique('say hi', ANALYSIS, SYNTHESIS, { ok: true, issues: [] }, { valid: true })
+    expect(c).toBeNull()
+  })
+
+  it('uses criticModel (when set) for the critique complete() call, not the base model', async () => {
+    let seenModel = ''
+    const llm: LLMClient = {
+      async complete(opts) {
+        seenModel = opts.model
+        return { text: '', tool_calls: [{ name: 'structured_output', input: { score: 90, findings: [] } }] }
+      },
+    }
+    const ultra = new UltraExpertise({ client: llm, model: 'base-model', criticModel: 'critic-model' })
+    await ultra.critique('say hi', ANALYSIS, SYNTHESIS, { ok: true, issues: [] }, { valid: true })
+    expect(seenModel).toBe('critic-model')
+  })
+})
+
 import { mkdtempSync, rmSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
