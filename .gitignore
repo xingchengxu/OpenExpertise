@@ -30,6 +30,9 @@ pnpm-debug.log*
 .env
 .env.local
 
+# Superpowers working docs (specs/plans kept locally, not part of OpenExpertise source)
+docs/superpowers/
+
 # Reference projects (kept locally for browsing, not part of OpenExpertise source)
 claude-code-workflow-creator/
 openhuman/
