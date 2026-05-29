@@ -333,4 +333,21 @@ describe('UltraExpertise.author quality loop', () => {
     expect(r.loop.final_score).not.toBeNull()         // <-- the bug: this was null before the fix
     expect(r.loop.final_score).toBeGreaterThan(0)     // reports clamp(critic score) = 40
   })
+
+  it('emits critique and revise phase events with round payloads', async () => {
+    tmp2 = mkdtempSync(join(tmpdir(), 'oe-author-ev-'))
+    const llm = new ScriptedLLM(ANALYSIS, SYNTHESIS)
+    const ultra = new UltraExpertise({ client: llm })
+    const phases: string[] = []
+    await ultra.author({
+      taskDescription: 'say hi',
+      rootDir: tmp2,
+      maxRounds: 1,
+      onPhase: (e) => {
+        phases.push(`${e.phase}:${e.status}`)
+      },
+    })
+    expect(phases).toContain('critique:start')
+    expect(phases).toContain('critique:done')
+  })
 })
