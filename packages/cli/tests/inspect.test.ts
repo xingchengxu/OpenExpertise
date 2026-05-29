@@ -49,11 +49,38 @@ describe('inspectCommand', () => {
     const runId = 'html-test-run-1'
     const lines = [
       JSON.stringify({ type: 'run.started', run_id: runId, ts: '2026-05-26T00:00:00Z' }),
-      JSON.stringify({ type: 'node.started', run_id: runId, node_id: 'step_a', ts: '2026-05-26T00:00:01Z' }),
-      JSON.stringify({ type: 'node.finished', run_id: runId, node_id: 'step_a', ts: '2026-05-26T00:00:03Z', metrics: { tokens_in: 10, tokens_out: 5 } }),
-      JSON.stringify({ type: 'node.started', run_id: runId, node_id: 'step_b', ts: '2026-05-26T00:00:03Z' }),
-      JSON.stringify({ type: 'node.failed', run_id: runId, node_id: 'step_b', ts: '2026-05-26T00:00:04Z', error: 'something went wrong' }),
-      JSON.stringify({ type: 'run.finished', run_id: runId, ts: '2026-05-26T00:00:05Z', status: 'failed' }),
+      JSON.stringify({
+        type: 'node.started',
+        run_id: runId,
+        node_id: 'step_a',
+        ts: '2026-05-26T00:00:01Z',
+      }),
+      JSON.stringify({
+        type: 'node.finished',
+        run_id: runId,
+        node_id: 'step_a',
+        ts: '2026-05-26T00:00:03Z',
+        metrics: { tokens_in: 10, tokens_out: 5 },
+      }),
+      JSON.stringify({
+        type: 'node.started',
+        run_id: runId,
+        node_id: 'step_b',
+        ts: '2026-05-26T00:00:03Z',
+      }),
+      JSON.stringify({
+        type: 'node.failed',
+        run_id: runId,
+        node_id: 'step_b',
+        ts: '2026-05-26T00:00:04Z',
+        error: 'something went wrong',
+      }),
+      JSON.stringify({
+        type: 'run.finished',
+        run_id: runId,
+        ts: '2026-05-26T00:00:05Z',
+        status: 'failed',
+      }),
     ]
     writeFileSync(join(dir, `.openexpertise/runs/${runId}.jsonl`), lines.join('\n'))
 
