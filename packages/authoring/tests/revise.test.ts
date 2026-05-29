@@ -213,6 +213,45 @@ phases:
   next_steps: [],
 }
 
+// Round-2 reviser output: builds on REVISED_SYNTH by adding a THIRD node, greet3.
+// greet3 is an agent node with an inline `prompt` (prompt is inline TEXT, not a
+// file-path — see preflight.ts), so it needs NO entry in files[] and stays
+// preflight-clean. writes: [greeting] references the declared state field.
+const REVISED_SYNTH_2: SynthesisOutput = {
+  experience_yaml: `name: hello-author
+version: 0.1.0
+state:
+  schema:
+    greeting: { type: string }
+graph:
+  nodes:
+    - id: greet
+      kind: tool
+      phase: main
+      impl: ./tools/greet.mjs
+      writes: [greeting]
+    - id: greet2
+      kind: tool
+      phase: main
+      impl: ./tools/greet2.mjs
+      writes: [greeting]
+    - id: greet3
+      kind: agent
+      phase: main
+      prompt: Say hello a third time and write the greeting.
+      writes: [greeting]
+  edges: []
+phases:
+  - { id: main }
+`,
+  files: [
+    { path: 'tools/greet.mjs', content: SYNTHESIS.files[0]!.content },
+    { path: 'tools/greet2.mjs', content: 'export default async function () { return { state_delta: {} } }\n' },
+    { path: 'README.md', content: '# hello-author\n' },
+  ],
+  next_steps: [],
+}
+
 describe('UltraExpertise.reviseDraft', () => {
   let tmp: string
   afterEach(() => {
@@ -323,5 +362,55 @@ phases:
     // the user's edit MUST land even though round-0 scored equally well:
     const written = readFileSync(join(draftDir, 'experience.yaml'), 'utf8')
     expect(written).toContain('greet2')
+  })
+
+  it('runs multiple rounds (maxRounds=2), accumulating edits', async () => {
+    const draftDir = await seedDraft()
+    const llm = new QueuedScriptedLLM({
+      analysis: [ANALYSIS],
+      synthesis: [SYNTHESIS],
+      critique: [HIGH_FINDING, HIGH_FINDING],
+      revise: [REVISED_SYNTH, REVISED_SYNTH_2], // round1 → greet2, round2 → greet3
+    })
+    const ultra = new UltraExpertise({ client: llm })
+    const result = await ultra.reviseDraft({ draftDir, feedback: 'keep adding greet nodes', maxRounds: 2 })
+    expect(result.loop.rounds_run).toBe(2)
+    expect(result.validation.valid).toBe(true)
+    const written = readFileSync(join(draftDir, 'experience.yaml'), 'utf8')
+    expect(written).toContain('greet3')
+  })
+
+  it('writes the original unchanged when the reviser throws (no valid revise)', async () => {
+    const draftDir = await seedDraft()
+    const before = readFileSync(join(draftDir, 'experience.yaml'), 'utf8')
+    const llm: LLMClient = {
+      async complete(opts: LLMCompleteOpts) {
+        if (opts.system?.includes('SOP architect')) return { text: '', tool_calls: [{ name: 'structured_output', input: ANALYSIS }] }
+        if (opts.system?.includes('SOP critic')) return { text: '', tool_calls: [{ name: 'structured_output', input: HIGH_FINDING }] }
+        if (opts.system?.includes('SOP reviser')) return { text: 'no tool call' } // → revise() throws
+        return { text: '', tool_calls: [{ name: 'structured_output', input: SYNTHESIS }] }
+      },
+    }
+    const ultra = new UltraExpertise({ client: llm })
+    const result = await ultra.reviseDraft({ draftDir, feedback: 'x', maxRounds: 1 })
+    expect(result.validation.valid).toBe(true)
+    expect(readFileSync(join(draftDir, 'experience.yaml'), 'utf8')).toBe(before) // unchanged
+  })
+
+  it('accepts a valid revise when the existing draft (round-0) is invalid', async () => {
+    const draftDir = await seedDraft()
+    // corrupt the on-disk draft so round-0 is invalid
+    const yamlPath = join(draftDir, 'experience.yaml')
+    writeFileSync(yamlPath, readFileSync(yamlPath, 'utf8').replace('writes: [greeting]', 'writes: [undeclared_field]'))
+    const llm = new QueuedScriptedLLM({
+      analysis: [ANALYSIS],
+      synthesis: [SYNTHESIS],
+      critique: [HIGH_FINDING],
+      revise: [REVISED_SYNTH], // valid
+    })
+    const ultra = new UltraExpertise({ client: llm })
+    const result = await ultra.reviseDraft({ draftDir, feedback: 'fix and extend', maxRounds: 1 })
+    expect(result.validation.valid).toBe(true) // recovered from invalid round-0
+    expect(readFileSync(yamlPath, 'utf8')).toContain('greet2')
   })
 })
