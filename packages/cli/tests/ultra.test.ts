@@ -522,3 +522,76 @@ describe('ultraCommand — default next-steps fallback', () => {
     expect(all).toContain('2.')
   })
 })
+
+describe('ultraReviseCommand', () => {
+  let tmp: string
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'oe-ultra-revise-'))
+    vi.clearAllMocks()
+  })
+  afterEach(() => {
+    if (tmp) rmSync(tmp, { recursive: true, force: true })
+  })
+
+  function mockReviseImpl(validation: { valid: boolean; errors?: string[] }) {
+    return vi.fn(async (opts: { onPhase?: (e: unknown) => void }) => {
+      opts.onPhase?.({ phase: 'critique', status: 'start', round: 1 })
+      opts.onPhase?.({
+        phase: 'critique',
+        status: 'done',
+        round: 1,
+        duration_ms: 1200,
+        result: { score: 84, findings: [] },
+      })
+      opts.onPhase?.({ phase: 'revise', status: 'start', round: 1 })
+      opts.onPhase?.({ phase: 'revise', status: 'done', round: 1, duration_ms: 3400, result: SYNTHESIS })
+      return {
+        analysis: ANALYSIS,
+        synthesis: SYNTHESIS,
+        draftDir: join(tmp, 'weekly-digest'),
+        files_written: ['experience.yaml', ...SYNTHESIS.files.map((f) => f.path)],
+        validation,
+        loop: { rounds_run: 1, final_score: 84, critiques: [{ score: 84, findings: [] }] },
+      }
+    })
+  }
+
+  it('parses the flat command, renders sub-lines + quality summary, exits 0 on valid', async () => {
+    const { UltraExpertise } = await import('@openexpertise/authoring')
+    const mockRevise = mockReviseImpl({ valid: true })
+    vi.mocked(UltraExpertise).mockImplementation(() => ({ reviseDraft: mockRevise }) as never)
+
+    const cap = captureStdout()
+    const { ultraReviseCommand } = await import('../src/commands/ultra.js')
+    const code = await ultraReviseCommand({
+      draftPath: join(tmp, 'weekly-digest'),
+      feedback: 'split the bugs node',
+      logger: makeLogger(),
+      maxRounds: 1,
+    })
+    cap.restore()
+    const output = cap.lines.join('')
+    expect(code).toBe(0)
+    expect(mockRevise).toHaveBeenCalled()
+    expect(output).toContain('↳ critique round 1')
+    expect(output).toContain('Quality loop:')
+    expect(output).toContain('✓ Draft revised at')
+  })
+
+  it('exits 2 when the revised draft is still invalid', async () => {
+    const { UltraExpertise } = await import('@openexpertise/authoring')
+    const mockRevise = mockReviseImpl({ valid: false, errors: ['still broken'] })
+    vi.mocked(UltraExpertise).mockImplementation(() => ({ reviseDraft: mockRevise }) as never)
+
+    const cap = captureStdout()
+    const { ultraReviseCommand } = await import('../src/commands/ultra.js')
+    const code = await ultraReviseCommand({
+      draftPath: join(tmp, 'weekly-digest'),
+      feedback: 'x',
+      logger: makeLogger(),
+    })
+    cap.restore()
+    expect(code).toBe(2)
+    expect(cap.lines.join('')).toContain('still broken')
+  })
+})
