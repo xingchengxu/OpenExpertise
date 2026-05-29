@@ -16,6 +16,7 @@ import { installCommand } from './commands/install.js'
 import { registryCommand, installedCommand } from './commands/registry.js'
 import { submitCommand } from './commands/submit.js'
 import { demoCommand } from './commands/demo.js'
+import { graphCommand } from './commands/graph.js'
 import { makeLogger } from './logger.js'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -46,6 +47,33 @@ export function buildProgram(): Command {
       const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
       process.exit(await validateCommand({ path, logger }))
     })
+
+  program
+    .command('graph')
+    .description('Render an experience as a Mermaid diagram (stdout, or --html / -o file)')
+    .argument('[path]', 'path to experience.yaml or experience directory', '.')
+    .option('--html', 'wrap the diagram in a self-contained HTML page')
+    .option('--lr', 'left-to-right layout (default top-down)')
+    .option('-o, --out <file>', 'write to a file instead of stdout')
+    .action(
+      async (
+        path: string,
+        cmdOpts: { html?: boolean; lr?: boolean; out?: string },
+        cmd: Command,
+      ) => {
+        const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+        const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+        process.exit(
+          await graphCommand({
+            path,
+            logger,
+            ...(cmdOpts.html ? { html: true } : {}),
+            ...(cmdOpts.out !== undefined ? { out: cmdOpts.out } : {}),
+            ...(cmdOpts.lr ? { direction: 'LR' as const } : {}),
+          }),
+        )
+      },
+    )
 
   program
     .command('run')
