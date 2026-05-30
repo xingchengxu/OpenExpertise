@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_Nothing yet — add entries here as features land._
+### Docs
+
+- **CI / GitHub Actions recipe** — new [Run on every PR & pin the report](https://github.com/xingchengxu/OpenExpertise/blob/main/site/cookbook/ci-pr-report.md) cookbook page plus a reusable `oe-report` **composite action** (`.github/actions/oe-report`, referenced as `xingchengxu/OpenExpertise/.github/actions/oe-report@v0.1.5`) that runs an experience on `pull_request`, captures the run-id, and pins the `oe inspect --html` report to the PR (uploaded artifact + sticky comment), with a `pull_request` vs `pull_request_target` secret-exposure security note.
 
 ## [0.1.5] — 2026-05-30
 
