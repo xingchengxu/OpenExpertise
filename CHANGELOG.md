@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`oe inspect --html`** — render a finished run as a self-contained HTML report: the experience DAG colored by each node's status (success / failed / skipped), an events timeline, and per-node duration + token counts. `-o <file>` to write, `--lr` for left-to-right layout. Reuses the `oe graph` Mermaid renderer.
 - **`oe evolve --runs <a,b,c>`** — cross-run evolution: analyze multiple runs together to surface STABLE patterns (recurring across ≥2 runs → higher confidence) versus one-off blips, instead of reacting to a single run. New `EvolutionAdvisor.analyzeAcrossRuns` + a dedicated cross-run prompt; writes `.openexpertise/evolution/cross-run-*.md`. The single-run `oe evolve <run-id>` path is unchanged.
 - **`oe ultra --run`** — after authoring a draft, run it once (a smoke test; ultra's defensive tool stubs let a tool-only draft run with no wiring). Prints the result + a `→ oe inspect … --html` hint; advisory only (authoring exit code is unchanged, so a draft whose agent nodes need an API key still exits 0). Built on a shared `buildRunContext` helper now used by both `oe run` and `oe ultra --run`.
+- **MCP parity for the new commands** — `oe_graph` (returns an experience's Mermaid DAG) joins the MCP toolset (7→8 tools), and `oe_evolve` gains an optional `run_ids` array for cross-run analysis. Any MCP client (Claude Code, Codex, Gemini) can now ask OpenExpertise for a diagram or a stable-patterns evolution report from inside its own session.
 
 ### Changed
 
