@@ -8,7 +8,7 @@
 
 ### Your team's best workflows — version-controlled, reproducible, self-improving.
 
-[![npm](https://img.shields.io/npm/v/%40openexpertise%2Fcli?label=%40openexpertise%2Fcli&color=cb3837)](https://www.npmjs.com/package/@openexpertise/cli) [![CI](https://github.com/xingchengxu/OpenExpertise/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/xingchengxu/OpenExpertise/actions/workflows/ci.yml) [![docs](https://img.shields.io/badge/docs-xingchengxu.github.io%2FOpenExpertise-3b82f6)](https://xingchengxu.github.io/OpenExpertise/) [![tests](https://img.shields.io/badge/tests-310%20passing-brightgreen)](#) [![packages](https://img.shields.io/badge/packages-15-blueviolet)](#) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![npm](https://img.shields.io/npm/v/%40openexpertise%2Fcli?label=%40openexpertise%2Fcli&color=cb3837)](https://www.npmjs.com/package/@openexpertise/cli) [![CI](https://github.com/xingchengxu/OpenExpertise/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/xingchengxu/OpenExpertise/actions/workflows/ci.yml) [![docs](https://img.shields.io/badge/docs-xingchengxu.github.io%2FOpenExpertise-3b82f6)](https://xingchengxu.github.io/OpenExpertise/) [![tests](https://img.shields.io/badge/tests-415%20passing-brightgreen)](#) [![packages](https://img.shields.io/badge/packages-15-blueviolet)](#) [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 [**Install**](#install) · [**60-second demo**](#60-second-demo) · [**Why**](#why-openexpertise) · [**Examples**](#built-in-examples) · [**Compare**](#vs-the-alternatives) · [**Docs site →**](https://xingchengxu.github.io/OpenExpertise/)
 
@@ -148,13 +148,13 @@ Apply the one-line YAML patch from the proposal and re-run:
 
 > **Five reasons it's different from every other AI workflow tool.**
 
-|                                     | What it gets you                                                                                                                                                                                                  |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Code-as-Law**                     | YAML schema validates structure. LLMs only fill the gaps inside nodes — they can't rewrite the graph at runtime. No drift, no surprises.                                                                          |
-| **6 node kinds in one graph**       | `tool` (deterministic code) · `agent` (LLM + structured output) · `skill` (SKILL.md packages) · `dataset` (file / SQLite / HTTP) · `experience` (nested) · `cli-agent` (delegate to Claude Code / Codex / Gemini) |
-| **Persistent SQLite state**         | Every node's writes land in a typed blackboard. `oe state findings` works hours later. Resume with `oe resume <run-id>` and replay cached steps.                                                                  |
-| **Self-improving**                  | `oe evolve <run-id>` reads the events + state diff and proposes graph upgrades as `git apply`-ready diffs. The author → run → evolve loop closes.                                                                 |
-| **Two-way agentic-CLI integration** | **Outbound:** delegate a node to Claude Code / Codex / Gemini. **Inbound:** `oe-mcp` exposes 7 OE tools so the same CLIs can run experiences from inside their own sessions.                                      |
+|                                     | What it gets you                                                                                                                                                                                                                              |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Code-as-Law**                     | YAML schema validates structure. LLMs only fill the gaps inside nodes — they can't rewrite the graph at runtime. No drift, no surprises.                                                                                                      |
+| **6 node kinds in one graph**       | `tool` (deterministic code) · `agent` (LLM + structured output) · `skill` (SKILL.md packages) · `dataset` (file / SQLite / HTTP) · `experience` (nested) · `cli-agent` (delegate to Claude Code / Codex / Gemini)                             |
+| **Persistent SQLite state**         | Every node's writes land in a typed blackboard. `oe state findings` works hours later. Resume with `oe resume <run-id>` and replay cached steps.                                                                                              |
+| **Self-improving**                  | `oe evolve <run-id>` reads the events + state diff and proposes graph upgrades as `git apply`-ready diffs; `oe evolve --runs a,b,c` analyzes several runs to surface stable patterns vs one-off blips. The author → run → evolve loop closes. |
+| **Two-way agentic-CLI integration** | **Outbound:** delegate a node to Claude Code / Codex / Gemini. **Inbound:** `oe-mcp` exposes 8 OE tools (incl. `oe_graph`) so the same CLIs can run, visualize, and evolve experiences from inside their own sessions.                        |
 
 ---
 
@@ -433,7 +433,7 @@ graph:
 oe ultra "Review pull requests for SOC2 compliance and produce a risk score"
 ```
 
-Behind the scenes, two LLM passes — **analyze** (decompose into phases + nodes + state schema) then **synthesize** (emit experience.yaml + tool stubs + prompts) — land a validated draft in `.openexpertise/drafts/<slug>/`. Inspect, run, promote with `mv`.
+Behind the scenes: **analyze** (decompose into phases + nodes + state schema) → **synthesize** (emit experience.yaml + tool stubs + prompts) → a built-in **critique→revise quality loop** that scores the draft on decomposition + prompt quality, feeds deterministic validation errors back to a reviser, and keeps the best-scoring round (never worse than the one-shot). The validated draft lands in `.openexpertise/drafts/<slug>/`. Add `--run` to smoke-run it on the spot; refine it in natural language with `oe ultra-revise <draft> "<feedback>"`; tune the loop with `--max-rounds` (`0` = legacy one-shot).
 
 From Claude Code:
 
