@@ -40,6 +40,7 @@ Once registered, the following tools appear in your Claude Code session:
 | `oe_evolve`       | Trigger the evolution advisor on a completed run            |
 | `oe_ultra`        | Author a new experience from a natural-language description |
 | `oe_ultra_revise` | Apply natural-language feedback to an existing draft        |
+| `oe_graph`        | Return an experience's DAG as a Mermaid diagram             |
 
 Example MCP session from inside Claude Code:
 

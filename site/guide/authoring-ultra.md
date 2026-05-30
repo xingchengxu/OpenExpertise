@@ -56,6 +56,56 @@ oe ultra "When a contributor opens their first PR, fetch the diff and their prev
 
 **Phase 3 — Materialization.** The writer creates the draft directory under `.openexpertise/drafts/<slug>/`, checks all paths for traversal attacks, writes every file, and runs `oe validate` against the result.
 
+### The critique→revise quality loop (on by default)
+
+`oe ultra` does not stop at the one-shot draft. By default it runs **one round** of a critique→revise quality loop on top of synthesis:
+
+1. A **critic** scores the draft on two axes — decomposition (are the phases/nodes the right shape?) and prompt quality — and returns a 0-100 score plus specific complaints.
+2. Any deterministic **validation / preflight errors** (a `writes:` field missing from the schema, a dangling edge) are fed to an **incremental reviser** alongside the critic's notes.
+3. The reviser produces an improved draft, which is re-scored.
+
+The loop is **keep-best with a monotonicity gate**: it keeps the highest-scoring round and is guaranteed to never return something worse than the original one-shot. If a revision scores lower, the one-shot wins. When it finishes you'll see a line like:
+
+```
+Quality loop: 1 round, final score 88/100 (bar 80)
+```
+
+Two environment variables tune the loop:
+
+| Variable                | Default | Effect                                                                                                                          |
+| ----------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `OE_ULTRA_SCORE_BAR`    | `80`    | The target score. A draft at or above the bar is considered good enough; below it gets a revise pass (within the round budget). |
+| `OE_ULTRA_CRITIC_MODEL` | —       | Override the model used for the critic role (same provider as authoring).                                                       |
+
+Control the loop with `--max-rounds <n>`:
+
+```bash
+oe ultra "..." --max-rounds 2   # up to two critique→revise rounds
+oe ultra "..." --max-rounds 0   # disable the loop — pure one-shot synthesis (fastest, cheapest)
+```
+
+::: tip Why the loop is safe to leave on
+The monotonicity gate means the loop can only help or no-op — it never ships a regression. The cost is one extra critic call (and possibly one reviser call) per round. Set `--max-rounds 0` when you want the absolute cheapest path and will iterate by hand or with `oe ultra-revise`.
+:::
+
+### Smoke-run the draft immediately with `--run`
+
+Add `--run` to have `oe ultra` run the freshly-authored draft once, right after writing it:
+
+```bash
+oe ultra "..." --run
+```
+
+A tool-only draft runs end-to-end on its defensive stubs with zero wiring. Agent/skill nodes need an LLM key and fail gracefully without one. The smoke run is **informational only** — it never changes `oe ultra`'s exit code (a valid draft still exits 0 even if the smoke run can't complete). On success you'll get a pointer to the HTML run report:
+
+```
+✓ smoke run succeeded (run run_2026_05_28_…)
+  final state — 4 state fields: pr_diff, merged_pr_count, welcome_message, comment_url
+  → oe inspect <run-id> --experience <draft-dir> --html for a report
+```
+
+See [Visualize & report](/guide/visualizing) for what `oe inspect --html` produces.
+
 After ~15 seconds you'll see output like:
 
 ```
@@ -266,6 +316,17 @@ Compare the two outputs. The second should be noticeably warmer for first-timers
 Tool stubs returning fixture data is what makes this loop tight. You're iterating prompts at LLM-API-latency — typically 2-5 seconds per run. You are NOT waiting on GitHub API auth, Octokit setup, or rate limits. Fill the real integrations last.
 :::
 
+::: tip Iterating the whole draft, not just one prompt
+When the change you want is structural — "split the fetch node in two", "make the welcome conditional on label X", "the prompt should also read the PR title" — describe it in plain English to [`oe ultra-revise`](/reference/cli/ultra-revise) instead of hand-editing. It reuses the same critique→revise roles on your **existing** draft:
+
+```bash
+oe ultra-revise .openexpertise/drafts/pr-welcome-bot \
+  "Also read the PR title and reference it in the welcome; split fetch into diff and history nodes."
+```
+
+It takes `--max-rounds` and `--llm` just like `oe ultra`.
+:::
+
 ---
 
 ## Step 7 — Fill in the real tool integrations (5 min)
@@ -474,6 +535,9 @@ The proposal is emitted as a `git apply`-ready diff. Review it, apply it, run ag
 
 ## Next steps
 
+- [`oe ultra-revise`](/reference/cli/ultra-revise) — apply natural-language feedback to an existing draft (reuses the critique→revise loop)
+- [Visualize & report](/guide/visualizing) — render the draft's DAG with `oe graph` and produce an HTML run report with `oe inspect --html`
+- [Editor support](/guide/editor-support) — autocomplete + inline validation for `experience.yaml`
 - [Your first experience](/guide/first-experience) — same destination via manual authoring; teaches the YAML from first principles
 - [Cookbook](/cookbook/) — 10 patterns for when you're ready to compose fan-out, retry, nested experiences
 - [Dispatchers](/concepts/dispatchers) — how each node kind gets dispatched under the hood

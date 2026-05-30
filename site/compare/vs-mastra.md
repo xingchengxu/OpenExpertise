@@ -20,17 +20,17 @@ For a TypeScript team building a new AI product — customer support bots, inter
 
 ## Where OpenExpertise differs
 
-| Dimension          | OpenExpertise                                                           | Mastra                                                        |
-| ------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------- |
-| Graph definition   | Declarative YAML — the graph is data, not code                          | TypeScript code — Mastra `Step` / `Workflow` objects          |
-| Schema validation  | AJV validates `state.schema` and graph structure before execution       | TypeScript types + Zod schemas at runtime                     |
-| Target use case    | Codifying a team's expert SOP into a persistent, evolvable artifact     | Building a production AI application backend                  |
-| Evolution loop     | `oe evolve` proposes graph patches from runtime traces                  | No equivalent                                                 |
-| CLI integration    | `cli-agent` node calls Claude Code / Codex / Gemini subprocesses        | No native CLI delegation                                      |
-| Self-improvement   | First-class: author → run → evolve is a closed loop                     | Not present                                                   |
-| MCP server         | Exposes OE as 8 MCP tools; can be called from Claude Code               | Supports MCP as a consumer                                    |
-| Authoring          | `oe ultra "<task>"` auto-generates YAML                                 | Code-first; no LLM authoring of the workflow graph            |
-| Node heterogeneity | 6 kinds: `tool`, `agent`, `skill`, `dataset`, `experience`, `cli-agent` | Steps are TypeScript functions; heterogeneity modeled in code |
+| Dimension          | OpenExpertise                                                                                       | Mastra                                                        |
+| ------------------ | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Graph definition   | Declarative YAML — the graph is data, not code                                                      | TypeScript code — Mastra `Step` / `Workflow` objects          |
+| Schema validation  | AJV validates `state.schema` and graph structure before execution                                   | TypeScript types + Zod schemas at runtime                     |
+| Target use case    | Codifying a team's expert SOP into a persistent, evolvable artifact                                 | Building a production AI application backend                  |
+| Evolution loop     | `oe evolve` proposes graph patches from runtime traces; `oe evolve --runs` finds cross-run patterns | No equivalent                                                 |
+| CLI integration    | `cli-agent` node calls Claude Code / Codex / Gemini subprocesses                                    | No native CLI delegation                                      |
+| Self-improvement   | First-class: author → run → evolve is a closed loop                                                 | Not present                                                   |
+| MCP server         | Exposes OE as 8 MCP tools; can be called from Claude Code                                           | Supports MCP as a consumer                                    |
+| Authoring          | `oe ultra "<task>"` auto-generates YAML                                                             | Code-first; no LLM authoring of the workflow graph            |
+| Node heterogeneity | 6 kinds: `tool`, `agent`, `skill`, `dataset`, `experience`, `cli-agent`                             | Steps are TypeScript functions; heterogeneity modeled in code |
 
 ## When to pick Mastra over OpenExpertise
 

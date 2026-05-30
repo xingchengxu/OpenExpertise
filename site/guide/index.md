@@ -27,10 +27,13 @@ The hands-on path. Concepts page is the _what_; this is the _how_.
 : The full YAML shape, from `state.schema` through `graph.nodes` to `edges`.
 
 [`oe ultra` — LLM authors for you](/guide/authoring-ultra)
-: One keyword, full experience synthesized into a validated draft directory.
+: One keyword, full experience synthesized into a validated draft directory. Now with a critique→revise quality loop and `--run` smoke test.
 
 [From inside Claude Code](/guide/authoring-slash-command)
 : Run `/oe-authoring` (or invoke the `oe-mcp` server) without leaving your editor.
+
+[Editor support (autocomplete + validation)](/guide/editor-support)
+: Wire the `experience.yaml` JSON Schema to VS Code / any yaml-language-server editor for autocomplete, hover docs, and inline validation.
 
 [Tool stubs in `.mjs`](/guide/tool-stubs)
 : The default-export signature, `state_delta` vs `edge_output`, error handling.
@@ -52,10 +55,13 @@ The hands-on path. Concepts page is the _what_; this is the _how_.
 [Self-hosted LLMs (vLLM, Ollama, LM Studio)](/guide/self-hosted-llm)
 : Point `OPENAI_BASE_URL` at your local server. The default-model override pattern.
 
+[Visualize & report](/guide/visualizing)
+: Render the DAG with `oe graph` (Mermaid, paste into READMEs) and produce an HTML run report with `oe inspect --html`.
+
 ## Evolving
 
 [The advisor](/guide/evolution-advisor)
-: What `EvolutionAdvisor.analyze()` reads, what it proposes, confidence levels.
+: What `EvolutionAdvisor.analyze()` reads, what it proposes, confidence levels. Plus `oe evolve --runs a,b,c` cross-run analysis (stable patterns vs one-off blips).
 
 [Applying proposals](/guide/applying-proposals)
 : Extracting the embedded diff. `git apply` workflow. Handling drift.

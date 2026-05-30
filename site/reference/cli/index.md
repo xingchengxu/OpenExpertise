@@ -27,19 +27,21 @@ All examples on this page use the short `oe` form.
 
 ## Verbs at a glance
 
-| Command                                        | Purpose                                                         |
-| ---------------------------------------------- | --------------------------------------------------------------- |
-| [`oe diff`](/reference/cli/diff)               | List pending evolution proposals                                |
-| [`oe evolve`](/reference/cli/evolve)           | Generate evolution proposals for a prior run                    |
-| [`oe init`](/reference/cli/init)               | Scaffold a new experience directory                             |
-| [`oe inspect`](/reference/cli/inspect)         | Render a run trace from the event log                           |
-| [`oe reset-state`](/reference/cli/reset-state) | Delete the persistent state blackboard (destructive)            |
-| [`oe resume`](/reference/cli/resume)           | Re-run an experience with cached results from a prior run       |
-| [`oe run`](/reference/cli/run)                 | Execute an experience                                           |
-| [`oe state`](/reference/cli/state)             | Inspect the persistent state blackboard                         |
-| [`oe ultra`](/reference/cli/ultra)             | LLM-author a new experience from a natural-language description |
-| [`oe validate`](/reference/cli/validate)       | Validate an `experience.yaml` file or directory                 |
-| `oe graph`                                     | Render an experience's DAG as a Mermaid diagram                 |
+| Command                                          | Purpose                                                         |
+| ------------------------------------------------ | --------------------------------------------------------------- |
+| [`oe diff`](/reference/cli/diff)                 | List pending evolution proposals                                |
+| [`oe evolve`](/reference/cli/evolve)             | Generate evolution proposals for one run or across several runs |
+| [`oe graph`](/reference/cli/graph)               | Render an experience's DAG as a Mermaid diagram                 |
+| [`oe init`](/reference/cli/init)                 | Scaffold a new experience directory from a template             |
+| [`oe inspect`](/reference/cli/inspect)           | Render a run trace, or an HTML run report (`--html`)            |
+| [`oe reset-state`](/reference/cli/reset-state)   | Delete the persistent state blackboard (destructive)            |
+| [`oe resume`](/reference/cli/resume)             | Re-run an experience with cached results from a prior run       |
+| [`oe run`](/reference/cli/run)                   | Execute an experience                                           |
+| [`oe schema`](/reference/cli/schema)             | Print the `experience.yaml` JSON Schema (editor autocomplete)   |
+| [`oe state`](/reference/cli/state)               | Inspect the persistent state blackboard                         |
+| [`oe ultra`](/reference/cli/ultra)               | LLM-author a new experience from a natural-language description |
+| [`oe ultra-revise`](/reference/cli/ultra-revise) | Apply natural-language feedback to an existing draft            |
+| [`oe validate`](/reference/cli/validate)         | Validate an `experience.yaml` file or directory                 |
 
 ## Global flags
 
@@ -68,29 +70,34 @@ oe --log-format json --log-level debug run examples/hello-tool
 
 ## Environment variables
 
-| Variable            | Used by                            | Purpose                                                                                                             |
-| ------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_API_KEY` | `run`, `resume`, `evolve`, `ultra` | Authenticates against the Anthropic API; selects Anthropic as the default LLM provider                              |
-| `OPENAI_API_KEY`    | `run`, `resume`, `evolve`, `ultra` | Authenticates against the OpenAI API; selects OpenAI as the default LLM provider when `ANTHROPIC_API_KEY` is absent |
-| `OPENAI_BASE_URL`   | `run`, `resume`, `evolve`, `ultra` | Override the OpenAI-compatible endpoint (e.g. for vLLM or Ollama)                                                   |
+| Variable                | Used by                                            | Purpose                                                                                                             |
+| ----------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_API_KEY`     | `run`, `resume`, `evolve`, `ultra`, `ultra-revise` | Authenticates against the Anthropic API; selects Anthropic as the default LLM provider                              |
+| `OPENAI_API_KEY`        | `run`, `resume`, `evolve`, `ultra`, `ultra-revise` | Authenticates against the OpenAI API; selects OpenAI as the default LLM provider when `ANTHROPIC_API_KEY` is absent |
+| `OPENAI_BASE_URL`       | `run`, `resume`, `evolve`, `ultra`, `ultra-revise` | Override the OpenAI-compatible endpoint (e.g. for vLLM or Ollama)                                                   |
+| `OE_ULTRA_SCORE_BAR`    | `ultra`, `ultra-revise`                            | Quality-loop pass bar (0–100, default `80`)                                                                         |
+| `OE_ULTRA_CRITIC_MODEL` | `ultra`, `ultra-revise`                            | Override the critic model used by the quality loop (same provider as the author)                                    |
 
-When both `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` are set, Anthropic takes precedence unless `--llm openai` is passed.
+When both `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` are set, Anthropic takes precedence unless `--llm openai` is passed. `oe graph` and `oe schema` are pure transforms and require no API key.
 
 ## Commands by use case
 
 ### Author
 
-| Command                            | When to use                                                          |
-| ---------------------------------- | -------------------------------------------------------------------- |
-| [`oe init`](/reference/cli/init)   | Bootstrap a new experience directory with a minimal scaffold         |
-| [`oe ultra`](/reference/cli/ultra) | Describe a task in plain English; let the LLM write the YAML for you |
+| Command                                          | When to use                                                          |
+| ------------------------------------------------ | -------------------------------------------------------------------- |
+| [`oe init`](/reference/cli/init)                 | Bootstrap a new experience directory from a starter template         |
+| [`oe ultra`](/reference/cli/ultra)               | Describe a task in plain English; let the LLM write the YAML for you |
+| [`oe ultra-revise`](/reference/cli/ultra-revise) | Steer an existing draft with natural-language feedback               |
+| [`oe schema`](/reference/cli/schema)             | Emit the JSON Schema to wire editor autocomplete into a project      |
 
 ### Validate
 
 | Command                                  | When to use                                                                                                                                                                                             |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`oe validate`](/reference/cli/validate) | Check YAML syntax and schema correctness before running                                                                                                                                                 |
-| `oe graph [path]`                        | Render the experience's DAG as a Mermaid `flowchart` — stdout (paste into a README), `--html` for a standalone page, `-o <file>` to write, `--lr` for left-to-right layout. Pure transform; no API key. |
+| [`oe graph`](/reference/cli/graph)       | Render the experience's DAG as a Mermaid `flowchart` — stdout (paste into a README), `--html` for a standalone page, `-o <file>` to write, `--lr` for left-to-right layout. Pure transform; no API key. |
+| [`oe schema`](/reference/cli/schema)     | Emit the `experience.yaml` JSON Schema for editor autocomplete — stdout, or `--write` to save `experience.schema.json`. Pure transform; no API key.                                                     |
 
 ### Run
 
@@ -101,18 +108,18 @@ When both `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` are set, Anthropic takes prec
 
 ### Inspect
 
-| Command                                | When to use                                    |
-| -------------------------------------- | ---------------------------------------------- |
-| [`oe inspect`](/reference/cli/inspect) | Replay the event log for a completed run       |
-| [`oe state`](/reference/cli/state)     | Read current values from the SQLite blackboard |
-| [`oe diff`](/reference/cli/diff)       | Preview pending evolution proposals            |
+| Command                                | When to use                                                      |
+| -------------------------------------- | ---------------------------------------------------------------- |
+| [`oe inspect`](/reference/cli/inspect) | Replay the event log, or render an HTML run report with `--html` |
+| [`oe state`](/reference/cli/state)     | Read current values from the SQLite blackboard                   |
+| [`oe diff`](/reference/cli/diff)       | Preview pending evolution proposals                              |
 
 ### Evolve
 
-| Command                              | When to use                                                        |
-| ------------------------------------ | ------------------------------------------------------------------ |
-| [`oe evolve`](/reference/cli/evolve) | Ask the LLM advisor to analyse a run and propose YAML improvements |
-| [`oe diff`](/reference/cli/diff)     | See what proposals are waiting to be reviewed                      |
+| Command                              | When to use                                                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| [`oe evolve`](/reference/cli/evolve) | Ask the LLM advisor to analyse a run (or `--runs a,b,c` across several) and propose improvements |
+| [`oe diff`](/reference/cli/diff)     | See what proposals are waiting to be reviewed                                                    |
 
 ### Reset
 

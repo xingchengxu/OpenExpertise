@@ -81,6 +81,10 @@ The component that knows how to execute one node kind. One dispatcher per kind. 
 
 The optional second return value from a tool: data passed to direct successors via `_edge_inputs` without committing to state. Use for transient values you don't want in your audit trail.
 
+## editor autocomplete
+
+Authoring `experience.yaml` with autocomplete, hover docs, and inline validation in VS Code / any yaml-language-server editor, powered by the published JSON Schema. `oe init` wires it automatically; existing projects run `oe schema --write` and add a `# yaml-language-server: $schema=` header. See [Editor support](/guide/editor-support).
+
 ## event
 
 A single runtime moment — `node.started`, `state.write`, `node.tokens`, etc. Emitted by `EventBus`, persisted as one line per event in `.openexpertise/runs/<run-id>.jsonl`. See [Events](/concepts/events).
@@ -135,7 +139,11 @@ One of six: `tool` / `agent` / `skill` / `dataset` / `experience` / `cli-agent`.
 
 ## `oe`
 
-The CLI binary. Aliases: `npx @openexpertise/cli` or `node packages/cli/dist/bin.js` while developing. Commands: `init`, `validate`, `run`, `resume`, `inspect`, `state`, `reset-state`, `evolve`, `diff`, `ultra`, `doctor`. See [CLI reference](/reference/cli/).
+The CLI binary. Aliases: `npx @openexpertise/cli` or `node packages/cli/dist/bin.js` while developing. Commands: `init`, `validate`, `run`, `resume`, `inspect`, `state`, `reset-state`, `evolve`, `diff`, `ultra`, `ultra-revise`, `graph`, `schema`, `doctor`. See [CLI reference](/reference/cli/).
+
+## `oe graph`
+
+The CLI subcommand `oe graph [path]` that renders an experience's DAG as a Mermaid `flowchart` (phase subgraphs, per-kind node shapes/colors, `for_each` + `when` edge labels). Prints to stdout; `--html` emits a self-contained page. Pure transform — no API key. See [Visualize & report](/guide/visualizing) and [oe graph](/reference/cli/graph).
 
 ## `on_error`
 
@@ -160,6 +168,10 @@ A `.md` file referenced by an `agent` or `skill` node. Plain markdown with `{{va
 ## provider
 
 The LLM backend (anthropic / openai / claude-code / codex / gemini). Configured in env or `runtime.providers`. Different node kinds pick which to use. See [Run with LLM](/guide/run-with-llm).
+
+## quality loop
+
+The internal critique→revise loop `oe ultra` (and `oe ultra-revise`) runs after the first draft: a critic scores decomposition + prompt quality, deterministic validation/preflight errors feed an incremental reviser, and the best-scoring round is kept (monotonicity gate — never worse than the one-shot). Tuned via `--max-rounds`, `OE_ULTRA_SCORE_BAR`, `OE_ULTRA_CRITIC_MODEL`. See [oe ultra](/reference/cli/ultra).
 
 ## `reads:` / `writes:`
 

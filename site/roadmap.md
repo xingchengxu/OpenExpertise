@@ -7,7 +7,18 @@ description: What's in v0.1, what's coming in v0.2 + v0.3, and what's deliberate
 
 What's shipped, what's coming, and what's deliberately not coming. Updated whenever direction changes — date-stamped on every entry.
 
-## Where we are (v0.1.1, 2026-05-28)
+## Where we are (v0.1.4, 2026-05-29)
+
+Shipped since 0.1.1 (the 0.1.x patch sweep):
+
+- **`oe ultra` quality loop** — `oe ultra` now runs an internal critique→revise loop (default 1 round). A critic scores the draft on decomposition + prompt quality; deterministic validation/preflight errors feed an incremental reviser; it keeps the best-scoring round (keep-best + monotonicity gate, so it's never worse than the one-shot). New flags: `--max-rounds <n>` (0 disables), `--run` (smoke-run the authored draft once), plus the existing `--dry-run` / `--llm`. Env: `OE_ULTRA_SCORE_BAR` (default 80), `OE_ULTRA_CRITIC_MODEL`.
+- **`oe ultra-revise <draftPath> <feedback>`** — apply natural-language feedback to an EXISTING draft, reusing the critique→revise roles. Flags: `--max-rounds`, `--llm`.
+- **`oe graph [path]`** — render an experience's DAG as a Mermaid `flowchart` (phase subgraphs, per-kind node shapes/colors, `for_each` + conditional-`when` edge labels). Prints to stdout (paste into a GitHub README — Mermaid renders natively). Flags: `--html`, `-o/--out <file>`, `--lr`. Pure transform; no API key.
+- **Cross-run evolution** — `oe evolve --runs <a,b,c>` surfaces STABLE patterns recurring across ≥2 runs vs one-off blips, writing `.openexpertise/evolution/cross-run-*.md`. The single `<run-id>` path is unchanged.
+- **`oe inspect --html`** — produces a self-contained HTML run report (the DAG colored by each node's status success/failed/skipped + an events timeline + per-node duration & tokens). Flags: `-o/--out <file>`, `--lr`.
+- **`oe schema` + editor autocomplete** — `oe schema` prints the `experience.yaml` JSON Schema (`--write` saves `experience.schema.json` locally, `-o/--out <file>`). `oe init` now scaffolds the schema file + a `# yaml-language-server: $schema=` header so VS Code / any yaml-language-server editor gives autocomplete, hover docs, and inline validation out of the box. See [Editor support](/guide/editor-support).
+- **`oe-mcp` now exposes 8 tools** — `oe_graph` (NEW, returns an experience's Mermaid DAG) and `oe_ultra_revise` joined the set; `oe_evolve` accepts an optional `run_ids` array for cross-run, and `oe_ultra` accepts `max_rounds`.
+- **Next-step hints** — `run` / `init` / `demo` / `doctor` now print `→` hints surfacing the right follow-up command (`oe inspect <id> --html`, `oe graph <dir>`, `oe evolve <id>`).
 
 Shipped in 0.1.1 (patch over 0.1.0):
 
@@ -60,23 +71,11 @@ V1 pipelines and loops run sequentially even when `runtime.concurrency > 1`. V2 
 
 **Why now:** users have reported the limitation explicitly. The fix is well-scoped.
 
-### Cross-run evolution (medium)
-
-Today `oe evolve` looks at one run. V2 will support `oe evolve --runs <run1>,<run2>,...` for advisor analysis across multiple runs to surface stable patterns vs. one-off blips.
-
-**Why now:** the most-asked feature in user feedback. Implementation is mostly prompt engineering on top of the existing advisor.
-
 ### Prompt rewriting (low)
 
 V1's advisor proposes `add-node` / `tune-param` / `add-dataset-case` but never rewrites a prompt's markdown body. V2 may add `rewrite-prompt` as a fourth operation.
 
-**Why deferred:** prompt rewriting is a different LLM task than graph evolution; we want to ship cross-run evolution first and see if prompt rewrites are still needed afterward.
-
-### `oe inspect --html` (medium)
-
-Today `oe inspect` renders to terminal. V2 will also produce a self-contained HTML report (Mermaid graph + timeline) you can pin to a PR.
-
-**Why now:** common ask from teams running OE in CI.
+**Why deferred:** prompt rewriting is a different LLM task than graph evolution; now that cross-run evolution has shipped, we want to see if prompt rewrites are still needed afterward.
 
 ### Plugin-friendly LLMClient (medium)
 

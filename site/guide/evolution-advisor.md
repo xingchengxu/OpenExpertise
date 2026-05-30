@@ -57,6 +57,26 @@ The advisor returns up to 5 proposals, sorted by relevance. Each proposal has: `
 
 **Output:** `oe evolve` writes the rendered Markdown to `.openexpertise/evolution/<run-id>.md`. The file is never auto-applied — `git apply` is always a manual step.
 
+## Cross-run analysis: stable patterns vs one-off blips
+
+A single run can mislead: one bad LLM completion, one transient 429, one empty fan-out. To separate signal from noise, point the advisor at several runs at once with `--runs`:
+
+```bash
+oe evolve --experience examples/review-branch --runs abc123,def456,ghi789
+# → wrote .openexpertise/evolution/cross-run-3runs-abc123.md
+```
+
+Instead of analyzing one run, the advisor compares the runs against each other and prioritizes by **recurrence**:
+
+- A pattern that recurs in **≥2 runs** (the same failure, the same missing focus area, the same drift) is a **stable** pattern. The advisor proposes an edit and rates it `high` (recurs in most/all runs) or `medium` (recurs in ≥2 but not all). The `rationale` names the specific runs it was seen in (e.g. _"seen in abc123 and ghi789"_).
+- A pattern that appears in **only one run** is a one-off **blip**. The advisor either omits it or includes it only at `low` confidence, stating explicitly that it was a single-run anomaly that may not warrant action yet.
+
+This means a `high`-confidence cross-run proposal is much stronger evidence than a `high` from a single run — it has been corroborated across executions. The output lands in `.openexpertise/evolution/cross-run-<n>runs-<first-id>.md` (the single `<run-id>` path is unchanged and still writes `<run-id>.md`).
+
+::: tip When to use which
+Use the single-run path while you're actively iterating (fast, one run to reason about). Switch to `--runs a,b,c` once you have a handful of real runs and want to invest only in changes the data corroborates more than once.
+:::
+
 ## Variations
 
 **Force a specific LLM provider for the advisor:**

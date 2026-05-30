@@ -38,16 +38,16 @@ The README's comparison diagram captures it precisely:
 
 Concretely:
 
-| Dimension         | OpenExpertise                                                       | Claude Code directly                                     |
-| ----------------- | ------------------------------------------------------------------- | -------------------------------------------------------- |
-| Run consistency   | Same DAG executes the same phases in the same order every run       | Improvises a different path each time                    |
-| State persistence | SQLite blackboard; `oe state findings` works hours later            | Session memory only; state is lost when the session ends |
-| Audit trail       | JSONL event log per run; every node write recorded                  | No structured log; terminal output only                  |
-| Self-improvement  | `oe evolve <run-id>` proposes graph patches from trace data         | No equivalent                                            |
-| Resumability      | `oe resume <run-id>` replays cached steps                           | No equivalent                                            |
-| Schema validation | State schema validated before execution; structured output per node | No schema enforcement                                    |
-| Non-LLM steps     | `tool` and `dataset` nodes run pure code, no LLM cost               | All work done by the LLM                                 |
-| Authoring         | `oe ultra "<task>"` authors a YAML SOP                              | `/ultraexpertise` skill generates an OE experience       |
+| Dimension         | OpenExpertise                                                                                                                           | Claude Code directly                                     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Run consistency   | Same DAG executes the same phases in the same order every run                                                                           | Improvises a different path each time                    |
+| State persistence | SQLite blackboard; `oe state findings` works hours later                                                                                | Session memory only; state is lost when the session ends |
+| Audit trail       | JSONL event log per run; every node write recorded; `oe inspect --html` emits a shareable run report (DAG colored by status + timeline) | No structured log; terminal output only                  |
+| Self-improvement  | `oe evolve <run-id>` proposes graph patches from trace data; `oe evolve --runs a,b,c` surfaces patterns recurring across runs           | No equivalent                                            |
+| Resumability      | `oe resume <run-id>` replays cached steps                                                                                               | No equivalent                                            |
+| Schema validation | State schema validated before execution; structured output per node                                                                     | No schema enforcement                                    |
+| Non-LLM steps     | `tool` and `dataset` nodes run pure code, no LLM cost                                                                                   | All work done by the LLM                                 |
+| Authoring         | `oe ultra "<task>"` authors a YAML SOP                                                                                                  | `/ultraexpertise` skill generates an OE experience       |
 
 ## When to use Claude Code directly (not OpenExpertise)
 

@@ -71,6 +71,22 @@ awk '/^```diff$/{f=1;next} /^```$/{f=0} f' \
 oe run examples/review-branch
 ````
 
+## One run, or many: stable patterns vs one-off blips
+
+A single run can mislead. A node that failed once might have hit a transient timeout; a finding the verifier rejected once might be noise. To tell a **stable pattern** from a **one-off blip**, the advisor can analyze several runs together:
+
+```bash
+oe evolve --runs r-abc123,r-def456,r-ghi789
+```
+
+Given multiple runs, the advisor weighs evidence that **recurs across ≥2 runs** more heavily than anything that shows up only once. Cross-run proposals land in their own file:
+
+```
+.openexpertise/evolution/cross-run-3runs-r-abc123.md
+```
+
+This sharpens the self-improving story: instead of reacting to whatever the last run happened to surface, you steer the graph toward the upgrades the evidence keeps pointing at. The single-`<run-id>` path is unchanged — use it for a focused look at one run, `--runs` when you want the durable signal.
+
 ## The three operations
 
 The advisor only proposes three kinds of changes:
@@ -124,7 +140,7 @@ Treat `high` as "probably apply", `medium` as "read carefully", `low` as "intere
 ## What the advisor does NOT do
 
 - **Auto-apply.** The contract is explicit: every proposal lands in a markdown file, you decide. No `oe evolve --apply` flag in V1.
-- **Reach across runs.** Each `oe evolve <run-id>` looks at one run's events + state diff. To find patterns across multiple runs, write a loop yourself.
+- **Auto-discover runs.** It analyzes the runs you name — a single `<run-id>`, or the comma-separated list you pass to `--runs`. It won't crawl `.openexpertise/runs/` to pick runs for you; you choose which traces to feed it.
 - **Suggest deletions.** It proposes additions and tunings, never "delete this node". Deletions are a human concern.
 - **Edit prompts.** The advisor doesn't propose changing the body of a `.md` prompt file. Prompt rewriting is a different LLM task (could be a V2 capability).
 - **Validate its own proposals.** The diffs it emits may not `git apply` cleanly. The CLI doesn't validate the diffs before writing them. You'll know within seconds (`git apply` errors).

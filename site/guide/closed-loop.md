@@ -81,6 +81,15 @@ Claude Code calls `oe_run`, then `oe_evolve`, then reads the proposal file.
 
 **Accumulate state across runs** — fields with `merge: array_append` collect findings from every run into the same SQLite table. The evolution advisor sees the growing history in the `state_diff`.
 
+**Evolve across several runs** — once you have a handful of real runs, pass them together so the advisor only proposes changes the data corroborates more than once:
+
+```bash
+oe evolve --experience examples/my-experience --runs abc123,def456,ghi789
+# → STABLE patterns (recur in ≥2 runs) ranked high/medium; one-off blips dropped or low
+```
+
+See [the advisor's cross-run analysis](/guide/evolution-advisor).
+
 **Promote a stable experience to the `examples/` directory:**
 
 ```bash
