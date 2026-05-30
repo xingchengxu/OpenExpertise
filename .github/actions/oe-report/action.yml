@@ -1,0 +1,141 @@
+name: 'OpenExpertise run report'
+description: >-
+  Run an OpenExpertise experience and emit a self-contained `oe inspect --html`
+  run report. Captures the run-id robustly and exposes it as an output so a
+  caller workflow can pin the report to a PR.
+
+# ---------------------------------------------------------------------------
+# LLM API KEY
+# ---------------------------------------------------------------------------
+# This action does NOT take the API key as an input (inputs land in run logs).
+# The CALLER supplies it via env on the `uses:` step, e.g.:
+#
+#   - uses: xingchengxu/OpenExpertise/.github/actions/oe-report@v0.1.5
+#     with:
+#       experience-path: examples/review-branch
+#     env:
+#       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # or OPENAI_API_KEY
+#
+# Composite steps inherit the calling step's env, so `oe` sees the key without
+# it ever being echoed. Tool-only experiences (no agent / cli-agent nodes)
+# need no key at all — omit the env entirely.
+# ---------------------------------------------------------------------------
+
+inputs:
+  experience-path:
+    description: 'Path to the experience.yaml or experience directory.'
+    required: true
+  args:
+    description: 'JSON object passed to the experience as args (oe run --args).'
+    required: false
+    default: '{}'
+  llm:
+    description: >-
+      LLM provider: anthropic | openai. Forwarded to oe run --llm only when set.
+      Default is intentionally EMPTY so tool-only experiences run keyless: with
+      --llm omitted, oe auto-detects from env and tolerates a missing key for
+      tool-only flows (a missing key only surfaces when an agent node fires).
+    required: false
+    default: ''
+  report-path:
+    description: 'Where to write the self-contained HTML run report.'
+    required: false
+    default: 'oe-report.html'
+
+outputs:
+  run-id:
+    description: 'The captured run-id (basename of the newest run-log .jsonl).'
+    value: ${{ steps.run.outputs.run-id }}
+  report-path:
+    description: 'Path to the generated HTML run report.'
+    value: ${{ steps.report.outputs.report-path }}
+  status:
+    description: 'success | failed — derived from the oe run exit code.'
+    value: ${{ steps.run.outputs.status }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install OpenExpertise CLI
+      shell: bash
+      run: npm i -g @openexpertise/cli@0.1.5
+
+    - name: Run experience and capture run-id
+      id: run
+      shell: bash
+      env:
+        # Pass every input through env (never interpolate ${{ }} into run:).
+        # Referencing the single-quoted shell var means bash never re-parses the
+        # value, so attacker-influenceable args can't become live shell.
+        EXP: ${{ inputs.experience-path }}
+        OE_ARGS: ${{ inputs.args }}
+        OE_LLM: ${{ inputs.llm }}
+      run: |
+        set -euo pipefail
+
+        # Resolve the experience directory so we know where the run log lands.
+        # oe writes the event log to <experience-dir>/.openexpertise/runs/<run-id>.jsonl
+        if [ -d "$EXP" ]; then
+          EXP_DIR="$EXP"
+        else
+          EXP_DIR="$(dirname "$EXP")"
+        fi
+        RUNS_DIR="$EXP_DIR/.openexpertise/runs"
+        echo "exp-dir=$EXP_DIR" >> "$GITHUB_OUTPUT"
+
+        # Snapshot existing run logs so we attribute the right one to THIS run
+        # (the run-id is logged via pino, not printed as a clean stdout value,
+        # and there is no --print-run-id flag — so we diff the runs/ dir).
+        mkdir -p "$RUNS_DIR"
+        BEFORE="$(mktemp)"
+        ls -1 "$RUNS_DIR"/*.jsonl 2>/dev/null | sort > "$BEFORE" || true
+
+        # Run. Capture the exit code without aborting the step so we can still
+        # report status + produce a report for a failed run.
+        STATUS="success"
+        # Only pass --llm when a provider is set, so tool-only experiences run
+        # keyless (an explicit --llm forces provider resolution and would fail
+        # at startup with no key, even for flows that never call an agent node).
+        LLM_FLAG=()
+        [ -n "$OE_LLM" ] && LLM_FLAG=(--llm "$OE_LLM")
+        # ${LLM_FLAG[@]+...} keeps the empty-array expansion safe under set -u.
+        oe run "$EXP" --args "$OE_ARGS" "${LLM_FLAG[@]+${LLM_FLAG[@]}}" || STATUS="failed"
+        echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+
+        # The new run-id is the run log that appeared (or, if reused, the newest).
+        AFTER="$(mktemp)"
+        ls -1 "$RUNS_DIR"/*.jsonl 2>/dev/null | sort > "$AFTER" || true
+        NEW_LOG="$(comm -13 "$BEFORE" "$AFTER" | tail -n 1 || true)"
+        if [ -z "$NEW_LOG" ]; then
+          # Fallback: newest .jsonl by mtime (covers a resumed / reused run-id).
+          NEW_LOG="$(ls -1t "$RUNS_DIR"/*.jsonl 2>/dev/null | head -n 1 || true)"
+        fi
+        if [ -z "$NEW_LOG" ]; then
+          echo "::error::No run log found under $RUNS_DIR — did oe run start?"
+          exit 1
+        fi
+
+        RUN_ID="$(basename "$NEW_LOG" .jsonl)"
+        echo "run-id=$RUN_ID" >> "$GITHUB_OUTPUT"
+        echo "Captured run-id: $RUN_ID (status: $STATUS)"
+
+    - name: Render HTML run report
+      id: report
+      shell: bash
+      env:
+        REPORT_PATH: ${{ inputs.report-path }}
+        RUN_ID: ${{ steps.run.outputs.run-id }}
+        EXP_DIR: ${{ steps.run.outputs.exp-dir }}
+      run: |
+        set -euo pipefail
+        oe inspect "$RUN_ID" \
+          --experience "$EXP_DIR" \
+          --html \
+          -o "$REPORT_PATH"
+        echo "report-path=$REPORT_PATH" >> "$GITHUB_OUTPUT"
+        echo "Wrote run report to $REPORT_PATH"

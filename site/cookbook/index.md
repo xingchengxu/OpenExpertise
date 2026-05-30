@@ -37,6 +37,12 @@ Each recipe is **self-contained** — a complete `experience.yaml` snippet you c
 | ---------------------------------------------------------------- | --------------------------------------------------------------------- |
 | [Visualize a graph & share a run report](./visualize-and-report) | `oe graph` Mermaid DAG; `oe inspect --html` self-contained run report |
 
+### CI / automation
+
+| Recipe                                             | What it covers                                                                                                                                                               |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Run on every PR & pin the report](./ci-pr-report) | `pull_request` workflow + reusable `oe-report` composite action; sticky PR comment + uploaded `oe inspect --html` artifact; `pull_request` vs `pull_request_target` security |
+
 ### Multi-provider & integration
 
 | Recipe                                                     | What it covers                                                    |
