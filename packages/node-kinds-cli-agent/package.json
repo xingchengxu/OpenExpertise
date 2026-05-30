@@ -1,6 +1,6 @@
 {
   "name": "@openexpertise/node-kinds-cli-agent",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Dispatcher for `cli-agent` nodes — delegates work to Claude Code, Codex, or Gemini CLI subprocesses with timeout/retry.",
   "keywords": [
     "openexpertise",

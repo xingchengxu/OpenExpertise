@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_Nothing yet — add entries here as features land._
+
+## [0.1.5] — 2026-05-30
+
+The largest feature drop since 0.1.0 — and fully backward-compatible (every new command/flag is additive; `0.2.0` stays reserved for breaking changes per the roadmap). Authoring gains a critique→revise quality loop and natural-language revision; experiences are now visualizable (`oe graph`) and runs shareable (`oe inspect --html`); the advisor reasons across runs (`oe evolve --runs`); authors get editor autocomplete (`oe schema` + JSON Schema); and the MCP surface grows to 8 tools. 415 tests across 83 files.
+
 ### Added
 
 - **`oe schema` + editor autocomplete** — `oe schema` prints the `experience.yaml` JSON Schema (`--write` saves it locally); `oe init` now scaffolds `experience.schema.json` + a `# yaml-language-server: $schema=` header so you get autocomplete, hover docs, and inline validation in VS Code/any yaml-language-server editor out of the box. The schema is also served from the docs site for a public `$schema` URL.
@@ -25,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Docs
 
 - **Every built-in example now shows its DAG** — `scripts/gen-example-diagrams.mjs` (`pnpm docs:diagrams`) auto-embeds the `oe graph` Mermaid diagram into all 13 example READMEs and the docs-site example pages, between idempotent `<!-- oe-graph:start … -->` markers (regenerate any time; safe to re-run).
+
+[0.1.5]: https://github.com/xingchengxu/OpenExpertise/releases/tag/v0.1.5
 
 ## [0.1.4] — 2026-05-28
 
