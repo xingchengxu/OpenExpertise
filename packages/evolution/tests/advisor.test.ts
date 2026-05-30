@@ -89,4 +89,89 @@ describe('EvolutionAdvisor', () => {
     })
     expect(proposals).toEqual([])
   })
+
+  it('analyzeAcrossRuns returns parsed proposals when given 2+ runs', async () => {
+    const llm = new CannedLLM([
+      {
+        operation: 'add-node',
+        confidence: 'high',
+        title: 'Add security reviewer',
+        rationale: 'SQL interpolation flagged in both runs (stable pattern).',
+        diff: '+ - id: security_review\n+   kind: skill\n',
+      },
+    ])
+    const advisor = new EvolutionAdvisor({ client: llm })
+    const proposals = await advisor.analyzeAcrossRuns({
+      experienceSpec: spec,
+      experienceYamlSource: 'name: t\nversion: 0.1.0\n',
+      runs: [
+        { runId: 'r1', runEvents: [{ type: 'run.started' }], stateDiff: [] },
+        {
+          runId: 'r2',
+          runEvents: [{ type: 'run.started' }, { type: 'run.finished' }],
+          stateDiff: [{ field: 'x', before: '1', after: '2' }],
+        },
+      ],
+    })
+    expect(proposals).toHaveLength(1)
+    expect(proposals[0]?.operation).toBe('add-node')
+    expect(proposals[0]?.confidence).toBe('high')
+  })
+
+  it('analyzeAcrossRuns passes a per-run aggregate payload to the LLM', async () => {
+    let captured: unknown
+    const llm: LLMClient = {
+      async complete(opts) {
+        captured = opts.messages[0]?.content
+        return {
+          text: '',
+          tool_calls: [{ name: 'structured_output', input: { proposals: [] } }],
+        }
+      },
+    }
+    const advisor = new EvolutionAdvisor({ client: llm })
+    await advisor.analyzeAcrossRuns({
+      experienceSpec: spec,
+      experienceYamlSource: 'name: t\n',
+      runs: [
+        { runId: 'r1', runEvents: [{ a: 1 }], stateDiff: [] },
+        { runId: 'r2', runEvents: [{ b: 2 }, { c: 3 }], stateDiff: [] },
+      ],
+    })
+    const payload = JSON.parse(String(captured)) as {
+      run_count: number
+      runs: Array<{ run_id: string; event_count: number }>
+    }
+    expect(payload.run_count).toBe(2)
+    expect(payload.runs.map((r) => r.run_id)).toEqual(['r1', 'r2'])
+    expect(payload.runs[1]?.event_count).toBe(2)
+  })
+
+  it('renderMarkdownCrossRun heads the report with the analyzed run set', () => {
+    const advisor = new EvolutionAdvisor({ client: new CannedLLM([]) })
+    const md = advisor.renderMarkdownCrossRun(
+      [
+        {
+          operation: 'tune-param',
+          confidence: 'high',
+          title: 'Bump retries',
+          rationale: 'Recurs across runs.',
+          diff: '- attempts: 1\n+ attempts: 3\n',
+        },
+      ],
+      ['r1', 'r2', 'r3'],
+    )
+    expect(md).toContain('# Cross-Run Evolution Proposals')
+    expect(md).toContain('r1')
+    expect(md).toContain('r2')
+    expect(md).toContain('r3')
+    expect(md).toContain('## 1. Bump retries _(tune-param, confidence: high)_')
+    expect(md).toContain('```diff')
+  })
+
+  it('renderMarkdownCrossRun shows an empty notice when no proposals', () => {
+    const advisor = new EvolutionAdvisor({ client: new CannedLLM([]) })
+    const md = advisor.renderMarkdownCrossRun([], ['r1', 'r2'])
+    expect(md).toContain('_No proposals generated across these runs._')
+  })
 })
