@@ -20,11 +20,11 @@ describe('mcp-server', () => {
     const { client } = await connectClient()
     const result = await client.listTools()
     const names = result.tools.map((t) => t.name).sort()
-    // Will grow to the full 5 as Tasks 4-8 register tools. Skeleton task asserts
-    // the framework is wired and listTools round-trips.
+    // Asserts the framework is wired, every tool registers, and listTools round-trips.
     expect(Array.isArray(names)).toBe(true)
     expect(names).toEqual([
       'oe_evolve',
+      'oe_graph',
       'oe_inspect',
       'oe_run',
       'oe_state',
@@ -205,6 +205,94 @@ graph: { nodes: [{ id: a, kind: tool, impl: ./x.mjs, writes: [x] }], edges: [] }
     } finally {
       if (prevA !== undefined) process.env.ANTHROPIC_API_KEY = prevA
       if (prevO !== undefined) process.env.OPENAI_API_KEY = prevO
+    }
+  })
+
+  it('oe_graph returns a Mermaid flowchart for an experience', async () => {
+    const { client } = await connectClient()
+    const dir = mkdtempSync(join(tmpdir(), 'oe-mcp-graph-'))
+    try {
+      writeFileSync(
+        join(dir, 'experience.yaml'),
+        `name: t
+version: 0.1.0
+state: { schema: { x: { type: string } } }
+graph:
+  nodes:
+    - { id: a, kind: tool, impl: ./x.mjs, writes: [x] }
+    - { id: b, kind: agent, prompt: ./b.md, reads: [x], writes: [x] }
+  edges: [{ from: a, to: b }]`,
+      )
+      const result = await client.callTool({
+        name: 'oe_graph',
+        arguments: { experience_path: dir },
+      })
+      const content = result.content as Array<{ type: string; text: string }>
+      const payload = JSON.parse(content[0]!.text) as { mermaid: string; html?: string }
+      expect(typeof payload.mermaid).toBe('string')
+      expect(payload.mermaid).toContain('flowchart TD')
+      expect(payload.mermaid).toContain('a --> b')
+      expect(payload.html).toBeUndefined()
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it('oe_graph honors direction and html options', async () => {
+    const { client } = await connectClient()
+    const dir = mkdtempSync(join(tmpdir(), 'oe-mcp-graph-html-'))
+    try {
+      writeFileSync(
+        join(dir, 'experience.yaml'),
+        `name: t
+version: 0.1.0
+state: { schema: { x: { type: string } } }
+graph: { nodes: [{ id: a, kind: tool, impl: ./x.mjs, writes: [x] }], edges: [] }`,
+      )
+      const result = await client.callTool({
+        name: 'oe_graph',
+        arguments: { experience_path: dir, direction: 'LR', html: true },
+      })
+      const content = result.content as Array<{ type: string; text: string }>
+      const payload = JSON.parse(content[0]!.text) as { mermaid: string; html?: string }
+      expect(payload.mermaid).toContain('flowchart LR')
+      expect(payload.html).toBeDefined()
+      expect(payload.html).toContain('class="mermaid"')
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it('oe_evolve exposes a run_ids array in its input schema', async () => {
+    const { client } = await connectClient()
+    const result = await client.listTools()
+    const evolve = result.tools.find((t) => t.name === 'oe_evolve')
+    expect(evolve).toBeDefined()
+    const props = (evolve!.inputSchema as { properties: Record<string, unknown> }).properties
+    expect(props['run_ids']).toBeDefined()
+    expect((props['run_ids'] as { type: string }).type).toBe('array')
+  })
+
+  it('oe_evolve cross-run requires run_id or run_ids', async () => {
+    const { client } = await connectClient()
+    const dir = mkdtempSync(join(tmpdir(), 'oe-mcp-evolve-noid-'))
+    try {
+      writeFileSync(
+        join(dir, 'experience.yaml'),
+        `name: t
+version: 0.1.0
+state: { schema: { x: { type: string } } }
+graph: { nodes: [{ id: a, kind: tool, impl: ./x.mjs, writes: [x] }], edges: [] }`,
+      )
+      const result = await client.callTool({
+        name: 'oe_evolve',
+        arguments: { experience_path: dir },
+      })
+      expect(result.isError).toBe(true)
+      const content = result.content as Array<{ type: string; text: string }>
+      expect(content[0]!.text).toMatch(/run_id|run_ids/)
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
     }
   })
 
