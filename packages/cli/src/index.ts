@@ -17,6 +17,7 @@ import { registryCommand, installedCommand } from './commands/registry.js'
 import { submitCommand } from './commands/submit.js'
 import { demoCommand } from './commands/demo.js'
 import { graphCommand } from './commands/graph.js'
+import { schemaCommand } from './commands/schema.js'
 import { makeLogger } from './logger.js'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -74,6 +75,25 @@ export function buildProgram(): Command {
         )
       },
     )
+
+  program
+    .command('schema')
+    .description(
+      'Print the experience.yaml JSON Schema (for editor autocomplete); --write saves it locally',
+    )
+    .option('--write', 'write experience.schema.json next to your experience instead of printing')
+    .option('-o, --out <file>', 'output path for --write')
+    .action(async (cmdOpts: { write?: boolean; out?: string }, cmd: Command) => {
+      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+      process.exit(
+        await schemaCommand({
+          logger,
+          ...(cmdOpts.write ? { write: true } : {}),
+          ...(cmdOpts.out !== undefined ? { out: cmdOpts.out } : {}),
+        }),
+      )
+    })
 
   program
     .command('run')
