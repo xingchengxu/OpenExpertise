@@ -33,6 +33,10 @@
     "./llm-factory": {
       "import": "./dist/llm-factory.js",
       "types": "./dist/llm-factory.d.ts"
+    },
+    "./render-mermaid": {
+      "import": "./dist/render-mermaid.js",
+      "types": "./dist/render-mermaid.d.ts"
     }
   },
   "bin": {
