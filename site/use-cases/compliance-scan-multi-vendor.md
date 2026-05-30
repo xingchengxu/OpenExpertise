@@ -137,7 +137,7 @@ After 5 runs, `oe evolve <run-id>` typically proposes: "Add a `false_positive_ch
 
 ## Why this is durable (and not just a one-off script)
 
-- **Every finding has a full trace.** `oe inspect <run-id>` shows which model said what, the exact prompt versions, and the token counts. Auditors can replay any finding's provenance.
+- **Every finding has a full trace.** `oe inspect <run-id>` shows which model said what, the exact prompt versions, and the token counts. Auditors can replay any finding's provenance. For a hand-off artifact, `oe inspect <run-id> --html -o scan-report.html` emits a self-contained run report (the DAG coloured by node status + a per-node duration & token table) you can attach to the audit ticket.
 - **Swap vendors without touching prompts.** If Codex is down, change `provider: codex` to `provider: gemini` in one line. The state contract (`summary` → `critique`) is vendor-neutral.
 - **Resume after failure.** If Claude Code times out mid-scan, `oe resume <run-id>` replays from the checkpoint. You don't re-run the Codex call you already paid for.
 - **Gate releases in CI.** A GitHub Actions step that runs `oe run` and checks `oe state verdict | jq '.findings | map(select(.severity == "critical")) | length'` gives you a numeric gate with a full audit trail.

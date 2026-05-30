@@ -9,17 +9,20 @@ Authoritative documentation for every public surface. If a name shows up here, t
 
 ## [CLI](/reference/cli/)
 
-12 commands: `init`, `validate`, `run`, `resume`, `inspect`, `state`, `reset-state`, `evolve`, `diff`, `ultra`, `doctor`, plus the registry commands.
+`init`, `validate`, `run`, `resume`, `inspect`, `state`, `reset-state`, `evolve`, `diff`, `ultra`, `ultra-revise`, `graph`, `schema`, `doctor`, `demo`, plus the registry commands.
 
 Common flows:
 
 ```bash
-oe init my-flow        # scaffold a new experience
+oe init my-flow        # scaffold a new experience (+ editor autocomplete schema)
 oe validate            # check the YAML schema
+oe graph .             # render the experience DAG as Mermaid
 oe run . --tui         # run with the TUI dashboard
-oe inspect <run-id>    # event timeline + per-node metrics
-oe evolve <run-id>     # advisor proposes graph upgrades
+oe inspect <id> --html # event timeline + per-node metrics → HTML run report
+oe evolve <id>         # advisor proposes graph upgrades
 ```
+
+New since v0.1.0: `oe graph` (Mermaid DAG), `oe schema` (JSON Schema for editor autocomplete), and `oe ultra-revise` (apply feedback to an existing draft).
 
 → [Browse all CLI commands](/reference/cli/)
 
@@ -36,13 +39,15 @@ events.subscribe((e) => /* … */)
 await runExperience({ specPath: './experience.yaml', events })
 ```
 
+Recent additions: [`UltraExpertise`](/reference/api/ultra-expertise) gains the critique → revise quality loop (the `loop` field + `maxRounds`/`criticModel`/`exemplars` opts) and a `reviseDraft()` method; [`EvolutionAdvisor`](/reference/api/evolution-advisor) gains `analyzeAcrossRuns()` + `renderMarkdownCrossRun()` for cross-run analysis.
+
 → [Browse the API](/reference/api/)
 
 ## [YAML schema](/reference/schema)
 
-The canonical shape of `experience.yaml`. AJV-validated by `oe validate` and the runtime.
+The canonical shape of `experience.yaml`. AJV-validated by `oe validate` and the runtime, and available as a JSON Schema for [editor autocomplete](/guide/editor-support) via `oe schema`.
 
-Top-level sections: `meta`, `runtime`, `state.schema`, `graph` (`nodes` + `edges` + optional `pipelines` + `loops`).
+Top-level sections: `name`, `version`, `description`, `state.schema`, `phases`, `graph` (`nodes` + `edges` + optional `pipelines` + `loops`), `runtime`.
 
 → [Read the full schema](/reference/schema)
 

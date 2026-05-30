@@ -143,11 +143,11 @@ To compare checkpoint A vs. checkpoint B: `diff <(oe inspect run-id-A | jq '.fin
 
 ## Why this is durable (and not just a one-off script)
 
-- **Every score is traceable.** `oe inspect <run-id>` shows the exact prompt sent to the model under test, the exact judge prompt, and the per-case token counts. No "what prompt did we use for checkpoint 34?" question.
+- **Every score is traceable.** `oe inspect <run-id>` shows the exact prompt sent to the model under test, the exact judge prompt, and the per-case token counts. No "what prompt did we use for checkpoint 34?" question. `oe inspect <run-id> --html -o checkpoint-34.html` turns that trace into a self-contained run report you can archive next to the checkpoint.
 - **Swap the model under test in one flag.** Change the `evaluate` node's `reads:` to point at a different model config, or run `oe run . --args model=gpt-4o`. The judge stays the same.
 - **CI-gateable.** A GitHub Actions step that runs `oe run` and checks `oe state metrics | jq '.pass_rate >= 0.85'` gives you a numeric quality gate. Model releases that drop below threshold are blocked before they ship.
 - **Resume from checkpoints.** If the judge phase fails midway (e.g., rate limit), `oe resume <run-id>` replays from the checkpoint — the 60 evaluate calls you already paid for are not re-run.
-- **Full eval history in one directory.** `.openexpertise/runs/` accumulates every eval run. Query across runs with `oe inspect` or raw SQL against the SQLite store.
+- **Full eval history in one directory.** `.openexpertise/runs/` accumulates every eval run. Query across runs with `oe inspect` or raw SQL against the SQLite store, or run `oe evolve --runs <a,b,c>` to surface failure patterns that recur across checkpoints rather than one-off blips.
 
 ## Estimated time investment
 

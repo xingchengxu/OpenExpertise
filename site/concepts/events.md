@@ -76,6 +76,14 @@ cat .openexpertise/runs/r-abc123.jsonl | jq -c 'select(.type=="state.write")'
 # → every state-mutation event
 ```
 
+For a **shareable** view of the same trace, add `--html` to get a self-contained run report — the DAG colored by each node's status (success / failed / skipped), an events timeline, and per-node duration & tokens:
+
+```bash
+oe inspect r-abc123 --experience examples/review-branch --html -o run-report.html
+```
+
+It's one file with no external assets, so you can attach it to a PR or hand it to a teammate.
+
 ## Why JSONL?
 
 - One line = one event. Append-only writes are atomic at the OS level.

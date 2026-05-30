@@ -4,7 +4,7 @@ title: EvolutionAdvisor
 
 # `EvolutionAdvisor`
 
-Analyzes a completed run (spec + events + state diff) and returns up to five ranked proposals for improving the `experience.yaml`. Part of `@openexpertise/evolution`. The runtime never auto-applies proposals — they are returned as text diffs for human review.
+Analyzes a completed run (spec + events + state diff) and returns up to five ranked proposals for improving the `experience.yaml`. Part of `@openexpertise/evolution`. The runtime never auto-applies proposals — they are returned as text diffs for human review. It can also analyze **multiple runs at once** (`analyzeAcrossRuns`) to surface stable, recurring patterns over one-off blips.
 
 ## Import
 
@@ -38,10 +38,22 @@ export interface EvolutionInput {
   stateDiff: Array<{ field: string; before: unknown; after: unknown }>
 }
 
+export interface CrossRunInput {
+  experienceSpec: ExperienceSpec
+  experienceYamlSource: string
+  runs: Array<{
+    runId: string
+    runEvents: unknown[] // jsonl lines parsed
+    stateDiff: Array<{ field: string; before: unknown; after: unknown }>
+  }>
+}
+
 export class EvolutionAdvisor {
   constructor(opts: EvolutionAdvisorOpts)
   async analyze(input: EvolutionInput): Promise<EvolutionProposal[]>
+  async analyzeAcrossRuns(input: CrossRunInput): Promise<EvolutionProposal[]>
   renderMarkdown(proposals: EvolutionProposal[], runId: string): string
+  renderMarkdownCrossRun(proposals: EvolutionProposal[], runIds: string[]): string
 }
 ```
 
@@ -83,6 +95,30 @@ renderMarkdown(proposals: EvolutionProposal[], runId: string): string
 
 The output starts with a heading `# Evolution Proposals for run <runId>` followed by one section per proposal including the rationale and a fenced `diff` block. Returns a single `_No proposals generated for this run._` line when the array is empty.
 
+## `analyzeAcrossRuns`
+
+```ts
+async analyzeAcrossRuns(input: CrossRunInput): Promise<EvolutionProposal[]>
+```
+
+Analyzes **two or more runs of the same experience together** and returns up to 5 proposals, prioritizing patterns that recur across runs (STABLE) over one-off blips. Powers `oe evolve --runs <a,b,c>`, which also writes the rendered Markdown to `.openexpertise/evolution/cross-run-*.md`.
+
+| Field                  | Type                                     | Required | Description                                                                       |
+| ---------------------- | ---------------------------------------- | -------- | --------------------------------------------------------------------------------- |
+| `experienceSpec`       | `ExperienceSpec`                         | ✓        | Parsed spec the runs share.                                                       |
+| `experienceYamlSource` | `string`                                 | ✓        | Raw YAML source string, included verbatim in the prompt.                          |
+| `runs`                 | `Array<{ runId; runEvents; stateDiff }>` | ✓        | One entry per run. Each carries its own parsed events and field-level state diff. |
+
+Returns the same `EvolutionProposal[]` shape as `analyze`. As with `analyze`, an empty array is returned (rather than throwing) when the model does not call the `structured_output` tool.
+
+## `renderMarkdownCrossRun`
+
+```ts
+renderMarkdownCrossRun(proposals: EvolutionProposal[], runIds: string[]): string
+```
+
+Formats cross-run proposals as Markdown. The output starts with `# Cross-Run Evolution Proposals (<n> runs)`, lists the analyzed run IDs, then renders one section per proposal (title, operation, confidence, rationale, fenced `diff`). Returns `_No proposals generated across these runs._` when the array is empty.
+
 ## Example
 
 ```ts
@@ -118,7 +154,7 @@ console.log(advisor.renderMarkdown(proposals, 'my-run-id'))
 
 **Structured output via tool use.** `analyze` sends the LLM a single tool definition (`structured_output`) whose `input_schema` constrains the proposals array to at most 5 items with required fields (`operation`, `confidence`, `title`, `rationale`, `diff`). If the model does not call the tool, an empty array is returned rather than throwing.
 
-**Event sampling.** Only the first 30 events from `runEvents` are sent to the LLM to avoid exceeding context limits. Pass a pre-filtered slice if you want to emphasize specific event types.
+**Event sampling.** `analyze` sends the first 30 events from `runEvents` to avoid exceeding context limits. `analyzeAcrossRuns` samples the first 15 events **per run** for the same reason. Pass a pre-filtered slice if you want to emphasize specific event types.
 
 **No auto-apply.** The `EvolutionAdvisor` never modifies files on disk. Apply accepted proposals manually with `git apply` (unified diffs) or by editing `experience.yaml` (dataset cases). See [Applying proposals](/guide/applying-proposals).
 

@@ -31,6 +31,12 @@ Each recipe is **self-contained** — a complete `experience.yaml` snippet you c
 | ---------------------------------------- | ------------------------------------------------------- |
 | [Resume from cache](./resume-from-cache) | `oe resume <run-id>`; cache invalidation; `--from` flag |
 
+### Visualize & share
+
+| Recipe                                                           | What it covers                                                        |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------- |
+| [Visualize a graph & share a run report](./visualize-and-report) | `oe graph` Mermaid DAG; `oe inspect --html` self-contained run report |
+
 ### Multi-provider & integration
 
 | Recipe                                                     | What it covers                                                    |

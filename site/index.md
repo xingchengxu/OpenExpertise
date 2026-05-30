@@ -34,19 +34,25 @@ features:
     details: Every node's writes land in a typed blackboard. <code>oe state findings</code> works hours later. Resume with <code>oe resume &lt;run-id&gt;</code> and replay cached steps.
   - icon: 🧬
     title: Self-improving
-    details: <code>oe evolve &lt;run-id&gt;</code> reads the events + state diff and proposes graph upgrades as <code>git apply</code>-ready diffs. The author → run → evolve loop closes.
+    details: <code>oe evolve &lt;run-id&gt;</code> reads the events + state diff and proposes graph upgrades as <code>git apply</code>-ready diffs. <code>oe evolve --runs a,b,c</code> finds stable patterns across runs, not one-off blips. The author → run → evolve loop closes.
   - icon: 🔗
     title: Two-way agentic-CLI integration
-    details: Outbound — delegate a node to Claude Code / Codex / Gemini. Inbound — <code>oe-mcp</code> exposes 7 OE tools so the same CLIs can run experiences from their own sessions.
+    details: Outbound — delegate a node to Claude Code / Codex / Gemini. Inbound — <code>oe-mcp</code> exposes 8 OE tools (incl. <code>oe_graph</code>) so the same CLIs can run, render, and evolve experiences from their own sessions.
   - icon: ⚡
     title: Parallel + 429-aware
     details: <code>--concurrency N</code> runs independent nodes (and <code>for_each</code> iterations) in parallel. Both Anthropic and OpenAI clients retry on HTTP 429 with exponential backoff.
   - icon: 🎯
-    title: One-keyword authoring
-    details: <code>oe ultra "&lt;task&gt;"</code> — an LLM agent analyzes your task and synthesizes a complete <code>experience.yaml</code> plus tool stubs and prompts into a validated draft directory.
+    title: Quality-loop authoring
+    details: <code>oe ultra "&lt;task&gt;"</code> synthesizes a complete <code>experience.yaml</code> + tool stubs + prompts, then runs an internal critique→revise loop — a critic scores the draft and an incremental reviser fixes it, keeping the best round. <code>oe ultra-revise</code> applies your feedback to an existing draft.
+  - icon: 📊
+    title: Visualize & share runs
+    details: <code>oe graph</code> renders the DAG as a Mermaid <code>flowchart</code> you can paste into a README. <code>oe inspect --html</code> emits a self-contained run report — the graph colored by per-node status, an events timeline, and per-node tokens & duration.
   - icon: 🪟
     title: htop-grade observability
     details: <code>--tui</code> shows each node's live status, current activity ("calling claude-sonnet-4-6"), accumulated per-node tokens, and a run-level total in the header.
+  - icon: ✨
+    title: Editor autocomplete
+    details: <code>oe init</code> wires a JSON Schema + <code>$schema</code> header into every new experience, so VS Code / any yaml-language-server editor gives autocomplete, hover docs, and inline validation. Existing projects — <code>oe schema --write</code>.
   - icon: 📦
     title: Multi-LLM provider
     details: Anthropic + OpenAI out of the box. <code>OPENAI_BASE_URL</code> redirects OpenAI calls to any compatible endpoint — vLLM, Ollama, LM Studio, your own internal API.

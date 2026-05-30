@@ -129,7 +129,8 @@ After 5 runs, `oe evolve <run-id>` typically proposes: "Add a `security` dimensi
 - **Replay any past PR** with `oe run . --args pr_id=142` — the diff is fetched fresh, but the graph shape and prompt versions are pinned to whatever you had at run time. No "what prompt did we use last Tuesday?" problem.
 - **Add dimensions without touching agents.** Update `list_dimensions.mjs` and every future run picks up the new dimension. The fan-out is data-driven.
 - **Cross-vendor option.** The `bug_review` agent runs against your default provider. Swap to `--llm openai` or `--llm anthropic` in one flag if one provider is down or you want a second opinion on a risky PR.
-- **Advisor-driven growth.** The evolution advisor reads which findings were verified vs. rejected and proposes prompt improvements to reduce false positives — a compounding quality improvement over time.
+- **Pin a run report to the PR.** In CI, run the flow then `oe inspect <run-id> --html -o review.html` to produce a self-contained run report (the DAG coloured by each node's status + a per-finding token table) and attach it as a build artifact — reviewers see exactly which dimension fired on what. Document the flow itself for the README with `oe graph . > review-branch.mmd`.
+- **Advisor-driven growth.** The evolution advisor reads which findings were verified vs. rejected and proposes prompt improvements to reduce false positives — a compounding quality improvement over time. Run `oe evolve --runs <a,b,c>` across several PRs to surface the _stable_ gaps (a dimension that keeps getting missed) versus one-off blips.
 
 ## Estimated time investment
 
@@ -147,4 +148,5 @@ After 5 runs, `oe evolve <run-id>` typically proposes: "Add a `security` dimensi
 - [examples/review-branch](/examples/review-branch) — the bundled reference implementation with SQL-injection scenario
 - [Fan-out with concurrency](/cookbook/fan-out-with-concurrency) — the specific pattern this leans on
 - [Merge strategies](/cookbook/merge-strategies) — how `array_append` accumulates fan-out results
+- [Visualize a graph & share a run report](/cookbook/visualize-and-report) — `oe graph` + `oe inspect --html` for PRs
 - [The advisor](/guide/evolution-advisor) — how `oe evolve` proposes new dimensions

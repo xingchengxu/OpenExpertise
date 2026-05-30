@@ -195,4 +195,15 @@ graph:
 
 See [oncall-runbook](/examples/oncall-runbook) for a real working version.
 
+## Seeing the graph
+
+Because all of this control flow is declared, not coded, the whole graph is renderable. `oe graph` emits a Mermaid `flowchart` — phase subgraphs, per-kind node shapes/colors, and edge labels for `for_each` and conditional `when:` edges:
+
+```bash
+oe graph examples/oncall-runbook          # prints Mermaid to stdout (paste into a GitHub README)
+oe graph examples/oncall-runbook --html -o graph.html   # self-contained page
+```
+
+It's a pure transform — no API key — so reading the structure of an experience is free and instant.
+
 → Continue with [Events & event log](/concepts/events).

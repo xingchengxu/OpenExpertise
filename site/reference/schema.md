@@ -8,6 +8,10 @@ The complete grammar of `experience.yaml`. Validated by AJV (draft-07) from `pac
 
 Use `oe validate` to check a file before running it, or call `validateExperienceSpec` from `@openexpertise/schema` in your own code.
 
+::: tip Editor autocomplete
+This same JSON Schema powers inline autocomplete, hover docs, and live validation in VS Code and any yaml-language-server editor. `oe init` wires it up automatically; for an existing project run `oe schema --write` and add a `# yaml-language-server: $schema=./experience.schema.json` header to your `experience.yaml`. See the [Editor support guide](/guide/editor-support).
+:::
+
 ---
 
 ## Top-level fields

@@ -118,6 +118,7 @@ export default defineConfig({
             { text: 'Tool stubs in .mjs', link: '/guide/tool-stubs' },
             { text: 'Prompt files', link: '/guide/prompt-files' },
             { text: 'Editor support (autocomplete)', link: '/guide/editor-support' },
+            { text: 'Visualize & report', link: '/guide/visualizing' },
           ],
         },
         {
@@ -222,6 +223,9 @@ export default defineConfig({
             { text: 'oe evolve', link: '/reference/cli/evolve' },
             { text: 'oe diff', link: '/reference/cli/diff' },
             { text: 'oe ultra', link: '/reference/cli/ultra' },
+            { text: 'oe ultra-revise', link: '/reference/cli/ultra-revise' },
+            { text: 'oe graph', link: '/reference/cli/graph' },
+            { text: 'oe schema', link: '/reference/cli/schema' },
             { text: 'oe doctor', link: '/reference/cli/doctor' },
           ],
         },

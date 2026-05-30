@@ -117,4 +117,5 @@ Claude Code calls `oe_inspect({ experience_path: "...", run_id: "abc123" })`.
 
 - [cli-agent node](/guide/cli-agent-usage) — the inverse direction: calling CLIs _from_ an OE experience
 - [Author → run → evolve loop](/guide/closed-loop) — running the full loop via the MCP server
+- [Visualize & report](/guide/visualizing) — `oe_graph` returns the same Mermaid DAG as the `oe graph` CLI
 - [`/ultraexpertise` slash command](/guide/authoring-slash-command) — authoring from inside Claude Code without the MCP server

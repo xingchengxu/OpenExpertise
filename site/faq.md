@@ -64,6 +64,18 @@ For `agent` / `skill` / `cli-agent` nodes you need a configured provider (`ANTHR
 
 Yes — point `OPENAI_BASE_URL` at a local vLLM / Ollama / LM Studio server. See [Self-hosted LLMs](/guide/self-hosted-llm). `tool` / `dataset` nodes don't need any model.
 
+### How good is `oe ultra`'s output — does it just one-shot the YAML?
+
+No — `oe ultra` runs an internal **critique→revise quality loop** (default 1 round). After the first draft, a critic scores it on decomposition + prompt quality, deterministic validation/preflight errors feed an incremental reviser, and it keeps the best-scoring round. There's a monotonicity gate, so the result is never worse than the one-shot. Tune it with `--max-rounds <n>` (0 disables the loop), `OE_ULTRA_SCORE_BAR` (default 80), and `OE_ULTRA_CRITIC_MODEL`. Already have a draft? `oe ultra-revise <draftPath> "<feedback>"` applies natural-language feedback using the same critique→revise roles. See [oe ultra](/reference/cli/ultra).
+
+### How do I see the graph or share a run with my team?
+
+`oe graph [path]` renders the experience's DAG as a Mermaid `flowchart` (phase subgraphs, per-kind shapes/colors, `for_each` + `when` edge labels) straight to stdout — paste it into a GitHub README and it renders natively. Add `--html` for a self-contained page. For a finished run, `oe inspect <run-id> --html` writes a self-contained HTML report: the DAG colored by each node's status plus an events timeline and per-node tokens & duration. Both take `-o/--out <file>` and `--lr`. See [Visualize & report](/guide/visualizing).
+
+### Do I get autocomplete for `experience.yaml`?
+
+Yes. `oe init` scaffolds an `experience.schema.json` and a `# yaml-language-server: $schema=./experience.schema.json` header into new experiences, so VS Code (or any yaml-language-server editor) gives autocomplete, hover docs, and inline validation. For existing projects: `oe schema --write` plus the same header. See [Editor support](/guide/editor-support).
+
 ### Will my workflow change between runs?
 
 **No.** The graph is fixed by your YAML. The LLM only fills in nodes' content (`findings`, `summary`, etc.). The shape is stable, the path is stable, the state schema is stable.
