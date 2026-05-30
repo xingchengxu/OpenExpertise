@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync, existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve, dirname, relative, basename } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { EXPERIENCE_SCHEMA } from '@openexpertise/schema'
 import { printNextSteps } from '../output-helpers.js'
 import type { Logger } from 'pino'
 
@@ -25,6 +26,8 @@ const TEMPLATE_DESCRIPTIONS: Record<Template, string> = {
   'full-pipeline': 'tool → agent → cli-agent → tool. Shows fan-out + state passing.',
 }
 
+const YAML_LANGUAGE_SERVER_HEADER = '# yaml-language-server: $schema=./experience.schema.json\n'
+
 function copyTreeWithSubstitution(src: string, dest: string, name: string): string[] {
   const created: string[] = []
   const walk = (s: string, d: string) => {
@@ -37,7 +40,13 @@ function copyTreeWithSubstitution(src: string, dest: string, name: string): stri
         walk(sp, dp)
       } else {
         const body = readFileSync(sp, 'utf8')
-        const replaced = body.replaceAll('{{NAME}}', name)
+        let replaced = body.replaceAll('{{NAME}}', name)
+        // Inject yaml-language-server header into top-level experience.yaml (not nested ones)
+        if (entry === 'experience.yaml' && d === dest) {
+          if (!replaced.startsWith('# yaml-language-server:')) {
+            replaced = YAML_LANGUAGE_SERVER_HEADER + replaced
+          }
+        }
         writeFileSync(dp, replaced)
         created.push(relative(dest, dp))
       }
@@ -81,6 +90,11 @@ export async function initCommand(opts: InitOpts): Promise<number> {
   const experienceName = basename(dir)
   const files = copyTreeWithSubstitution(src, dir, experienceName)
 
+  // Write the JSON Schema alongside experience.yaml for editor autocomplete
+  const schemaPath = join(dir, 'experience.schema.json')
+  writeFileSync(schemaPath, JSON.stringify(EXPERIENCE_SCHEMA, null, 2) + '\n')
+  files.push('experience.schema.json')
+
   opts.logger.info(
     { dir, template, files },
     `scaffolded ${opts.name}/ from the \`${template}\` template`,
@@ -88,6 +102,7 @@ export async function initCommand(opts: InitOpts): Promise<number> {
   printNextSteps([
     `oe graph ${dir}  — visualize the scaffold`,
     `cd ${opts.name} && oe run .  — run it`,
+    `open in VS Code (Red Hat YAML ext) for autocomplete + inline validation`,
   ])
   return 0
 }
