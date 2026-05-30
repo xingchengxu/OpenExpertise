@@ -425,6 +425,8 @@ graph:
 
 `oe validate` checks it; `oe run` executes it.
 
+**Editor autocomplete:** `oe init` scaffolds `experience.schema.json` + a `# yaml-language-server: $schema=` header automatically. Install the [Red Hat YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) in VS Code and you get autocomplete, hover docs, and inline validation for free. Existing projects: `oe schema --write` + add the header. See the [editor support guide](https://xingchengxu.github.io/OpenExpertise/guide/editor-support).
+
 ### 2. One-keyword authoring (LLM writes the YAML)
 
 ```bash
@@ -479,6 +481,7 @@ Seven MCP tools are exposed: `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, 
 | `oe ultra "<task>"`            | LLM authors a new experience from natural language                                                                                                                  |
 | `oe ultra-revise <dir> "<fb>"` | Apply natural-language feedback to an existing draft (critique→revise)                                                                                              |
 | `oe graph [path]`              | Render an experience as a Mermaid diagram (`--html`, `-o <file>`, `--lr`)                                                                                           |
+| `oe schema [--write] [-o <f>]` | Print (or write) the `experience.yaml` JSON Schema for editor autocomplete                                                                                          |
 
 ### `--tui` dashboard
 

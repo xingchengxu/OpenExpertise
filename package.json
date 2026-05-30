@@ -18,6 +18,7 @@
     "typecheck": "pnpm -r typecheck",
     "clean": "pnpm -r exec rm -rf dist tsconfig.tsbuildinfo .tsbuildinfo node_modules/.cache",
     "docs:diagrams": "node scripts/gen-example-diagrams.mjs",
+    "docs:schema": "node -e \"const fs=require('node:fs');fs.mkdirSync('site/public/schemas',{recursive:true});fs.copyFileSync('packages/schema/src/schemas/experience.schema.json','site/public/schemas/experience.schema.json')\"",
     "docs:dev": "pnpm --filter @openexpertise/site dev",
     "docs:build": "pnpm --filter @openexpertise/site build",
     "docs:preview": "pnpm --filter @openexpertise/site preview"

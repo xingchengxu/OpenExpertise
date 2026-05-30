@@ -109,4 +109,39 @@ describe('oe init --template', () => {
       rmSync(base, { recursive: true, force: true })
     }
   })
+
+  it('scaffolded experience.yaml has yaml-language-server header and experience.schema.json is valid', async () => {
+    const base = mkdtempSync(join(tmpdir(), 'oe-init-test-'))
+    const target = join(base, 'editor-test')
+    const code = await initCommand({ name: target, template: 'tool-only', logger: mockLogger })
+    expect(code).toBe(0)
+
+    // First line must be the yaml-language-server header
+    const yaml = readFileSync(join(target, 'experience.yaml'), 'utf8')
+    const firstLine = yaml.split('\n')[0]
+    expect(firstLine).toContain('yaml-language-server: $schema=./experience.schema.json')
+
+    // Schema file must exist and parse to an object with a $schema key
+    const schemaPath = join(target, 'experience.schema.json')
+    expect(existsSync(schemaPath)).toBe(true)
+    const schemaObj = JSON.parse(readFileSync(schemaPath, 'utf8'))
+    expect(schemaObj).toHaveProperty('$schema')
+
+    rmSync(base, { recursive: true, force: true })
+  })
+
+  it('header is injected for all templates', async () => {
+    for (const t of TEMPLATES) {
+      const base = mkdtempSync(join(tmpdir(), 'oe-init-test-'))
+      const target = join(base, `hdr-${t}`)
+      const code = await initCommand({ name: target, template: t, logger: mockLogger })
+      expect(code).toBe(0)
+      const yaml = readFileSync(join(target, 'experience.yaml'), 'utf8')
+      expect(yaml.split('\n')[0]).toContain(
+        'yaml-language-server: $schema=./experience.schema.json',
+      )
+      expect(existsSync(join(target, 'experience.schema.json'))).toBe(true)
+      rmSync(base, { recursive: true, force: true })
+    }
+  })
 })
