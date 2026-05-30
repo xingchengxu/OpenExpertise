@@ -5,6 +5,7 @@ import { runExperience } from '@openexpertise/core'
 import { startTui } from '@openexpertise/tui'
 import { resolveExperienceYaml } from './validate.js'
 import { buildRunContext } from '../run-context.js'
+import { printNextSteps } from '../output-helpers.js'
 import type { Logger } from 'pino'
 
 export interface RunOpts {
@@ -64,6 +65,11 @@ export async function runCommand(opts: RunOpts): Promise<number> {
     { runId: result.runId, status: result.status, finalState: result.finalState },
     'run complete',
   )
+  printNextSteps([
+    `oe inspect ${result.runId} --experience ${experienceDir} --html -o report.html  — open a shareable run report`,
+    `oe graph ${experienceDir}  — see the DAG as a Mermaid diagram`,
+    `oe evolve ${result.runId} --experience ${experienceDir}  — ask the advisor what to improve`,
+  ])
 
   // Plan 6: optional auto-evolve trigger
   if (opts.evolve && result.status === 'success') {

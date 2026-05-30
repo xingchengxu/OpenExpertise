@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process'
 import { mkdirSync, rmdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { printNextSteps } from '../output-helpers.js'
 
 export interface DoctorOpts {
   json: boolean
@@ -170,6 +171,11 @@ export async function doctorCommand(opts: DoctorOpts): Promise<number> {
     parts.push(`${warned} warning${warned !== 1 ? 's' : ''}`)
     parts.push(`${failed} failure${failed !== 1 ? 's' : ''}`)
     process.stdout.write(`Summary: ${parts.join(' · ')}\n`)
+    printNextSteps([
+      `oe init my-flow  — scaffold`,
+      `oe ultra "<task>"  — let the LLM author one`,
+      `oe demo  — preview without an API key`,
+    ])
   }
 
   return failed > 0 ? 1 : 0

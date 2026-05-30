@@ -30,3 +30,6 @@ oe state answer
 
 - See [`examples/cli-orchestration`](https://github.com/xingchengxu/OpenExpertise/tree/main/examples/cli-orchestration) for a two-CLI flow.
 - See [`examples/tri-cli-orchestration`](https://github.com/xingchengxu/OpenExpertise/tree/main/examples/tri-cli-orchestration) for all three rival CLIs in one graph.
+- Visualize it: `oe graph .` (paste the Mermaid into your README).
+- Turn a run into a shareable report: `oe inspect <run-id> --html -o report.html`.
+- Let the LLM iterate the YAML for you: `oe ultra-revise <run-id>`.

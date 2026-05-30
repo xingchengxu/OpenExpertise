@@ -60,6 +60,8 @@ describe('oe demo', () => {
     expect(all).toContain('evolution proposal')
     expect(all).toContain('add-node')
     expect(all).toContain('pre-recorded demo')
+    expect(all).toContain('oe graph')
+    expect(all).toContain('oe inspect')
   })
 
   it('returns 1 + writes to stderr for unknown demo', async () => {

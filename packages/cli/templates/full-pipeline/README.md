@@ -37,3 +37,6 @@ cat $(oe state output_path)                # see the result
 - After several runs, try `oe evolve <run-id>` to see what the advisor proposes.
 - Add a downstream `agent` node that reviews the generated report and writes a `feedback` field. That's the closed-loop pattern.
 - See [`examples/deep-research`](https://github.com/xingchengxu/OpenExpertise/tree/main/examples/deep-research) for a more elaborate research pipeline.
+- Visualize it: `oe graph .` (paste the Mermaid into your README).
+- Turn a run into a shareable report: `oe inspect <run-id> --html -o report.html`.
+- Let the LLM iterate the YAML for you: `oe ultra-revise <run-id>`.

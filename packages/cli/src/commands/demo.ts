@@ -81,5 +81,11 @@ export async function demoCommand(opts: DemoOpts): Promise<number> {
   process.stdout.write(`${DIM}ⓘ This is a pre-recorded demo. To run for real:${RESET}\n`)
   process.stdout.write(`  ${CYAN}oe install ${demo.name}${RESET}\n`)
   process.stdout.write(`  ${CYAN}oe run .openexpertise/experiences/${demo.name}${RESET}\n`)
+  process.stdout.write(
+    `  ${CYAN}oe graph .openexpertise/experiences/${demo.name}${RESET}  — see its DAG\n`,
+  )
+  process.stdout.write(
+    `  ${CYAN}oe inspect <run-id> --html${RESET}  — turn a run into a shareable report\n`,
+  )
   return 0
 }

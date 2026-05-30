@@ -26,12 +26,20 @@ describe('oe init --template', () => {
   it('scaffolds tool-only by default (backwards-compatible)', async () => {
     const base = mkdtempSync(join(tmpdir(), 'oe-init-test-'))
     const target = join(base, 'my-flow')
+    const writes: string[] = []
+    const spy = vi.spyOn(process.stdout, 'write').mockImplementation((c: unknown) => {
+      writes.push(String(c))
+      return true
+    })
     const code = await initCommand({ name: target, logger: mockLogger })
+    spy.mockRestore()
     expect(code).toBe(0)
     expect(existsSync(join(target, 'experience.yaml'))).toBe(true)
     expect(existsSync(join(target, 'tools/hello.mjs'))).toBe(true)
     const yaml = readFileSync(join(target, 'experience.yaml'), 'utf8')
     expect(yaml).toContain(`name: ${target.split('/').pop()}`)
+    // next-steps hints
+    expect(writes.join('')).toContain('oe graph')
     rmSync(base, { recursive: true, force: true })
   })
 
