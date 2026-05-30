@@ -241,22 +241,44 @@ export function buildProgram(): Command {
 
   program
     .command('evolve')
-    .description('Generate evolution proposals for a prior run')
-    .argument('<run-id>', 'prior run id')
+    .description('Generate evolution proposals for a prior run (or across several runs)')
+    .argument('[run-id]', 'prior run id (single-run analysis)')
     .option('--experience <path>', 'experience path', '.')
+    .option(
+      '--runs <ids>',
+      'comma-separated run ids for cross-run analysis (stable patterns vs one-off blips)',
+    )
     .option('--llm <provider>', 'LLM provider: anthropic | openai (auto-detected from env)')
-    .action(async (runId: string, cmdOpts: { experience: string; llm?: string }, cmd: Command) => {
-      const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
-      const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
-      process.exit(
-        await evolveCommand({
-          experiencePath: cmdOpts.experience,
-          runId,
-          logger,
-          ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
-        }),
-      )
-    })
+    .action(
+      async (
+        runId: string | undefined,
+        cmdOpts: { experience: string; runs?: string; llm?: string },
+        cmd: Command,
+      ) => {
+        const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
+        const logger = makeLogger({ pretty: root.logFormat === 'pretty', level: root.logLevel })
+        const runIds =
+          cmdOpts.runs !== undefined
+            ? cmdOpts.runs
+                .split(',')
+                .map((s) => s.trim())
+                .filter(Boolean)
+            : undefined
+        if (!runIds && runId === undefined) {
+          console.error('oe evolve: provide a <run-id> or --runs a,b,c')
+          process.exit(1)
+        }
+        process.exit(
+          await evolveCommand({
+            experiencePath: cmdOpts.experience,
+            ...(runIds ? { runIds } : {}),
+            ...(runId !== undefined ? { runId } : {}),
+            logger,
+            ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
+          }),
+        )
+      },
+    )
 
   program
     .command('ultra')
