@@ -59,7 +59,7 @@ Flags: `--dry-run` prints the entry without opening the browser; `--output entry
 
 `.openexpertise/experiences/<name>/` (gitignored). Each install is a snapshot at the pinned ref — re-run `oe install` against an updated ref to upgrade.
 
-## Limits in v0.1.0
+## Limits (v0.1.x)
 
 - No signature verification (yet). Inspect what you install.
 - No transitive dependencies between experiences (yet).

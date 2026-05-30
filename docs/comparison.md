@@ -2,6 +2,8 @@
 
 A short take on how OpenExpertise positions against the most-asked-about peers. Fuller treatment as the project matures and we get specific feedback.
 
+A few things are unique to OpenExpertise across all of these: it's **bidirectionally** MCP-native — it both delegates nodes to agentic CLIs (Claude Code / Codex / Gemini) _and_ exposes itself as 8 MCP tools (`oe-mcp`), so those same CLIs can run, **visualize**, and **evolve** experiences from inside their own sessions; the graph is declarative data you can diagram (`oe graph` → Mermaid, paste into a README) and get **editor autocomplete** for (`oe schema` + a JSON Schema); runs produce a shareable HTML report (`oe inspect --html`); and the evolution advisor closes a self-improving loop across one run or many (`oe evolve --runs`).
+
 ## vs LangGraph
 
 LangGraph is a Python library for building stateful, multi-actor LLM applications as graphs. It's deeply integrated with LangChain and excellent at iterative agent loops.
@@ -10,10 +12,10 @@ LangGraph is a Python library for building stateful, multi-actor LLM application
 
 **Where OpenExpertise differs:**
 
-- Heterogeneous node kinds in one graph (tool, agent, skill, dataset, experience). LangGraph nodes are typically Python functions wrapping LLM calls.
-- Declarative YAML format with strict schema validation — graph structure is reviewable by non-engineers.
+- Six heterogeneous node kinds in one graph (tool, agent, skill, dataset, experience, cli-agent). LangGraph nodes are typically Python functions wrapping LLM calls.
+- Declarative YAML with strict schema validation — graph structure is reviewable by non-engineers, gets editor autocomplete, and renders to a Mermaid diagram with `oe graph` (no Studio server to stand up).
 - TypeScript / Node runtime — fits front-end-adjacent teams better.
-- An explicit evolution advisor that proposes graph upgrades from runtime traces.
+- An explicit evolution advisor that proposes graph upgrades from runtime traces — across a single run or many (`oe evolve --runs`) to separate stable patterns from one-off blips.
 
 ## vs CrewAI
 
