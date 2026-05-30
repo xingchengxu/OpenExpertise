@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`oe ultra-revise <draftPath> <feedback>`** (+ `oe_ultra_revise` MCP tool, 6→7 tools, + `/ultraexpertise` slash parity) — apply natural-language feedback to an existing draft, reusing the critique→revise roles from the quality loop. Reads the draft back via a new `analysis.json` sidecar (re-derived-minimal fallback for older drafts), runs one steered critique→revise pass with keep-best + monotonicity, and prunes now-absent files.
 - **`oe graph [path]`** — render any experience's DAG as a Mermaid `flowchart` (phase subgraphs, per-kind node shapes/colors, `for_each` + conditional-`when:` edge labels). Prints to stdout (paste into a GitHub README — Mermaid renders natively), `--html` for a self-contained page, `-o <file>` to write, `--lr` for left-to-right. Pure transform; no API key.
 - **`oe inspect --html`** — render a finished run as a self-contained HTML report: the experience DAG colored by each node's status (success / failed / skipped), an events timeline, and per-node duration + token counts. `-o <file>` to write, `--lr` for left-to-right layout. Reuses the `oe graph` Mermaid renderer.
+- **`oe evolve --runs <a,b,c>`** — cross-run evolution: analyze multiple runs together to surface STABLE patterns (recurring across ≥2 runs → higher confidence) versus one-off blips, instead of reacting to a single run. New `EvolutionAdvisor.analyzeAcrossRuns` + a dedicated cross-run prompt; writes `.openexpertise/evolution/cross-run-*.md`. The single-run `oe evolve <run-id>` path is unchanged.
+- **`oe ultra --run`** — after authoring a draft, run it once (a smoke test; ultra's defensive tool stubs let a tool-only draft run with no wiring). Prints the result + a `→ oe inspect … --html` hint; advisory only (authoring exit code is unchanged, so a draft whose agent nodes need an API key still exits 0). Built on a shared `buildRunContext` helper now used by both `oe run` and `oe ultra --run`.
+
+### Changed
+
+- **First-run guidance** — `oe run`, `oe init`, `oe demo`, and `oe doctor` now print `→` next-step hints surfacing the right command for the moment (`oe inspect <id> --html`, `oe graph <dir>`, `oe evolve <id>`, `oe ultra`, `oe demo`). The four `oe init` templates' READMEs gained `oe graph` / `oe inspect --html` / `oe ultra-revise` pointers.
+
+### Docs
+
+- **Every built-in example now shows its DAG** — `scripts/gen-example-diagrams.mjs` (`pnpm docs:diagrams`) auto-embeds the `oe graph` Mermaid diagram into all 13 example READMEs and the docs-site example pages, between idempotent `<!-- oe-graph:start … -->` markers (regenerate any time; safe to re-run).
 
 ## [0.1.4] — 2026-05-28
 

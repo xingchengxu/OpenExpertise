@@ -1,17 +1,11 @@
 import { readFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { parseExperienceYaml } from '@openexpertise/schema'
-import { DispatcherRegistry, EventBus, runExperience } from '@openexpertise/core'
-import type { LLMClient } from '@openexpertise/core'
-import { ToolDispatcher } from '@openexpertise/node-kinds-tool'
-import { AgentDispatcher } from '@openexpertise/node-kinds-agent'
-import { CliAgentDispatcher } from '@openexpertise/node-kinds-cli-agent'
-import { SkillDispatcher } from '@openexpertise/node-kinds-skill'
-import { DatasetDispatcher } from '@openexpertise/node-kinds-dataset'
-import { ExperienceDispatcher } from '@openexpertise/node-kinds-experience'
+import { runExperience } from '@openexpertise/core'
 import { startTui } from '@openexpertise/tui'
 import { resolveExperienceYaml } from './validate.js'
-import { makeLLMClient, resolveLLMProvider, defaultModelFor } from '../llm-factory.js'
+import { buildRunContext } from '../run-context.js'
+import { printNextSteps } from '../output-helpers.js'
 import type { Logger } from 'pino'
 
 export interface RunOpts {
@@ -30,42 +24,9 @@ export async function runCommand(opts: RunOpts): Promise<number> {
   const spec = parseExperienceYaml(source)
   const experienceDir = dirname(yamlPath)
 
-  const dispatchers = new DispatcherRegistry()
-  dispatchers.register(new ToolDispatcher())
-
-  // Resolve provider eagerly so dispatchers know which default model to send
-  // (Anthropic vs OpenAI model names). When no env var or flag is configured,
-  // we keep going with a fallback default — agent/skill dispatchers won't fire
-  // for experiences like hello-tool, so the bogus default is never used.
-  // SDK construction itself stays lazy via the proxy below.
-  let eagerProvider: ReturnType<typeof resolveLLMProvider> | null = null
-  try {
-    eagerProvider = resolveLLMProvider(opts.llm !== undefined ? { flag: opts.llm } : {})
-  } catch (err) {
-    if (opts.llm !== undefined) throw err // explicit --llm with missing/unknown value → surface
-    // otherwise: no LLM configured; tolerable if no agent/skill nodes fire
-  }
-  const defaultModel = eagerProvider ? defaultModelFor(eagerProvider) : 'claude-sonnet-4-5'
-
-  let cached: LLMClient | null = null
-  const llm: LLMClient = {
-    async complete(llmOpts) {
-      if (!cached) {
-        const provider =
-          eagerProvider ?? resolveLLMProvider(opts.llm !== undefined ? { flag: opts.llm } : {})
-        cached = await makeLLMClient(provider)
-      }
-      return cached.complete(llmOpts)
-    },
-  }
-  dispatchers.register(new AgentDispatcher({ client: llm, defaultModel }))
-  dispatchers.register(new SkillDispatcher({ client: llm, defaultModel }))
-
-  dispatchers.register(new DatasetDispatcher())
-  dispatchers.register(new ExperienceDispatcher({ runExperience }))
-  dispatchers.register(new CliAgentDispatcher())
-
-  const events = new EventBus()
+  // Dispatcher registry + lazy LLM proxy live in buildRunContext (shared with
+  // `oe ultra --run`). Behavior is identical to the inline wiring this replaced.
+  const { dispatchers, events } = buildRunContext(opts.llm !== undefined ? { llm: opts.llm } : {})
 
   if (opts.tui) {
     const tuiInstance = startTui({
@@ -104,6 +65,11 @@ export async function runCommand(opts: RunOpts): Promise<number> {
     { runId: result.runId, status: result.status, finalState: result.finalState },
     'run complete',
   )
+  printNextSteps([
+    `oe inspect ${result.runId} --experience ${experienceDir} --html -o report.html  — open a shareable run report`,
+    `oe graph ${experienceDir}  — see the DAG as a Mermaid diagram`,
+    `oe evolve ${result.runId} --experience ${experienceDir}  — ask the advisor what to improve`,
+  ])
 
   // Plan 6: optional auto-evolve trigger
   if (opts.evolve && result.status === 'success') {

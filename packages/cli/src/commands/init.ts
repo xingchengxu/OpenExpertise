@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync, existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve, dirname, relative, basename } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { printNextSteps } from '../output-helpers.js'
 import type { Logger } from 'pino'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -84,5 +85,9 @@ export async function initCommand(opts: InitOpts): Promise<number> {
     { dir, template, files },
     `scaffolded ${opts.name}/ from the \`${template}\` template`,
   )
+  printNextSteps([
+    `oe graph ${dir}  — visualize the scaffold`,
+    `cd ${opts.name} && oe run .  — run it`,
+  ])
   return 0
 }

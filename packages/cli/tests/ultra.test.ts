@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import pino from 'pino'
 import type { AnalysisOutput, SynthesisOutput } from '@openexpertise/authoring'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -80,6 +80,20 @@ vi.mock('../src/llm-factory.js', () => ({
   defaultModelFor: vi.fn(() => 'claude-sonnet-4-6'),
   makeLLMClient: vi.fn(async () => ({ complete: vi.fn() })),
 }))
+
+// ─── Mock @openexpertise/core's runExperience (the --run smoke path) ──────────
+// buildRunContext also imports DispatcherRegistry/EventBus/runExperience, so we
+// spread the real module and only stub runExperience for deterministic smoke
+// assertions. The default impl returns success; --run tests can override it.
+const runExperienceMock = vi.fn(async () => ({
+  runId: 'smoke-run-1',
+  status: 'success' as const,
+  finalState: { greeting: 'hello' },
+}))
+vi.mock('@openexpertise/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@openexpertise/core')>()
+  return { ...actual, runExperience: runExperienceMock }
+})
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -607,5 +621,143 @@ describe('ultraReviseCommand', () => {
     cap.restore()
     expect(code).toBe(2)
     expect(cap.lines.join('')).toContain('still broken')
+  })
+})
+
+describe('ultraCommand — --run smoke test', () => {
+  let tmp: string
+
+  beforeEach(async () => {
+    tmp = mkdtempSync(join(tmpdir(), 'oe-ultra-run-'))
+    vi.clearAllMocks()
+    // clearAllMocks resets the default impl — restore the success default.
+    runExperienceMock.mockResolvedValue({
+      runId: 'smoke-run-1',
+      status: 'success',
+      finalState: { greeting: 'hello' },
+    })
+
+    // The mocked author reports its draftDir; write a real (parseable) draft
+    // there so ultraCommand's readFileSync + parseExperienceYaml succeed.
+    const draftDir = join(tmp, 'weekly-digest')
+    const { mkdirSync } = await import('node:fs')
+    mkdirSync(draftDir, { recursive: true })
+    writeFileSync(
+      join(draftDir, 'experience.yaml'),
+      `name: weekly-digest
+version: 0.1.0
+state:
+  schema:
+    prs: { type: array }
+graph:
+  nodes:
+    - id: load_prs
+      kind: tool
+      impl: ./tools/load_prs.mjs
+      writes: [prs]
+  edges: []
+`,
+    )
+
+    const { UltraExpertise } = await import('@openexpertise/authoring')
+    const mockAuthor = vi.fn(async (opts: { onPhase?: (e: unknown) => void }) => {
+      opts.onPhase?.({ phase: 'analyze', status: 'start' })
+      opts.onPhase?.({ phase: 'analyze', status: 'done', duration_ms: 100, result: ANALYSIS })
+      opts.onPhase?.({ phase: 'synthesize', status: 'start' })
+      opts.onPhase?.({ phase: 'synthesize', status: 'done', duration_ms: 200, result: SYNTHESIS })
+      return {
+        analysis: ANALYSIS,
+        synthesis: SYNTHESIS,
+        draftDir,
+        files_written: ['experience.yaml', ...SYNTHESIS.files.map((f) => f.path)],
+        validation: { valid: true },
+      }
+    })
+    vi.mocked(UltraExpertise).mockImplementation(() => ({ author: mockAuthor }) as never)
+  })
+
+  afterEach(() => {
+    if (tmp) rmSync(tmp, { recursive: true, force: true })
+  })
+
+  it('runs the authored draft once with experienceDir === draftDir and prints the success line', async () => {
+    const { ultraCommand } = await import('../src/commands/ultra.js')
+    const cap = captureStdout()
+    const code = await ultraCommand({
+      taskDescription: 'weekly digest',
+      draftRoot: tmp,
+      logger: makeLogger(),
+      run: true,
+    })
+    cap.restore()
+
+    const all = cap.lines.join('')
+    expect(runExperienceMock).toHaveBeenCalledTimes(1)
+    expect(runExperienceMock.mock.calls[0]![0]).toMatchObject({
+      experienceDir: join(tmp, 'weekly-digest'),
+    })
+    expect(all).toContain('smoke run succeeded')
+    expect(all).toContain('smoke-run-1')
+    // The oe inspect hint points at the draft dir with --html
+    expect(all).toContain('oe inspect smoke-run-1')
+    expect(all).toContain('--html')
+    // Authoring exit code is unchanged (0) — the smoke is advisory.
+    expect(code).toBe(0)
+  })
+
+  it('does NOT call runExperience without --run', async () => {
+    const { ultraCommand } = await import('../src/commands/ultra.js')
+    const cap = captureStdout()
+    const code = await ultraCommand({
+      taskDescription: 'weekly digest',
+      draftRoot: tmp,
+      logger: makeLogger(),
+    })
+    cap.restore()
+
+    expect(runExperienceMock).not.toHaveBeenCalled()
+    expect(cap.lines.join('')).not.toContain('smoke run')
+    expect(code).toBe(0)
+  })
+
+  it('prints the failed line + wire/run hint when the smoke run fails (exit still 0)', async () => {
+    runExperienceMock.mockResolvedValueOnce({
+      runId: 'smoke-run-2',
+      status: 'failed',
+      finalState: {},
+    })
+    const { ultraCommand } = await import('../src/commands/ultra.js')
+    const cap = captureStdout()
+    const code = await ultraCommand({
+      taskDescription: 'weekly digest',
+      draftRoot: tmp,
+      logger: makeLogger(),
+      run: true,
+    })
+    cap.restore()
+
+    const all = cap.lines.join('')
+    expect(all).toContain('smoke run failed')
+    expect(all).toContain('oe run')
+    // Advisory: authoring still succeeded.
+    expect(code).toBe(0)
+  })
+
+  it('does not crash oe ultra when the smoke run throws (e.g. missing LLM key)', async () => {
+    runExperienceMock.mockRejectedValueOnce(new Error('no API key for agent node'))
+    const { ultraCommand } = await import('../src/commands/ultra.js')
+    const cap = captureStdout()
+    const code = await ultraCommand({
+      taskDescription: 'weekly digest',
+      draftRoot: tmp,
+      logger: makeLogger(),
+      run: true,
+    })
+    cap.restore()
+
+    const all = cap.lines.join('')
+    expect(all).toContain('smoke run could not complete')
+    expect(all).toContain('no API key for agent node')
+    expect(code).toBe(0)
   })
 })

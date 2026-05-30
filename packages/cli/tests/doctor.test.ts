@@ -126,6 +126,8 @@ describe('doctorCommand', () => {
     expect(out).toContain('Summary:')
     // No failures
     expect(out).toContain('0 failures')
+    // Next-steps hints
+    expect(out).toContain('oe init')
   })
 
   it('missing claude CLI → 1 warn, exit code 0', async () => {
