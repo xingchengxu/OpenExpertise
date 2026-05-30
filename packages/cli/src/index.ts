@@ -291,10 +291,17 @@ export function buildProgram(): Command {
       'run Phase 1 (analyze) only and print the detected shape; no files written',
     )
     .option('--max-rounds <n>', 'critique→revise rounds (0 disables the loop)', '1')
+    .option('--run', 'after writing the draft, run it once (smoke test the scaffold)')
     .action(
       async (
         task: string,
-        cmdOpts: { draftRoot: string; llm?: string; dryRun?: boolean; maxRounds?: string },
+        cmdOpts: {
+          draftRoot: string
+          llm?: string
+          dryRun?: boolean
+          maxRounds?: string
+          run?: boolean
+        },
         cmd: Command,
       ) => {
         const root = cmd.optsWithGlobals<{ logFormat: string; logLevel: string }>()
@@ -316,6 +323,7 @@ export function buildProgram(): Command {
             ...(cmdOpts.llm !== undefined ? { llm: cmdOpts.llm } : {}),
             ...(cmdOpts.dryRun ? { dryRun: true } : {}),
             ...(cmdOpts.maxRounds !== undefined ? { maxRounds: Number(cmdOpts.maxRounds) } : {}),
+            ...(cmdOpts.run ? { run: true } : {}),
           }),
         )
       },

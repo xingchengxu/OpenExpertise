@@ -1,10 +1,14 @@
-import { dirname, resolve } from 'node:path'
+import { readFileSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { Logger } from 'pino'
 import type { LLMClient } from '@openexpertise/core'
+import { runExperience } from '@openexpertise/core'
+import { parseExperienceYaml } from '@openexpertise/schema'
 import { UltraExpertise } from '@openexpertise/authoring'
 import type { AnalysisOutput } from '@openexpertise/authoring'
 import { makeLLMClient, resolveLLMProvider, defaultModelFor } from '../llm-factory.js'
+import { buildRunContext } from '../run-context.js'
 
 // ─── ANSI helpers ────────────────────────────────────────────────────────────
 const CYAN_DIM = '\x1b[36;2m'
@@ -53,6 +57,7 @@ export interface UltraOpts {
   llm?: string
   dryRun?: boolean
   maxRounds?: number
+  run?: boolean
 }
 
 export async function ultraCommand(opts: UltraOpts): Promise<number> {
@@ -269,6 +274,57 @@ export async function ultraCommand(opts: UltraOpts): Promise<number> {
     },
     'next: run or promote',
   )
+
+  // ── Optional smoke run (--run) ─────────────────────────────────────────────
+  // ADVISORY: this runs the freshly-authored draft once as a smoke test. The
+  // ultra draft ships defensive tool stubs, so a tool-only draft runs with no
+  // wiring; agent/skill nodes need an LLM key and fail gracefully without one.
+  // The authoring result (a valid draft) already returns 0 — the smoke outcome
+  // NEVER changes that exit code. A draft with agent nodes legitimately can't
+  // smoke-run without a key, so the run is informational only and merely prints.
+  // (--dry-run returns earlier, so this path is unreachable in dry-run.)
+  if (opts.run) {
+    const draftDir = fullResult.draftDir
+    out('')
+    const wireHint = `  Set an API key (agent nodes) or wire the tool stubs, then: oe run ${draftDir}`
+    try {
+      const spec = parseExperienceYaml(readFileSync(join(draftDir, 'experience.yaml'), 'utf8'))
+      const { dispatchers, events } = buildRunContext(
+        opts.llm !== undefined ? { llm: opts.llm } : {},
+      )
+      const result = await runExperience({
+        spec,
+        experienceDir: draftDir,
+        dispatchers,
+        events,
+        args: {},
+      })
+      opts.logger.info(
+        { runId: result.runId, status: result.status, finalState: result.finalState },
+        'ultraexpertise: smoke run complete',
+      )
+      if (result.status === 'success') {
+        out(`${GREEN}✓ smoke run succeeded (run ${result.runId})${RESET}`)
+        const fields = Object.keys(result.finalState)
+        const summary =
+          fields.length > 0
+            ? `${fields.length} state field${fields.length === 1 ? '' : 's'}: ${fields.slice(0, 4).join(', ')}${fields.length > 4 ? '…' : ''}`
+            : 'no state fields written'
+        out(`  final state — ${summary}`)
+        out(`  → oe inspect ${result.runId} --experience ${draftDir} --html for a report`)
+      } else {
+        out(`${RED}✗ smoke run ${result.status}${RESET}`)
+        out(wireHint)
+      }
+    } catch (err) {
+      // A thrown run (e.g. missing LLM key for an agent node) must NOT crash
+      // oe ultra — the draft is still valid. Print and continue.
+      const msg = err instanceof Error ? err.message : String(err)
+      opts.logger.warn({ err: msg }, 'ultraexpertise: smoke run could not complete (non-blocking)')
+      out(`${RED}✗ smoke run could not complete: ${msg}${RESET}`)
+      out(wireHint)
+    }
+  }
 
   return 0
 }
