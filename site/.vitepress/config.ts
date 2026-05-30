@@ -117,6 +117,7 @@ export default defineConfig({
             { text: 'From inside Claude Code', link: '/guide/authoring-slash-command' },
             { text: 'Tool stubs in .mjs', link: '/guide/tool-stubs' },
             { text: 'Prompt files', link: '/guide/prompt-files' },
+            { text: 'Editor support (autocomplete)', link: '/guide/editor-support' },
           ],
         },
         {
