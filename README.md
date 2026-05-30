@@ -210,7 +210,7 @@ OE is **not** a protocol (that's MCP), **not** a reusable LLM unit (that's a Ski
 MCP is a protocol for exposing tools, data, and prompts to LLMs. OpenExpertise rides on top:
 
 - **Consumes MCP** — a `dataset` node with `source.type: mcp-resource` reads from any MCP server (declared in schema today; dispatcher wiring planned for a later 0.x).
-- **Exposes MCP** — [`@openexpertise/mcp-server`](https://www.npmjs.com/package/@openexpertise/mcp-server) (binary `oe-mcp`) ships 7 tools (`oe_run`, `oe_validate`, `oe_state`, `oe_inspect`, `oe_evolve`, `oe_ultra`, `oe_ultra_revise`) so any MCP client — Claude Code, Codex, Gemini, or anything else — can run OpenExpertise experiences from inside its own session.
+- **Exposes MCP** — [`@openexpertise/mcp-server`](https://www.npmjs.com/package/@openexpertise/mcp-server) (binary `oe-mcp`) ships 8 tools (`oe_run`, `oe_validate`, `oe_state`, `oe_inspect`, `oe_evolve`, `oe_ultra`, `oe_ultra_revise`, `oe_graph`) so any MCP client — Claude Code, Codex, Gemini, or anything else — can run OpenExpertise experiences from inside its own session.
 
 MCP is the wire format; OE is the workflow on top of the wire, AND offered ON the wire.
 
@@ -458,7 +458,7 @@ Then inside any Claude Code session:
 > _"Use oe_run on examples/review-branch"_
 > _"Use oe_evolve on the last run id"_
 
-Seven MCP tools are exposed: `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `oe_evolve`, `oe_ultra`, `oe_ultra_revise`. Reference: [`docs/mcp-server.md`](docs/mcp-server.md).
+Eight MCP tools are exposed: `oe_validate`, `oe_state`, `oe_inspect`, `oe_run`, `oe_evolve`, `oe_ultra`, `oe_ultra_revise`, `oe_graph`. Reference: [`docs/mcp-server.md`](docs/mcp-server.md).
 
 ---
 

@@ -66,7 +66,7 @@ The hands-on path. Concepts page is the _what_; this is the _how_.
 ## Integration
 
 [MCP server (use OE from Claude Code)](/guide/mcp-server)
-: `oe-mcp` exposes 7 tools so Claude Desktop / Cursor can invoke OE primitives.
+: `oe-mcp` exposes 8 tools so Claude Desktop / Cursor can invoke OE primitives.
 
 [cli-agent node (call CLIs from OE)](/guide/cli-agent-usage)
 : Outbound: have an OE node spawn a Claude Code / Codex / Gemini session.

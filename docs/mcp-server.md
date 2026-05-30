@@ -1,6 +1,6 @@
 # `@openexpertise/mcp-server`
 
-A stdio MCP server that exposes OpenExpertise as 7 tools, callable from any MCP-aware CLI (Claude Code, Codex, Gemini, or other MCP clients).
+A stdio MCP server that exposes OpenExpertise as 8 tools, callable from any MCP-aware CLI (Claude Code, Codex, Gemini, or other MCP clients).
 
 ## Tools
 
@@ -10,11 +10,12 @@ A stdio MCP server that exposes OpenExpertise as 7 tools, callable from any MCP-
 | `oe_state` | `{ experience_path, field? }` | `{ field, value }` or `{ snapshot }` or `{ note }` |
 | `oe_inspect` | `{ experience_path, run_id }` | `{ events: object[] }` |
 | `oe_run` | `{ experience_path, args?, llm? }` | `{ run_id, status, final_state }` |
-| `oe_evolve` | `{ experience_path, run_id, llm? }` | `{ proposal_md, proposal_count }` |
+| `oe_evolve` | `{ experience_path, run_id? \| run_ids?, llm? }` | `{ proposal_md, proposal_count }` |
 | `oe_ultra` | `{ task, draft_root? }` | `{ slug, draft_dir, validation, files_written, ... }` |
 | `oe_ultra_revise` | `{ draft_dir, feedback, max_rounds? }` | `{ draft_dir, analysis, synthesis, validation, files_written, loop }` |
+| `oe_graph` | `{ experience_path, direction?, html? }` | `{ mermaid }` or `{ mermaid, html }` |
 
-`oe_run` and `oe_evolve` use the same LLM provider resolution as `oe run` / `oe evolve` (env var auto-detect + optional `llm` flag).
+`oe_run` and `oe_evolve` use the same LLM provider resolution as `oe run` / `oe evolve` (env var auto-detect + optional `llm` flag). `oe_evolve` accepts either a single `run_id` or a `run_ids` array (≥1 ids) for cross-run analysis. `oe_graph` is a pure transform (no API key) — it returns the experience DAG as a Mermaid `flowchart`.
 
 ## Install
 

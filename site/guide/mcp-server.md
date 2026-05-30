@@ -27,19 +27,20 @@ Claude Code calls `oe_validate`, then `oe_run`, then reads the `final_state` fro
 
 ## How it works
 
-The MCP server (`packages/mcp-server/src/server.ts`) is a stdio MCP server built on `@modelcontextprotocol/sdk`. It exposes **7 tools**:
+The MCP server (`packages/mcp-server/src/server.ts`) is a stdio MCP server built on `@modelcontextprotocol/sdk`. It exposes **8 tools**:
 
-| Tool              | Input                                  | Output                                                                |
-| ----------------- | -------------------------------------- | --------------------------------------------------------------------- |
-| `oe_validate`     | `{ experience_path }`                  | `{ valid: bool, errors?: string[] }`                                  |
-| `oe_state`        | `{ experience_path, field? }`          | `{ field, value }` or `{ snapshot }`                                  |
-| `oe_inspect`      | `{ experience_path, run_id }`          | `{ events: object[] }`                                                |
-| `oe_run`          | `{ experience_path, args?, llm? }`     | `{ run_id, status, final_state }`                                     |
-| `oe_evolve`       | `{ experience_path, run_id, llm? }`    | `{ proposal_md, proposal_count }`                                     |
-| `oe_ultra`        | `{ task, draft_root? }`                | `{ slug, draft_dir, validation, files_written, ... }`                 |
-| `oe_ultra_revise` | `{ draft_dir, feedback, max_rounds? }` | `{ draft_dir, analysis, synthesis, validation, files_written, loop }` |
+| Tool              | Input                                            | Output                                                                |
+| ----------------- | ------------------------------------------------ | --------------------------------------------------------------------- |
+| `oe_validate`     | `{ experience_path }`                            | `{ valid: bool, errors?: string[] }`                                  |
+| `oe_state`        | `{ experience_path, field? }`                    | `{ field, value }` or `{ snapshot }`                                  |
+| `oe_inspect`      | `{ experience_path, run_id }`                    | `{ events: object[] }`                                                |
+| `oe_run`          | `{ experience_path, args?, llm? }`               | `{ run_id, status, final_state }`                                     |
+| `oe_evolve`       | `{ experience_path, run_id? \| run_ids?, llm? }` | `{ proposal_md, proposal_count }`                                     |
+| `oe_ultra`        | `{ task, draft_root? }`                          | `{ slug, draft_dir, validation, files_written, ... }`                 |
+| `oe_ultra_revise` | `{ draft_dir, feedback, max_rounds? }`           | `{ draft_dir, analysis, synthesis, validation, files_written, loop }` |
+| `oe_graph`        | `{ experience_path, direction?, html? }`         | `{ mermaid }` or `{ mermaid, html }`                                  |
 
-All tools run in the user's process (stdio MCP, no network surface). Tools that write to disk (`oe_run`, `oe_evolve`) write to the experience's `.openexpertise/` directory. `oe_run` may spawn subprocesses if the experience uses `cli-agent` nodes.
+All tools run in the user's process (stdio MCP, no network surface). Tools that write to disk (`oe_run`, `oe_evolve`) write to the experience's `.openexpertise/` directory. `oe_run` may spawn subprocesses if the experience uses `cli-agent` nodes. `oe_evolve` accepts a `run_ids` array for cross-run analysis; `oe_graph` is a pure transform (no API key) that returns the experience DAG as a Mermaid `flowchart`.
 
 `oe_run` and `oe_evolve` use the same LLM provider auto-detection as `oe run` and `oe evolve` — env vars `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` are read from the shell that started the MCP server.
 
